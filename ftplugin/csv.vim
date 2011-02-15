@@ -90,7 +90,11 @@ fu! <SID>WColumn()"{{{
     let i=escape(line[start : end], '\')
     let fields=(split(line,b:col.'\zs'))
     call setpos('.',_cur)
-    return match(fields, '\V'.i)+1
+    return strlen(substitute(line[0:start], b:col, '-', 'g'))
+    "let i=escape(line[start : end], '\')
+    "let fields=(split(line,b:col.'\zs'))
+    "call setpos('.',_cur)
+    "return match(fields, '\V'.i)+1
 endfu"}}}
 
 fu! <SID>MaxColumns()"{{{
@@ -176,13 +180,19 @@ endfu"}}}
 
 fu! <SID>ArrangeCol() range"{{{
    let _cur=getpos('.')
+"   let max_width=<SID>ColWidth(<SID>WColumn())+1
    let col_width=[]
    let max_cols=<SID>MaxColumns()
    for i in range(1,max_cols)
        call add(col_width, <SID>ColWidth(i))
    endfor
 
-   exe ':%s/' . (b:col) . '/\=printf("%-*.*s", (col_width[<SID>WColumn()-1]+1) ,  (col_width[<SID>WColumn()-1]+1) , submatch(0))/g'
+   "exe ':%s/' . (b:col) . '/\=printf("%.' . (<SID>ColWidth(<SID>WColumn())+1) . 's", submatch(0).repeat(" ", (<SID>ColWidth(<SID>WColumn())-strlen(submatch(0)))))/g'
+"   echo ':%s/' . (b:col) . '/\=printf("%*.*s",'  (col_width[<SID>WColumn()-1]+1) ", ". (col_width[<SID>WColumn()-1]+1) . ", submatch(0))"/g'
+   "exe ':%s/' . (b:col) . '/\=printf("%*.*s",' . (col_width[<SID>WColumn()-1]+1) . ", " . (col_width[<SID>WColumn()-1]+1) . ", submatch(0))/g"
+   "exe ':%s/' . (b:col) . '/\=printf("%*.*s",  (<SID>ColWidth(<SID>WColumn())+1) ,  (<SID>ColWidth(<SID>WColumn())+1) , submatch(0))/g'
+   "exe ':%s/' . (b:col) . '/\=printf("%-*.*s", (col_width[<SID>WColumn()-1]+1) ,  (col_width[<SID>WColumn()-1]+1) , submatch(0))/g'
+   exe ':%s/' . (b:col) . '/\=printf("%*s", (col_width[<SID>WColumn()-1]+1) ,  submatch(0))/g'
    " If delimiter is a <Tab>, replace it by Space
    if b:delimiter ==? "\t"
        %s/\t/ /g
