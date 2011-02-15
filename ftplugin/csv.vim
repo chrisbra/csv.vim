@@ -3,9 +3,9 @@
 " Version: 0.6
 " Script:  http://www.vim.org/scripts/script.php?script_id=2830
 " License: VIM License
-" Last Change: Tue, 15 Feb 2011 20:51:31 +0100
+" Last Change: Wed, 16 Feb 2011 00:00:45 +0100
 " Documentation: see :help ft_csv.txt
-" GetLatestVimScripts: 2830 4 :AutoInstall: csv.vim
+" GetLatestVimScripts: 2830 5 :AutoInstall: csv.vim
 "
 " Some ideas are take from the wiki http://vim.wikia.com/wiki/VimTip667
 " though, implementation differs.
