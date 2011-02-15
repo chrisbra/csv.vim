@@ -1,12 +1,9 @@
 " Filetype plugin for editing CSV files. "{{{
 " Author:  Christian Brabandt <cb@256bit.org>
-" Version: 0.7
+" Version: 0.6
 " Script:  http://www.vim.org/scripts/script.php?script_id=2830
 " License: VIM License
 " Last Change: Tue, 15 Feb 2011 20:51:31 +0100
-
-
-
 " Documentation: see :help ft_csv.txt
 " GetLatestVimScripts: 2830 4 :AutoInstall: csv.vim
 "
@@ -16,6 +13,7 @@ if v:version < 700 || exists('b:did_ftplugin')
   finish
 endif
 let b:did_ftplugin = 1 "}}}
+
 fu! <SID>GetDelimiter() "{{{
     let _cur = getpos('.')
     let Delim={0: ';', 1:  ','}
@@ -202,12 +200,11 @@ fu! <SID>Columnize(field) "{{{
    let add -= len(a)
    
    " Add one for as a frame
-   " add additionall width for multibyte chars
+   " add additional width for multibyte chars
    let width = width + add  + 1
 
    return printf("%*s", width ,  a:field)
 endfun "}}}
-
 fu! <SID>GetColPat(colnr, zs_flag) "{{{
     if a:colnr > 1
 	"let pat='\%(\%("\%([^"]\|""\)*"\)\|\%([^' . b:delimiter . '"]*\)\)\{' . (a:colnr-1) . '\}'
@@ -226,6 +223,64 @@ fu! <SID>GetColPat(colnr, zs_flag) "{{{
     "return (a:startofline ? '^' : '') . pat
     return pat . (a:zs_flag ? '\zs' : '')
 endfu "}}}
+fu! <SID>SplitHeaderLine(lines, bang) "{{{
+    if !a:bang && !exists("b:CSV_SplitWindow")
+	" Split Window
+	let _stl = &l:stl
+	let _sbo = &sbo
+	setl scrollopt=hor scrollbind
+	let lines = empty(a:lines) ? 1 : a:lines
+	noa sp
+	1
+	exe "resize" . lines
+	setl scrollopt=hor scrollbind
+	"let &l:stl=repeat(' ', winwidth(0))
+	let &l:stl="%#Normal#".repeat(' ',winwidth(0))
+	" Highlight first row
+	call matchadd("Type", b:col)
+	let b:CSV_SplitWindow = winnr()
+	exe "noa wincmd p"
+    else
+	" Close split window
+	if !exists("b:CSV_SplitWindow")
+	    return
+	endif
+	exe "noa" b:CSV_SplitWindow "wincmd w"
+	unlet b:CSV_SplitWindow
+	if exists("_stl")
+	    let &l_stl = _stl
+	endif
+	if exists("_sbo")
+	    let &sbo = _sbo
+	endif
+	setl noscrollbind
+	wincmd c
+    endif
+endfu "}}}
+fu! <SID>Col(forward) "{{{
+    let colnr=<SID>WColumn()
+    "if colnr > 1 && !a:forward
+    if colnr - v:count1 > 1 && !a:forward
+	let colnr -= v:count1
+    elseif colnr - v:count1 < 1 && !a:forward
+	let colnr = 1
+    elseif colnr + v:count1 < <SID>MaxColumns() && a:forward
+	let colnr += v:count1
+    elseif colnr + v:count1 > <SID>MaxColumns() && a:forward
+	let colnr = <SID>MaxColumns()
+    endif
+    if colnr == 1
+	let pat='^'. <SID>GetColPat(colnr,0)
+    else
+	let pat='^'. <SID>GetColPat(colnr-1,1) . b:col
+    endif
+    let pat = pat . '\%' . line('.') . 'l'
+    if a:forward
+	call search(pat, 'cW')
+    else
+	call search(pat, 'bW')
+    endif
+endfun "}}}
 fu! <SID>Init() "{{{
     " Hilight Group for Columns
     if exists("g:csv_hiGroup")
@@ -246,7 +301,6 @@ fu! <SID>Init() "{{{
     endif
     " Pattern for matching a single column
     let b:col='\%(\%([^' . b:delimiter . ']*"[^"]*"[^' . b:delimiter . ']*' . b:delimiter . '\)\|\%([^' . b:delimiter . ']*\%(' . b:delimiter . '\|$\)\)\)'
-    setl nostartofline tw=0 nowrap
     command! -buffer WhatColumn :echo <SID>WColumn()
     command! -buffer NrColumns :echo <SID>MaxColumns()
     command! -buffer -nargs=? HiColumn :call <SID>HiCol(<q-args>)
@@ -254,9 +308,17 @@ fu! <SID>Init() "{{{
     command! -buffer -nargs=1 DeleteColumn :call <SID>DelColumn(<args>)
     command! -buffer ArrangeColumn :call <SID>ArrangeCol()
     command! -buffer InitCSV :call <SID>Init()
+    command! -buffer -bang -nargs=? Header :call <SID>SplitHeaderLine(<q-args>,<bang>0)
     " undo when setting a new filetype
     let b:undo_ftplugin = "setlocal sol< tw< wrap<"
 	\ . "| unlet b:delimiter b:col"
+    " CSV specific mappings
+    nnoremap <silent> <buffer> W :<C-U>call <sid>Col(1)<CR>
+    nnoremap <silent> <buffer> E :<C-U>call <sid>Col(0)<CR>
+    nnoremap <silent> <buffer> <C-Right> :<C-U>call <sid>Col(1)<CR>
+    nnoremap <silent> <buffer> <C-Left> :<C-U> call <sid>Col(0)<CR>
+    " CSV local settings
+    setl nostartofline tw=0 nowrap
 endfu "}}}
 
 :call <SID>Init()
