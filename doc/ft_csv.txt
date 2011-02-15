@@ -1,26 +1,28 @@
 *ft_csv.txt*  A plugin for CSV Files
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.5 Tue, 20 Apr 2010 19:58:49 +0200
-Copyright: (c) 2009, 2010 by Christian Brabandt
-           The VIM LICENSE applies to csv.vim and csv.txt
-           (see |copyright|) except use csv instead of "Vim".
-	   NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
+Version: 0.6
 
-This is a filetype plugin for CSV files. It was heavily influenced by the Vim
-Wiki Tip667 (http://vim.wikia.com/wiki/VimTip667), though it works
-differently.
+The VIM LICENSE applies to csv.vim and csv.txt
+(see |copyright|) except use csv instead of "Vim".
+NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
+
+This is a filetype plugin for CSV files. It was heavily influenced by
+the Vim Wiki Tip667 (http://vim.wikia.com/wiki/VimTip667), though it
+works differently.
 
                                                            *csv-toc*
 1. Installation.................................|csv-installation|
-2. CSV.Commands.................................|csv-commands|
-    2.1 WhatColumn..............................|WhatColumn|
-    2.2 NrColumns...............................|NrColumns|
-    2.3 SearchInColumn..........................|SearchInColumn|
-    2.4 HiColumn................................|HiColumn|
-    2.5 ArrangeColumn...........................|ArrangeColumn|
-    2.6 DeleteColumn............................|DeleteColumn|
+2. CSV Commands.................................|csv-commands|
+    2.1 WhatColumn..............................|WhatColumn_CSV|
+    2.2 NrColumns...............................|NrColumns_CSV|
+    2.3 SearchInColumn..........................|SearchInColumn_CSV|
+    2.4 HiColumn................................|HiColumn_CSV|
+    2.5 ArrangeColumn...........................|ArrangeColumn_CSV|
+    2.6 DeleteColumn............................|DeleteColumn_CSV|
     2.7 InitCSV.................................|InitCSV|
+    2.8 Header..................................|Header_CSV|
+    2.9 Normal mode commands....................|csv-motion|
 3. CSV Filetype configuration...................|csv-configuration|
     3.1 Delimiter...............................|csv-delimiter|
     3.2 Column..................................|csv-column|
@@ -28,12 +30,17 @@ differently.
 4. CSV Changelog................................|csv-changelog|
 
 ==============================================================================
-1. Installation					*csv-installation*
+1. Installation			*csv-installation*
 
 In order to have vim automatically detect csv files, you need to have
-|ftplugins| enabled (e.g. by having this line in your |.vimrc| file:
+|ftplugins| enabled (e.g. by having this line in your |.vimrc| file: >
 
    :filetype plugin on
+
+<
+The plugin already sets up some logic, to detect CSV files. By default,
+the plugin recognizes *.csv and *.dat files as csv filetype. In case
+this did not work, you need to setup vim like this:
 
 To have Vim automatically detect csv files, you need to do the following.
 
@@ -44,24 +51,24 @@ To have Vim automatically detect csv files, you need to do the following.
       your user directory is. 
       To create this directory, you can do:
 
-	  :!mkdir ~/.vim 
-	  
+      :!mkdir ~/.vim 
+      
       for Unix and
 
-	  :!mkdir ~/vimfiles 
+      :!mkdir ~/vimfiles 
 
       for Windows.
 
    2) In that directory you create a file that will detect csv files.
 
-	if exists("did_load_csvfiletype")
-	  finish
-	endif
-	let did_load_csvfiletype=1
+    if exists("did_load_csvfiletype")
+      finish
+    endif
+    let did_load_csvfiletype=1
 
-	augroup filetypedetect
-	  au! BufRead,BufNewFile *.csv,*.dat		setfiletype csv
-	augroup END
+    augroup filetypedetect
+      au! BufRead,BufNewFile *.csv,*.dat	setfiletype csv
+    augroup END
 
       You save this file as "filetype.vim" in your user runtime diretory:
 
@@ -72,36 +79,36 @@ To have Vim automatically detect csv files, you need to do the following.
       names end with .csv.
 
 ==============================================================================
-2. Installation					                *csv-commands*
+2. Installation					*csv-commands*
 
 The CSV ftplugin provides several Commands:
 
-2.1 WhatColumn                                                  *WhatColumn*
+2.1 WhatColumn                                                  *WhatColumn_CSV*
 --------------
 
 If you would like to know, on which column the cursor is, use :WhatColumn.
 
-2.2 NrColumns                                                   *NrColumns*
+2.2 NrColumns                                                   *NrColumns_CSV*
 --------------
 
 :NrColumns outputs the maximum number of columns available. It does this by
 testing the first 10 lines for the number of columns. This usually should be
 enough.
 
-2.3 SearchInColumn                                          *SearchInColumn*
+2.3 SearchInColumn                                          *SearchInColumn_CSV*
 ------------------
 
 Use :SearchInColumn to search for a pattern within a specific column. The
 usage is:
 :SearchInColumn <nr> /{pat}/
 
-So if you would like to search in Column 1 for the word foobar, you enter
+So if you would like to search in Column 1 for the word foobar, you enter >
 
-:SearchInColumn 1 /foobar/
+    :SearchInColumn 1 /foobar/
 
 Instead of / as delimiter, you can use any other delimiter you like.
 
-2.4 HiColumn                                                     *HiColumn*
+2.4 HiColumn                                                     *HiColumn_CSV*
 ------------
 
 :HiColumn <nr> can be used to highlight Column <nr>. Currently the plugin uses
@@ -110,7 +117,7 @@ define the variable |g:csv_hiGroup|.
 If you do not specify a <nr>, HiColumn will hilight the column on which the
 cursor is.
 
-2.5 ArrangeColumn                                           *ArrangeColumn*
+2.5 ArrangeColumn                                           *ArrangeColumn_CSV*
 -----------------
 
 If you would like all columns to be arranged visually, you can use the
@@ -118,9 +125,9 @@ If you would like all columns to be arranged visually, you can use the
 on the size of your file may slow down Vim significantly. This is highly
 experimental.
 :ArrangeCommand will try to vertically align all columns by their maximum
-column size.
+column size. Note, this can be very slow on large files!
 
-2.6 DeleteColumn                                           *DeleteColumn*
+2.6 DeleteColumn                                           *DeleteColumn_CSV*
 ----------------
 
 The command :DeleteColumn can be used to delete a specific column.
@@ -135,8 +142,39 @@ will delete column 2.
 Reinitialize the Plugin. Use this, if you have changed the configuration
 of the plugin (see |csv-configuration| ).
 
+2.8 Header                                                *Header_CSV*
+-----------
+
+This command splits the csv-buffer and adds a window, that holds a small
+fraction of the csv file. This is useful, if the first line contains
+some kind of a heading and you want always to display it. This works
+similar to fixing a certain line at the top. As optional argument, you
+can give the number of columns from the top, that shall be displayed. By
+default, 1 is used. Use the '!' to close this window. So this >
+
+    :Header 3
+
+opens at the top a split window, that holds the first 3 lines, is fixed
+and horizontally 'scrollbind'ed to the csv window, while >
+
+    :Header!
+
+closes the fixed window.
+
+2.9 Normal mode commands		    *csv-motion*
+-----------
+
+The csv filetype plugin redefines the following keys as:
+
+<C-Right> or
+W	Move [count] field forwards
+
+<C-Left> or
+E	Move [count] field backwards
+
+
 ==============================================================================
-3. CSV Configuration					  *csv-configuration*
+3. CSV Configuration			  *csv-configuration*
 
 The CSV plugin tries to automatically detect the field delimiter for your
 file, cause although often the file is called CSV (comma separated values), a
@@ -193,17 +231,21 @@ variable. You can e.g. define it in your .vimrc:
 You need to restart Vim, if you have changed this variable or use |InitCSV|
 
 ==============================================================================
-4. CSV Changelog					  *csv-changelog*
+4. CSV Changelog		      *csv-changelog*
 
-0.5  Apr, 20     -documentation update
-		 -switched to a public repository:
-		  http://github.com/chrisbra/csv.vim
-		 -enabled GLVS (see |GLVS|)
-0.4a Mar, 11	 -fixed documentation
-0.4  Mar, 11	 -introduce |InitCSV|
-		 -better Error handling
-		 -HiColumn now by default highlights the current
-		  column, if no argument is specified.
-0.3  Oct, 28	 -initial Version
+0.6 Feb 15, 2011	-Make |ArrangeColumn| work more reliable (had problems with
+			 multibyte chars before)
+			-Add |Header| function
+			-'W' and 'E' move forward/backwards between csv fields
+0.5  Apr 20 2010	-documentation update
+			-switched to a public repository:
+			  http://github.com/chrisbra/csv.vim
+			-enabled GLVS (see |GLVS|)
+0.4a Mar 11 2010	-fixed documentation
+0.4  Mar 11 2010	-introduce |InitCSV|
+			-better Error handling
+			-HiColumn now by default highlights the current
+			 column, if no argument is specified.
+0.3  Oct, 28 2010	-initial Version
 
 vim:tw=78:ts=8:ft=help:norl:
