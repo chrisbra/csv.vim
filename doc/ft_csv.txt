@@ -1,7 +1,7 @@
 *ft_csv.txt*  A plugin for CSV Files
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.7
+Version: 0.6
 The VIM LICENSE applies to csv.vim and csv.txt
 (see |copyright|) except use csv instead of "Vim".
 NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
