@@ -41,7 +41,9 @@ fu! <SID>Init() "{{{3
     endif
     
     " Pattern for matching a single column
-    let b:col='\%(\%([^' . b:delimiter . ']*"[^"]*"[^' . b:delimiter . ']*' . b:delimiter . '\)\|\%([^' . b:delimiter . ']*\%(' . b:delimiter . '\|$\)\)\)'
+    let b:col='\%(\%([^' . b:delimiter . ']*"[^"]*"[^' . 
+		\ b:delimiter . ']*' . b:delimiter . '\)\|\%([^' . 
+		\ b:delimiter . ']*\%(' . b:delimiter . '\|$\)\)\)'
 
     " define buffer-local commands
     call <SID>CommandDefinitions()
@@ -51,8 +53,9 @@ fu! <SID>Init() "{{{3
     " force reloading CSV Syntax Highlighting
     if exists("b:current_syntax")
 	unlet b:current_syntax
+	" Force reloading syntax file
+	exe "silent do Syntax" expand("%")
     endif
-    call <SID>CSVSyntaxHL()
 
     " undo when setting a new filetype
     let b:undo_ftplugin = "setlocal sol< tw< wrap<"
@@ -288,34 +291,69 @@ fu! <SID>SplitHeaderLine(lines, bang) "{{{3
     endif
 endfu
 
-fu! <SID>MoveCol(forward) "{{{3
+fu! <SID>MoveCol(forward, line) "{{{3
     let colnr=<SID>WColumn()
     let maxcol=<SID>MaxColumns()
-    if colnr - v:count1 >= 1 && !a:forward
+
+    " Check for valid column
+    " a:forward == 1 : search next col
+    " a:forward == -1: search prev col
+    " a:forward == 0 : stay in col
+    if colnr - v:count1 >= 1 && a:forward == -1
 	let colnr -= v:count1
-    elseif colnr - v:count1 < 1 && !a:forward
+    elseif colnr - v:count1 < 1 && a:forward == -1
 	let colnr = 0
-    elseif colnr + v:count1 <= <SID>MaxColumns() && a:forward
+    elseif colnr + v:count1 <= <SID>MaxColumns() && a:forward == 1
 	let colnr += v:count1
-    elseif colnr + v:count1 > <SID>MaxColumns() && a:forward
+    elseif colnr + v:count1 > <SID>MaxColumns() && a:forward == 1
 	let colnr = maxcol + 1
     endif
+
+    let line=a:line
+    if line < 1
+	let line=1
+    elseif line > line('$')
+	let line=line('$')
+    endif
+
+    " Generate search pattern
     if colnr == 1
-	let pat='^'. <SID>GetColPat(colnr-1,0) 
-	"let pat='^' . '\%' . line('.') . 'l'
+	let pat = '^' . <SID>GetColPat(colnr-1,0) 
+	let pat = pat . '\%' . line . 'l'
     elseif colnr == 0
-	let pat='^' . '\%' . line('.') . 'l'
+	let pat = '^' . '\%' . line . 'l'
     elseif colnr == maxcol + 1
-	let pat='\%' . line('.') . 'l$'
+	let pat='\%' . line . 'l$'
     else
 	let pat='^'. <SID>GetColPat(colnr-1,1) . b:col
-	let pat = pat . '\%' . line('.') . 'l'
+	let pat = pat . '\%' . line . 'l'
     endif
-    if a:forward
+
+    " Search
+    if a:forward > 0
 	call search(pat, 'cW')
-    else
+    elseif a:forward < 0
 	call search(pat, 'bWe')
+    else
+	call search(pat, 'c')
     endif
+endfun
+
+fu! <SID>SortComplete(A,L,P) "{{{3
+    return join(range(1,<sid>MaxColumns()),"\n")
+endfun 
+
+fu! <SID>Sort(bang, colnr) range "{{{3
+    if a:colnr != '1'
+	let pat= '^' . <SID>GetColPat(a:colnr-1,1) . b:col
+    else
+	let pat= '^' . <SID>GetColPat(a:colnr,0) 
+    endif
+    exe ":sort" . (a:bang ? '!' : '') . ' r /' . pat . '/'
+endfun
+
+fu! CSV_WCol() "{{{3
+    return printf(" %d/%d", <SID>WColumn(), <SID>MaxColumns())
 endfun
 
 fu! <SID>CommandDefinitions() "{{{3
@@ -325,58 +363,41 @@ fu! <SID>CommandDefinitions() "{{{3
     if exists(":NrColumns")
 	command! -buffer NrColumns :echo <SID>MaxColumns()
     endif
-    if exists(":HiColumn")
+    if !exists(":HiColumn")
 	command! -buffer -nargs=? HiColumn :call <SID>HiCol(<q-args>)
     endif
-    if exists(":SearchInColumn")
+    if !exists(":SearchInColumn")
 	command! -buffer -nargs=* SearchInColumn :call <SID>SearchColumn(<q-args>)
     endif
-    if exists(":DeleteColumn")
+    if !exists(":DeleteColumn")
 	command! -buffer -nargs=? DeleteColumn :call <SID>DelColumn(<args>)
     endif
-    if exists(":ArrangeColumn")
+    if !exists(":ArrangeColumn")
 	command! -buffer ArrangeColumn :call <SID>ArrangeCol()
     endif
-    if exists(":InitCSV")
+    if !exists(":InitCSV")
 	command! -buffer InitCSV :call <SID>Init()
     endif
-    if exists(":Header")
+    if !exists(":Header")
 	command! -buffer -bang -nargs=? Header :call <SID>SplitHeaderLine(<q-args>,<bang>0)
+    endif
+    if !exists(":Sort")
+	command! -buffer -nargs=1 -bang -range=% -complete=custom,<SID>SortComplete Sort :<line1>,<line2>call <SID>Sort(<bang>0,<args>)
     endif
 endfu
 
 fu! <SID>CSVMappings() "{{{3
-    nnoremap <silent> <buffer> W :<C-U>call <SID>MoveCol(1)<CR>
-    nnoremap <silent> <buffer> E :<C-U>call <SID>MoveCol(0)<CR>
+    nnoremap <silent> <buffer> W :<C-U>call <SID>MoveCol(1, line('.'))<CR>
+    nnoremap <silent> <buffer> E :<C-U>call <SID>MoveCol(-1, line('.'))<CR>
+    nnoremap <silent> <buffer> K :<C-U>call <SID>MoveCol(0, line('.')-v:count1)<CR>
+    nnoremap <silent> <buffer> J :<C-U>call <SID>MoveCol(0, line('.')+v:count1)<CR>
     " Map C-Right and C-Left as alternative to W and E
     nmap <silent> <buffer> <C-Right> W
     nmap <silent> <buffer> <C-Left>  E
+    nmap <silent> <buffer> H E
+    nmap <silent> <buffer> L W
 endfu
 
-fu! <SID>CSVSyntaxHL() "{{{3
-    " A simple syntax highlighting, simply alternate colors between two
-    " adjacent columns
-    if version < 600
-	syn clear
-    elseif exists("b:current_syntax")
-	return
-    endif
-
-    syntax spell toplevel
-
-    " Not really needed
-    syntax case ignore
-
-    exe 'syntax match CSVColumnOdd nextgroup=CSVColumnEven excludenl /'
-		\ . b:col . '/'
-    exe 'syntax match CSVColumnEven nextgroup=CSVColumnOdd excludenl /'
-		\ . b:col . '/' 
-
-    hi def link CSVColumnOdd	Todo
-    hi def link CSVColumnEven	Visual
-
-    let b:current_syntax="csv"
-endfun
 
 " end function definition "}}}2
 " Initialize Plugin "{{{2
