@@ -245,6 +245,8 @@ You need to restart Vim, if you have changed this variable or use |InitCSV|
 			 (this was already included in version 0.7, but
 			 forgotten to mention)
 			-Document how to setup filetype plugins
+			-Make |WhatColumn| work more reliable
+			 (report from http://vim.wikia.com/Script:3280)
 0.6 Feb 15, 2011	-Make |ArrangeColumn| work more reliable (had problems with
 			 multibyte chars before)
 			-Add |Header| function
