@@ -21,12 +21,14 @@ works differently.
     2.6 DeleteColumn............................|DeleteColumn_CSV|
     2.7 InitCSV.................................|InitCSV|
     2.8 Header..................................|Header_CSV|
-    2.9 Normal mode commands....................|csv-motion|
+    2.9 Sort....................................|Sort_CSV|
+    2.10 Normal mode commands...................|csv-motion|
 3. CSV Filetype configuration...................|csv-configuration|
     3.1 Delimiter...............................|csv-delimiter|
     3.2 Column..................................|csv-column|
     3.3 hiGroup.................................|csv-higroup|
-4. CSV Changelog................................|csv-changelog|
+4. CSV Tips and Tricks..........................|csv-tips|
+5. CSV Changelog................................|csv-changelog|
 
 ==============================================================================
 1. Installation			*csv-installation*
@@ -149,7 +151,7 @@ Reinitialize the Plugin. Use this, if you have changed the configuration
 of the plugin (see |csv-configuration| ).
 
 2.8 Header                                                *Header_CSV*
------------
+----------
 
 This command splits the csv-buffer and adds a window, that holds a small
 fraction of the csv file. This is useful, if the first line contains
@@ -167,20 +169,38 @@ and horizontally 'scrollbind'ed to the csv window, while >
 
 closes the fixed window.
 
-2.9 Normal mode commands		    *csv-motion*
------------
+2.9 Sort							*Sort_CSV*
+--------
+
+This command can be used to sort the csv file on a certain column. If no range
+is given, is sorts the whole file. Specify the column number to sort on as
+argument. Use the '!' attribute to reverse the sort order.
+For example, the following command sorts line 1 til 10 on the 3 column >
+
+    :1,10Sort 3
+
+While this command >
+
+    :1,10Sort! 3
+
+reverses the order based on column 3.
+
+2.10 Normal mode commands					 *csv-motion*
+-------------------------
 
 The csv filetype plugin redefines the following keys as:
 
-<C-Right> or
-W	Move [count] field forwards
+<C-Right> or L or W	Move [count] field forwards
 
-<C-Left> or
-E	Move [count] field backwards
+<C-Left> or E or H	Move [count] field backwards
+
+K			Move [count] lines upwards within the same column
+
+J			Move [count] lines downwards within the same column
 
 
 ==============================================================================
-3. CSV Configuration			  *csv-configuration*
+3. CSV Configuration					 *csv-configuration*
 
 The CSV plugin tries to automatically detect the field delimiter for your
 file, cause although often the file is called CSV (comma separated values), a
@@ -237,20 +257,52 @@ variable. You can e.g. define it in your .vimrc:
 You need to restart Vim, if you have changed this variable or use |InitCSV|
 
 ==============================================================================
-4. CSV Changelog		      *csv-changelog*
+4. CSV Tips and Tricks						*csv-tips*
+
+Suppose you want to include the column, on which the cursor is, into your
+statusline. You can do this, by defining in your .vimrc the 'statusline' like
+this: >
+
+    function MySTL()
+    if has("statusline")
+	hi User1 term=standout ctermfg=0 ctermbg=11 guifg=Black guibg=Yellow
+	let stl = ...
+	let csv = '%=%1*%{&ft=~"csv" ? CSV_WCol() : ""}%*'
+	return stl.csv
+    endfunc
+    set stl=%!MySTL()
+
+<
+
+This will draw in your statusline right aligned the current column and max
+column (like 1/10), if you are inside a CSV file. This status uses the User1
+highlighting (|hl-User1|), that has been defined in the second line of the
+function. In the third line of your function, put your desired 'statusline'
+settings as |expression|.
+
+==============================================================================
+5. CSV Changelog					       *csv-changelog*
 
 0.7			-Make the motion commands 'W' and 'E' work more
 			 reliable
-			-provide a file ftdetect/csv.vim to detect csv files
-			 (this was already included in version 0.7, but
-			 forgotten to mention)
 			-Document how to setup filetype plugins
-			-Make |WhatColumn| work more reliable
+			-Make |WhatColumn_CSV| work more reliable
 			 (report from http://vim.wikia.com/Script:3280)
-0.6 Feb 15, 2011	-Make |ArrangeColumn| work more reliable (had problems with
-			 multibyte chars before)
-			-Add |Header| function
+			-DeleteColumn deletes current column, if no argument
+			 given
+			-|ArrangeColumn_CSV| handles errors better
+			-Code cleanup
+			-Syntax highlighting
+			-'H' and 'L' move forward/backwards between csv fields
+			-'K' and 'J' move upwards/downwards within the same
+			 column
+			-|Sort_CSV| to sort on a certain column
+			-|csv-tips| on how to colorize the statusline
+0.6 Feb 15, 2011	-Make |ArrangeColumn_CSV| work more reliable
+			 (had problems with multibyte chars before)
+			-Add |Header_CSV| function
 			-'W' and 'E' move forward/backwards between csv fields
+			-provide a file ftdetect/csv.vim to detect csv files
 0.5  Apr 20 2010	-documentation update
 			-switched to a public repository:
 			  http://github.com/chrisbra/csv.vim
