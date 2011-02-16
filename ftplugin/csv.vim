@@ -75,19 +75,15 @@ fu! <SID>WColumn() "{{{
     let _cur = getpos('.')
     let line=getline('.')
     " If the cursor is on the field delimiter,
-    " match will return the next column
-    " so we move one char left
-    if line[col('.')-1] == b:delimiter
-       norm! h
-    endif
-    call search(b:col, 'e', line('.'))
+    call search(b:col, 'ec', line('.'))
     let end=col('.')-1
-    call search(b:col, 'b', line('.'))
-    let start=col('.')-1
-    let i=escape(line[start : end], '\')
-    let fields=(split(line,b:col.'\zs'))
+    "call search(b:col, 'b', line('.'))
+    "let start=col('.')-1
+    "let i=escape(line[start : end], '\')
+    let fields=(split(line[0:end],b:col.'\zs'))
     call setpos('.',_cur)
-    return strlen(substitute(line[0:start], b:col, '-', 'g'))
+    return len(fields)
+    "return strlen(substitute(line[0:start], b:col, '-', 'g'))
     "let i=escape(line[start : end], '\')
     "let fields=(split(line,b:col.'\zs'))
     "call setpos('.',_cur)
