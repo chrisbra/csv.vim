@@ -38,8 +38,15 @@ In order to have vim automatically detect csv files, you need to have
 
 <
 The plugin already sets up some logic, to detect CSV files. By default,
-the plugin recognizes *.csv and *.dat files as csv filetype. In case
-this did not work, you need to setup vim like this:
+the plugin recognizes *.csv and *.dat files as csv filetype. In order that the
+csv filetype plugin is loaded correctly, vim needs to be enabled to load
+|filetype-plugins|. This can be ensured, by putting a line like this into your
+|.vimrc|: >
+    :filetype plugin on
+<
+(see also |filetype-plugin-on|).
+
+In case this did not work, you need to setup vim like this:
 
 To have Vim automatically detect csv files, you need to do the following.
 
@@ -232,6 +239,12 @@ You need to restart Vim, if you have changed this variable or use |InitCSV|
 ==============================================================================
 4. CSV Changelog		      *csv-changelog*
 
+0.7			-Make the motion commands 'W' and 'E' work more
+			 reliable
+			-provide a file ftdetect/csv.vim to detect csv files
+			 (this was already included in version 0.7, but
+			 forgotten to mention)
+			-Document how to setup filetype plugins
 0.6 Feb 15, 2011	-Make |ArrangeColumn| work more reliable (had problems with
 			 multibyte chars before)
 			-Add |Header| function
