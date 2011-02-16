@@ -25,7 +25,7 @@ undo:
 	for i in */*.orig; do mv -f "$$i" "$${i%.*}"; done
 
 csv.vba:
-	vim -N -c 'ru! vimballPlugin.vim' -c ':let g:vimball_home=getcwd()'  -c ':call append("0", ["ftplugin/csv.vim", "doc/ft_csv.txt", "ftdetect/csv.vim"])' -c '$$d' -c ':%MkVimball! ${PLUGIN}' -c':q!'
+	vim -N -c 'ru! vimballPlugin.vim' -c ':let g:vimball_home=getcwd()'  -c ':call append("0", ["ftplugin/csv.vim", "doc/ft_csv.txt", "syntax/csv.vim", "ftdetect/csv.vim"])' -c '$$d' -c ':%MkVimball! ${PLUGIN}' -c':q!'
 
 csv:
 	rm -f ${PLUGIN}.vba
