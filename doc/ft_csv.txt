@@ -1,9 +1,10 @@
 *ft_csv.txt*  A plugin for CSV Files
 
 Author:  Christian Brabandt <cb@256bit.org>
-Version: 0.6
-The VIM LICENSE applies to csv.vim and csv.txt
-(see |copyright|) except use csv instead of "Vim".
+Version: 0.7
+
+The VIM LICENSE applies to csv.vim
+(see |copyright|) except use csv.vim instead of "Vim".
 NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
 
 This is a filetype plugin for CSV files. It was heavily influenced by
@@ -283,7 +284,7 @@ settings as |expression|.
 ==============================================================================
 5. CSV Changelog					       *csv-changelog*
 
-0.7			-Make the motion commands 'W' and 'E' work more
+0.7 Feb 16, 2011	-Make the motion commands 'W' and 'E' work more
 			 reliable
 			-Document how to setup filetype plugins
 			-Make |WhatColumn_CSV| work more reliable
