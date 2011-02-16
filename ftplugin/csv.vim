@@ -259,26 +259,31 @@ fu! <SID>SplitHeaderLine(lines, bang) "{{{
 endfu "}}}
 fu! <SID>Col(forward) "{{{
     let colnr=<SID>WColumn()
-    "if colnr > 1 && !a:forward
-    if colnr - v:count1 > 1 && !a:forward
+    let maxcol=<SID>MaxColumns()
+    if colnr - v:count1 >= 1 && !a:forward
 	let colnr -= v:count1
     elseif colnr - v:count1 < 1 && !a:forward
-	let colnr = 1
-    elseif colnr + v:count1 < <SID>MaxColumns() && a:forward
+	let colnr = 0
+    elseif colnr + v:count1 <= <SID>MaxColumns() && a:forward
 	let colnr += v:count1
     elseif colnr + v:count1 > <SID>MaxColumns() && a:forward
-	let colnr = <SID>MaxColumns()
+	let colnr = maxcol + 1
     endif
     if colnr == 1
-	let pat='^'. <SID>GetColPat(colnr,0)
+	let pat='^'. <SID>GetColPat(colnr-1,0) 
+	"let pat='^' . '\%' . line('.') . 'l'
+    elseif colnr == 0
+	let pat='^' . '\%' . line('.') . 'l'
+    elseif colnr == maxcol + 1
+	let pat='\%' . line('.') . 'l$'
     else
 	let pat='^'. <SID>GetColPat(colnr-1,1) . b:col
+	let pat = pat . '\%' . line('.') . 'l'
     endif
-    let pat = pat . '\%' . line('.') . 'l'
     if a:forward
 	call search(pat, 'cW')
     else
-	call search(pat, 'bW')
+	call search(pat, 'bWe')
     endif
 endfun "}}}
 fu! <SID>Init() "{{{
