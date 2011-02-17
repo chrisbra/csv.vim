@@ -2,3 +2,5 @@ post.pl
 vim_passfile
 .*.un~
 .*.sw*
+# ignore csv files for tests
+*.csv
