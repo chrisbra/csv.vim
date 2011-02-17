@@ -411,6 +411,9 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 			-SearchInColumn now searches in the current column,
 			 if no column has been specified
 			-A lot more documentation
+			-Syntax Highlighting conceales delimiter
+			-small performance improvements for
+			 |ArrangeColumn_CSV|
 0.7 Feb 16, 2011	-Make the motion commands 'W' and 'E' work more
 			 reliable
 			-Document how to setup filetype plugins
