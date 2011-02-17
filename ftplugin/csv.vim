@@ -33,6 +33,12 @@ fu! <SID>Init() "{{{3
     else
 	let s:hiGroup="WildMenu"
     endif
+    if !exists("g:csv_hiHeader")
+	let s:hiHeader = "Title"
+    else
+	let s:hiHeader = g:csv_hiHeader
+    endif
+    exe "hi link CSVHeaderLine" s:hiHeader
     " Determine default Delimiter
     if !exists("g:csv_delim")
 	let b:delimiter=<SID>GetDelimiter()
@@ -346,7 +352,7 @@ fu! <SID>SplitHeaderLine(lines, bang) "{{{3
 	"let &l:stl=repeat(' ', winwidth(0))
 	let &l:stl="%#Normal#".repeat(' ',winwidth(0))
 	" Highlight first row
-	call matchadd("Title", b:col)
+	call matchadd("CSVHeaderLine", b:col)
 	let b:CSV_SplitWindow = winnr()
 	exe "noa wincmd p"
     else
