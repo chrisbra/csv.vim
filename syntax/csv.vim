@@ -20,7 +20,7 @@ hi CSVColumnHeaderEven ctermfg=0 ctermbg=8 guibg=grey50 guifg=black cterm=underl
 " else, it won't work properly.
 redir => a |sil filetype | redir end
 let a=split(a, "\n")[0]
-if match(a, "plugin:off")
+if match(a, '\cplugin:off') > 0
     echohl WarningMsg
     echomsg "CSV Syntax: No filetype support, only simple highlighting!" 
     echomsg "See :h csv-installation"
