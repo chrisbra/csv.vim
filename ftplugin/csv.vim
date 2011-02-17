@@ -54,8 +54,16 @@ fu! <SID>Init() "{{{3
     if exists("b:current_syntax")
 	unlet b:current_syntax
 	" Force reloading syntax file
-	exe "silent do Syntax" expand("%")
     endif
+    if !exists("#CSV#ColorScheme")
+	" Make sure, syntax highlighting is applied
+	" after changing the colorscheme
+	augroup CSV
+	    au!
+	    au ColorScheme *.csv,*.dat do Syntax
+	augroup end
+    endif
+    silent do Syntax
 
     " undo when setting a new filetype
     let b:undo_ftplugin = "setlocal sol< tw< wrap<"
@@ -65,9 +73,19 @@ fu! <SID>Init() "{{{3
 endfu 
 
 fu! <SID>SearchColumn(arg) "{{{3
-    let arglist=split(a:arg)
-    let colnr=arglist[0]
-    let pat=substitute(arglist[1], '^\(.\)\(.*\)\1$', '\2', '')
+    try 
+	let arglist=split(a:arg)
+	if len(arglist) == 1
+	   let colnr=<SID>WColumn()
+	   let pat=substitute(arglist[0], '^\(.\)\(.*\)\1$', '\2', '')
+	else
+	    let colnr=arglist[0]
+	    let pat=substitute(arglist[1], '^\(.\)\(.*\)\1$', '\2', '')
+	endif
+    catch /^Vim\%((\a\+)\)\=:E684/	" catch error index out of bounds
+	call <SID>Warn("Error! Usage :SearchInColumn [<colnr>] /pattern/")
+	return 1
+    endtry
     let maxcolnr = <SID>MaxColumns()
     if colnr > maxcolnr
 	call <SID>Warn("There exists no column " . colnr)
@@ -89,7 +107,17 @@ fu! <SID>SearchColumn(arg) "{{{3
 	"let @/= '^\zs' . b:col1 . '\?' . pat . '\ze' . b:col1 . '\?' .  <SID>GetColPat(maxcolnr,0) . '$'
 	let @/= '^' . '\%([^' . b:delimiter . ']*\)\?\zs' . pat . '\ze\%([^' . b:delimiter . ']*\)\?' . b:delimiter .  <SID>GetColPat(maxcolnr-1,0) . '$'
     endif
-    norm! n
+    try
+	norm! n
+    catch /^Vim\%((\a\+)\)\=:E486/
+        " Pattern not found
+	echohl Error
+	echomsg "E486: Pattern not found in column " . colnr . ": " . pat 
+	if &vbs > 0
+	    echomsg substitute(v:exception, '^[^:]*:', '','')
+	endif
+	echohl Normal
+    endtry
 endfu
 
 fu! <SID>DelColumn(colnr) "{{{3
@@ -114,20 +142,23 @@ fu! <SID>DelColumn(colnr) "{{{3
 endfu
 
 fu! <SID>HiCol(colnr) "{{{3
-    if a:colnr > <SID>MaxColumns()
+    if a:colnr > <SID>MaxColumns() && a:colnr[-1:] != '!'
 	call <SID>Warn("There exists no column " . a:colnr)
 	return
     endif
-    if empty(a:colnr)
-       let colnr=<SID>WColumn()
-    else
-       let colnr=a:colnr
-    endif
 
-    if colnr==1
-	let pat='^'. <SID>GetColPat(colnr,0)
-    else
-	let pat='^'. <SID>GetColPat(colnr-1,1) . b:col
+    if a:colnr[-1:] != '!'
+	if empty(a:colnr)
+	let colnr=<SID>WColumn()
+	else
+	let colnr=a:colnr
+	endif
+
+	if colnr==1
+	    let pat='^'. <SID>GetColPat(colnr,0)
+	else
+	    let pat='^'. <SID>GetColPat(colnr-1,1) . b:col
+	endif
     endif
 
     if exists("*matchadd")
@@ -139,9 +170,14 @@ fu! <SID>HiCol(colnr) "{{{3
 	let matchlist=getmatches()
 	call filter(matchlist, 'v:val["group"] !~ s:hiGroup')
 	call setmatches(matchlist)
+	if a:colnr[-1:] == '!'
+	    return
+	endif
 	let s:matchid=matchadd(s:hiGroup, pat, 0)
     else
-        exe ":2match " . s:hiGroup . ' /' . pat . '/'
+	if a:colnr[-1:] != '!'
+	    exe ":2match " . s:hiGroup . ' /' . pat . '/'
+	endif
     endif
 endfu
 
@@ -360,11 +396,11 @@ fu! <SID>CommandDefinitions() "{{{3
     if !exists(":WhatColumn")
 	command! -buffer WhatColumn :echo <SID>WColumn()
     endif
-    if exists(":NrColumns")
+    if !exists(":NrColumns")
 	command! -buffer NrColumns :echo <SID>MaxColumns()
     endif
     if !exists(":HiColumn")
-	command! -buffer -nargs=? HiColumn :call <SID>HiCol(<q-args>)
+	command! -buffer -bang -nargs=? HiColumn :call <SID>HiCol(<q-args>.<q-bang>)
     endif
     if !exists(":SearchInColumn")
 	command! -buffer -nargs=* SearchInColumn :call <SID>SearchColumn(<q-args>)
