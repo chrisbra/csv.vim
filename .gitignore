@@ -4,3 +4,5 @@ vim_passfile
 .*.sw*
 # ignore csv files for tests
 *.csv
+# ignore vimballs
+*.vba
