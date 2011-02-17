@@ -16,6 +16,9 @@ if v:version < 700 || exists('b:did_ftplugin')
 endif
 let b:did_ftplugin = 1
 
+let s:cpo_save = &cpo
+set cpo&vim
+
 " Function definitions: "{{{2
 fu! <SID>Warn(mess) "{{{3
     echohl WarningMsg
@@ -72,8 +75,13 @@ fu! <SID>Init() "{{{3
     " undo when setting a new filetype
     let b:undo_ftplugin = "setlocal sol< tw< wrap<"
 	\ . "| unlet b:delimiter b:col"
+
     " CSV local settings
     setl nostartofline tw=0 nowrap
+    if has("conceal")
+	setl cole=2 cocu=nc
+	let b:undo_ftplugin .= '|setl cole< cocu<'
+    endif
 endfu 
 
 fu! <SID>SearchColumn(arg) "{{{3
@@ -469,7 +477,9 @@ endfu
 
 " end function definition "}}}2
 " Initialize Plugin "{{{2
-:call <SID>Init()
+call <SID>Init()
+let &cpo = s:cpo_save
+unlet s:cpo_save
 
 " Vim Modeline " {{{2
 " vim: set foldmethod=marker: 
