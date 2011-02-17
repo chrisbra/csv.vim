@@ -41,9 +41,13 @@ fu! <SID>Init() "{{{3
     endif
     
     " Pattern for matching a single column
-    let b:col='\%(\%([^' . b:delimiter . ']*"[^"]*"[^' . 
-		\ b:delimiter . ']*' . b:delimiter . '\)\|\%([^' . 
-		\ b:delimiter . ']*\%(' . b:delimiter . '\|$\)\)\)'
+    if !exists("g:csv_strict_columns")
+	let b:col='\%(\%([^' . b:delimiter . ']*"[^"]*"[^' . 
+		    \ b:delimiter . ']*' . b:delimiter . '\)\|\%([^' . 
+		    \ b:delimiter . ']*\%(' . b:delimiter . '\|$\)\)\)'
+    else
+	let b:col='\%([^' . b:delimiter . ']*' . b:delimiter . '\|$\)'
+    endif
 
     " define buffer-local commands
     call <SID>CommandDefinitions()
@@ -120,12 +124,9 @@ fu! <SID>SearchColumn(arg) "{{{3
     endtry
 endfu
 
+
 fu! <SID>DelColumn(colnr) "{{{3
     let maxcolnr = <SID>MaxColumns()
-    if a:colnr > maxcolnr
-	call <SID>Warn("There exists no column " . a:colnr)
-	return 
-    endif
 
     if empty(a:colnr)
        let colnr=<SID>WColumn()
@@ -133,10 +134,18 @@ fu! <SID>DelColumn(colnr) "{{{3
        let colnr=a:colnr
     endif
 
+    if colnr > maxcolnr
+	call <SID>Warn("There exists no column " . colnr)
+	return 
+    endif
+
     if a:colnr != '1'
 	let pat= '^' . <SID>GetColPat(a:colnr-1,1) . b:col
     else
 	let pat= '^' . <SID>GetColPat(a:colnr,0) 
+    endif
+    if &ro
+       setl noro
     endif
     exe ':%s/' . escape(pat, '/') . '//'
 endfu
@@ -146,12 +155,11 @@ fu! <SID>HiCol(colnr) "{{{3
 	call <SID>Warn("There exists no column " . a:colnr)
 	return
     endif
-
     if a:colnr[-1:] != '!'
 	if empty(a:colnr)
-	let colnr=<SID>WColumn()
+	   let colnr=<SID>WColumn()
 	else
-	let colnr=a:colnr
+	   let colnr=a:colnr
 	endif
 
 	if colnr==1
@@ -233,8 +241,12 @@ endfu
 
 fu! <SID>ColWidth(colnr) "{{{3
     " Return the width of a column
-    let list=getline(1,'$')
+    if !exists("b:buffer_content")
+	let b:csv_list=getline(1,'$')
+	let b:buffer_content=1
+    endif
     let width=20 "Fallback (wild guess)
+    let list=copy(b:csv_list)
     try
 	" we have a list of the first 10 rows
 	" Now transform it to a list of field a:colnr
@@ -245,7 +257,7 @@ fu! <SID>ColWidth(colnr) "{{{3
 	call map(list, 'strlen(v:val)')
 	return max(list)
     catch
-        return  width
+        return width
     endtry
 endfu
 
@@ -255,8 +267,19 @@ fu! <SID>ArrangeCol() range "{{{3
     if exists("b:col_width")
       unlet b:col_width
     endif
+    " Force recalculation of column width
+    if exists("b:buffer_content")
+      unlet b:buffer_content
+    endif
 
-   exe ':%s/' . (b:col) . '/\=<SID>Columnize(submatch(0))/g'
+   if &ro
+       " Just in case, to prevent the Warning 
+       " Warning: W10: Changing read-only file
+       setl noro
+   endif
+   exe a:firstline . ',' . a:lastline .'s/' . (b:col) .
+  \ '/\=<SID>Columnize(submatch(0))/g'
+   setl ro
    call setpos('.', _cur)
 endfu
 
@@ -267,13 +290,22 @@ fu! <SID>Columnize(field) "{{{3
 	for i in range(1,max_cols)
 	    call add(b:col_width, <SID>ColWidth(i))
 	endfor
+	if exists("b:csv_list")
+	    " delete buffer content in variable b:csv_list,
+	    " this was only necessary for calculating the max width
+	    unlet b:csv_list
+	endif
    endif
    " convert zero based indexed list to 1 based indexed list,
    " Default: 20 width, in case that column width isn't defined
    let width=get(b:col_width,<SID>WColumn()-1,20)
-   let a = split(a:field, '\zs')
-   let add = eval(join(map(a, 'len(v:val)'), '+'))
-   let add -= len(a)
+   if !exists("g:csv_no_multibyte")
+       let a = split(a:field, '\zs')
+       let add = eval(join(map(a, 'len(v:val)'), '+'))
+       let add -= len(a)
+   else
+       let add = 0
+   endif
    
    " Add one for the frame
    " plus additional width for multibyte chars,
@@ -306,7 +338,7 @@ fu! <SID>SplitHeaderLine(lines, bang) "{{{3
 	"let &l:stl=repeat(' ', winwidth(0))
 	let &l:stl="%#Normal#".repeat(' ',winwidth(0))
 	" Highlight first row
-	call matchadd("Type", b:col)
+	call matchadd("Title", b:col)
 	let b:CSV_SplitWindow = winnr()
 	exe "noa wincmd p"
     else
@@ -406,10 +438,10 @@ fu! <SID>CommandDefinitions() "{{{3
 	command! -buffer -nargs=* SearchInColumn :call <SID>SearchColumn(<q-args>)
     endif
     if !exists(":DeleteColumn")
-	command! -buffer -nargs=? DeleteColumn :call <SID>DelColumn(<args>)
+	command! -buffer -nargs=? DeleteColumn :call <SID>DelColumn(<q-args>)
     endif
     if !exists(":ArrangeColumn")
-	command! -buffer ArrangeColumn :call <SID>ArrangeCol()
+	command! -buffer -range ArrangeColumn :<line1>,<line2>call <SID>ArrangeCol()
     endif
     if !exists(":InitCSV")
 	command! -buffer InitCSV :call <SID>Init()
