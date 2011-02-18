@@ -334,7 +334,7 @@ And to force calculating the byte width of each column |unlet| the variable: >
 
 You should reinitialize the plugin afterwards |InitCSV|
 ==============================================================================
-4. CSV Tips and Tricks							*csv-tips*
+4. CSV Tips and Tricks						*csv-tips*
 
 Here, there you'll find some small tips and tricks that might help when
 working with CSV files.
@@ -354,7 +354,6 @@ this: >
 	    else
 		let csv = ''
 	    endif
-	    let csv = '%=%1*%{&ft=~"csv" ? CSV_WCol() : ""}%*'
 	    return stl.csv
 	endfunc
     set stl=%!MySTL()
