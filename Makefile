@@ -1,7 +1,7 @@
 SCRIPT=ftplugin/csv.vim
 DOC=doc/ft_csv.txt
 PLUGIN=csv
-.PHONY : csv.vba
+.PHONY : csv.vba csv
 
 
 all: $(PLUGIN) $(PLUGIN).vba

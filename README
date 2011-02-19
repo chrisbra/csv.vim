@@ -1,7 +1,7 @@
 *ft_csv.txt*	For Vim version 7.3	Last change: 2011 Feb 17
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.8
+Version:	0.9
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -334,7 +334,7 @@ And to force calculating the byte width of each column |unlet| the variable: >
 
 You should reinitialize the plugin afterwards |InitCSV|
 ==============================================================================
-4. CSV Tips and Tricks							*csv-tips*
+4. CSV Tips and Tricks						*csv-tips*
 
 Here, there you'll find some small tips and tricks that might help when
 working with CSV files.
@@ -354,7 +354,6 @@ this: >
 	    else
 		let csv = ''
 	    endif
-	    let csv = '%=%1*%{&ft=~"csv" ? CSV_WCol() : ""}%*'
 	    return stl.csv
 	endfunc
     set stl=%!MySTL()
@@ -402,6 +401,9 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 ==============================================================================
 5. CSV Changelog					       *csv-changelog*
 
+0.9 Feb 19, 2011        -use conceal char depending on encoding
+			-Map normal mode keys also for visual/select and
+			 operator pending mode
 0.8 Feb 17, 2011	-Better Error handling 
 			-HiColumn! removes highlighting
 			-Enable NrColumns, that was deactivated in v.0.7
@@ -411,6 +413,9 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 			-SearchInColumn now searches in the current column,
 			 if no column has been specified
 			-A lot more documentation
+			-Syntax Highlighting conceales delimiter
+			-small performance improvements for
+			 |ArrangeColumn_CSV|
 0.7 Feb 16, 2011	-Make the motion commands 'W' and 'E' work more
 			 reliable
 			-Document how to setup filetype plugins
