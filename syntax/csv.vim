@@ -35,7 +35,7 @@ else
 endif
 
 if has("conceal")
-    exe "syn match CSVDelimiter /" . del . "/ contained conceal cchar=│"
+    exe "syn match CSVDelimiter /" . del . "/ contained conceal cchar=" . (&enc=="utf-8" ? "│" : '|')
     hi def link CSVDelimiter Conceal
 else
     exe "syn match CSVDelimiter /" . del . "/ contained"
