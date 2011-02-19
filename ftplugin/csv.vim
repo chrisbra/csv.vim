@@ -469,15 +469,15 @@ fu! <SID>CommandDefinitions() "{{{3
 endfu
 
 fu! <SID>CSVMappings() "{{{3
-    nnoremap <silent> <buffer> W :<C-U>call <SID>MoveCol(1, line('.'))<CR>
-    nnoremap <silent> <buffer> E :<C-U>call <SID>MoveCol(-1, line('.'))<CR>
-    nnoremap <silent> <buffer> K :<C-U>call <SID>MoveCol(0, line('.')-v:count1)<CR>
-    nnoremap <silent> <buffer> J :<C-U>call <SID>MoveCol(0, line('.')+v:count1)<CR>
+    noremap <silent> <buffer> W :<C-U>call <SID>MoveCol(1, line('.'))<CR>
+    noremap <silent> <buffer> E :<C-U>call <SID>MoveCol(-1, line('.'))<CR>
+    noremap <silent> <buffer> K :<C-U>call <SID>MoveCol(0, line('.')-v:count1)<CR>
+    noremap <silent> <buffer> J :<C-U>call <SID>MoveCol(0, line('.')+v:count1)<CR>
     " Map C-Right and C-Left as alternative to W and E
-    nmap <silent> <buffer> <C-Right> W
-    nmap <silent> <buffer> <C-Left>  E
-    nmap <silent> <buffer> H E
-    nmap <silent> <buffer> L W
+    map <silent> <buffer> <C-Right> W
+    map <silent> <buffer> <C-Left>  E
+    map <silent> <buffer> H E
+    map <silent> <buffer> L W
 endfu
 
 
