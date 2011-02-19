@@ -401,6 +401,9 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 ==============================================================================
 5. CSV Changelog					       *csv-changelog*
 
+0.9 Feb 19, 2011        -use conceal char depending on encoding
+			-Map normal mode keys also for visual/select and
+			 operator pending mode
 0.8 Feb 17, 2011	-Better Error handling 
 			-HiColumn! removes highlighting
 			-Enable NrColumns, that was deactivated in v.0.7
