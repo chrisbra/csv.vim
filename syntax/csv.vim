@@ -34,11 +34,11 @@ else
     let del = b:delimiter
 endif
 
-if has("conceal")
-    exe "syn match CSVDelimiter /" . del . "/ contained conceal cchar=" . (&enc=="utf-8" ? "│" : '|')
+if has("conceal") && !exists("g:csv_noconceal")
+    exe "syn match CSVDelimiter /" . col . "/ms=e contained conceal cchar=" . (&enc=="utf-8" ? "│" : '|')
     hi def link CSVDelimiter Conceal
 else
-    exe "syn match CSVDelimiter /" . del . "/ contained"
+    exe "syn match CSVDelimiter /" . col . "/ms=e-1 contained"
     hi def link CSVDelimiter Ignore
 endif
 
