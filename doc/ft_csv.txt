@@ -31,6 +31,8 @@ works differently. For instructions on installing this file, type
     3.3 HiGroup.................................|csv-higroup|
     3.4 Strict Columns..........................|csv-strict|
     3.5 Multibyte Chars.........................|csv-mbyte|
+    3.6 Concealing..............................|csv-conceal|
+    3.7 Newlines................................|csv-newline|
 4. CSV Tips and Tricks..........................|csv-tips|
     4.1 Statusline..............................|csv-stl|
     4.2 Slow ArrangeCol.........................|csv-slow|
@@ -211,9 +213,9 @@ The csv filetype plugin redefines the following keys as:
 
 <C-Left> or E or H	Move [count] field backwards
 
-K			Move [count] lines upwards within the same column
+<Up> or K		Move [count] lines upwards within the same column
 
-J			Move [count] lines downwards within the same column
+<Down> or J		Move [count] lines downwards within the same column
 
 
 ==============================================================================
@@ -250,7 +252,7 @@ b:col. By default this variable is initialized to: >
     \. '\|$\)\)\)'
 
 This should take care of quoted delimiters within a column. Those should
-obviously not count as a delimiter. This is regular expression is quite
+obviously not count as a delimiter. This regular expression is quite
 complex and might not always work on some complex cases (e.g. linebreaks
 within a field, see RFC4180 for some ugly cases that will probably not work
 with this plugin).
@@ -263,6 +265,17 @@ this command: >
     :let b:col=substitute(b:col, ',', ';', 'g')
 
 Check with :echo b:col, if the definition is correct afterwards.
+
+You can also force the plugin to use your own defined regular expression as
+column. That regular expression should include the delimiter for the columns. 
+To define your own regular expression, set the g:csv_col variable: >
+
+    let g:csv_col='[^,]*,'
+
+This defines a column as a field delimited by the comma (where no comma can be
+contained inside a field), similar to how |csv-strict| works.
+
+You should reinitialize the plugin afterwards |InitCSV|
 
 3.3 Hilighting Group                                         *csv-higroup*
 --------------------
@@ -287,6 +300,8 @@ for the popup menu. To disable the custom highlighting, simply |unlet| the
 variable: >
 
     unlet g:csv_hiHeader
+
+You should reinitialize the plugin afterwards |InitCSV|
 
 3.4 Strict Columns						*csv-strict*
 ------------------
@@ -315,7 +330,7 @@ You can disable the effect if you |unlet| the variable: >
 
 You should reinitialize the plugin afterwards |InitCSV|
 
-3.4 Multibyte Chars						*csv-mbyte*
+3.5 Multibyte Chars						*csv-mbyte*
 -------------------
 
 Unfortunately, when using the |ArrangeColumn_CSV| command, multibyte chars
@@ -333,6 +348,45 @@ And to force calculating the byte width of each column |unlet| the variable: >
     unlet g:csv_no_multibyte
 
 You should reinitialize the plugin afterwards |InitCSV|
+
+3.6 Concealing					*csv-syntax*	*csv-conceal*
+-------------------
+
+The CSV plugin comes with a function to syntax highlight csv files. Basically
+allt it does is highlight the columns and the header line.
+
+By default, the delimiter will not be displayed, if Vim supports |conceal| of
+syntax items and instead draws a vertical line. If you don't want that, simply
+set the g:csv_noconceal variable in your .vimrc >
+    
+    let g:csv_no_conceal = 1
+
+and to disable it, simply unlet the variable >
+
+    unlet g:csv_no_conceal
+
+You should reinitialize the plugin afterwards |InitCSV|
+
+3.7 Newlines						*csv-newline*
+------------
+
+RFC4180 allows newlines in double quoted strings. By default, the csv-plugin
+won't recognize newlines inside fields. It is however possible to make the
+plugin aware of newlines within quoted strings. To enbale this, set >
+
+    let g:csv_nl = 1
+
+and to disable it again, simply unset the variable >
+
+    unlet g:csv_nl
+
+It is a good idea to reinitialize the plugin afterwards |InitCSV|
+
+Note, this might not work correctly in all cases. The syntax highlighting
+seems to change on cursor movements. This could possibly be a bug in the
+syntax highlighting engine of Vim. Also, |WhatColumn_CSV| can't handle
+newlines inside fields and will most certainly be wrong. 
+
 ==============================================================================
 4. CSV Tips and Tricks						*csv-tips*
 
@@ -401,6 +455,11 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 ==============================================================================
 5. CSV Changelog					       *csv-changelog*
 
+0.10 (unreleased)	-Only conceal real delimiters
+			-document g:csv_no_conceal variable
+			-document g:csv_nl variable
+			-document conceal feature and syntax highlighting
+			-Normal mode command <Up>/<Down> work like K/J
 0.9 Feb 19, 2011        -use conceal char depending on encoding
 			-Map normal mode keys also for visual/select and
 			 operator pending mode
