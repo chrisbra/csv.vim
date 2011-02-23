@@ -40,8 +40,9 @@ else
 endif
 
 if has("conceal") && !exists("g:csv_noconceal")
-    exe "syn match CSVDelimiter /" . del . "/ contained conceal cchar=" .
-    \ (&enc=="utf-8" ? "│" : '|')
+    exe "syn match CSVDelimiter /" . col . 
+    \ '\%(.\)\@=/ms=e,me=e contained conceal cchar=' .
+    \ (&enc == "utf-8" ? "│" : '|')
     hi def link CSVDelimiter Conceal
 else
     " The \%(.\)\@= make sure, the last char won't be concealed,
