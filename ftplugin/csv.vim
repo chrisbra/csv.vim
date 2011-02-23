@@ -3,9 +3,9 @@
 " Version: 0.9
 " Script:  http://www.vim.org/scripts/script.php?script_id=2830
 " License: VIM License
-" Last Change: Sat, 19 Feb 2011 15:07:27 +0100
+" Last Change: Wed, 23 Feb 2011 20:54:40 +0100
 " Documentation: see :help ft_csv.txt
-" GetLatestVimScripts: 2830 8 :AutoInstall: csv.vim
+" GetLatestVimScripts: 2830 10 :AutoInstall: csv.vim
 "
 " Some ideas are take from the wiki http://vim.wikia.com/wiki/VimTip667
 " though, implementation differs.
@@ -54,7 +54,9 @@ fu! <SID>Init() "{{{3
     if !exists("g:csv_strict_columns") && !exists("g:csv_col")
 	" - Allow double quotes as escaped quotes only insides double quotes
 	" - Allow linebreaks only, if g:csv_nl isn't set (this is
-	"   only allowed in double quoted strings see RFC4180)
+	"   only allowed in double quoted strings see RFC4180), though this
+	"   does not work with :WhatColumn and might mess up syntax
+	"   highlighting.
 	" - optionally allow whitespace in front of the fields (to make it 
 	"   work with :ArrangeCol (that is actually not RFC4180 valid))
 	" - Should work with most ugly solutions that are available
@@ -491,6 +493,8 @@ fu! <SID>CSVMappings() "{{{3
     map <silent> <buffer> <C-Left>  E
     map <silent> <buffer> H E
     map <silent> <buffer> L W
+    map <silent> <buffer> <Up> K
+    map <silent> <buffer> <Down> J
 endfu
 
 
