@@ -400,9 +400,9 @@ fu! <SID>MoveCol(forward, line) "{{{3
 	let colnr -= v:count1
     elseif colnr - v:count1 < 1 && a:forward == -1
 	let colnr = 0
-    elseif colnr + v:count1 <= <SID>MaxColumns() && a:forward == 1
+    elseif colnr + v:count1 <= maxcol && a:forward == 1
 	let colnr += v:count1
-    elseif colnr + v:count1 > <SID>MaxColumns() && a:forward == 1
+    elseif colnr + v:count1 > maxcol && a:forward == 1
 	let colnr = maxcol + 1
     endif
 
@@ -417,10 +417,8 @@ fu! <SID>MoveCol(forward, line) "{{{3
     if colnr == 1
 	let pat = '^' . <SID>GetColPat(colnr-1,0) 
 	"let pat = pat . '\%' . line . 'l'
-    elseif colnr == 0
-	let pat = '^' . '\%' . line . 'l'
-    elseif colnr == maxcol + 1
-	let pat='\%' . line . 'l$'
+    elseif (colnr == 0) || (colnr == maxcol + 1)
+	let pat=b:col
     else
 	let pat='^'. <SID>GetColPat(colnr-1,1) . b:col
 	"let pat = pat . '\%' . line . 'l'
