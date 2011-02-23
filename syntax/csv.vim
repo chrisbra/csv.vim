@@ -1,5 +1,6 @@
 " A simple syntax highlighting, simply alternate colors between two
 " adjacent columns
+scriptencoding utf8
 if version < 600
     syn clear
 elseif exists("b:current_syntax")
@@ -11,10 +12,14 @@ syn spell toplevel
 " Not really needed
 syn case ignore
 
-hi CSVColumnOdd	ctermfg=0 ctermbg=6 guibg=grey80 guifg=black term=underline cterm=underline gui=underline
-hi CSVColumnEven ctermfg=0 ctermbg=8 guibg=grey50 guifg=black term=underline cterm=underline gui=underline
-hi CSVColumnHeaderOdd ctermfg=0 ctermbg=6 guibg=grey80 guifg=black cterm=underline gui=bold,underline
-hi CSVColumnHeaderEven ctermfg=0 ctermbg=8 guibg=grey50 guifg=black cterm=underline gui=bold,underline
+hi CSVColumnOdd  ctermfg=0 ctermbg=6 guibg=grey80 guifg=black 
+\ term=underline cterm=underline gui=underline
+hi CSVColumnEven ctermfg=0 ctermbg=8 guibg=grey50 guifg=black
+\ term=underline cterm=underline gui=underline
+hi CSVColumnHeaderOdd ctermfg=0 ctermbg=6 guibg=grey80 guifg=black
+\ cterm=underline gui=bold,underline
+hi CSVColumnHeaderEven ctermfg=0 ctermbg=8 guibg=grey50 guifg=black
+\ cterm=underline gui=bold,underline
 
 " Check for filetype plugin. This syntax script relies on the filetype plugin,
 " else, it won't work properly.
@@ -35,26 +40,27 @@ else
 endif
 
 if has("conceal") && !exists("g:csv_noconceal")
-    exe "syn match CSVDelimiter /" . col . "/ms=e contained conceal cchar=" . (&enc=="utf-8" ? "│" : '|')
+    exe "syn match CSVDelimiter /" . del . "/ contained conceal cchar=" .
+    \ (&enc=="utf-8" ? "│" : '|')
     hi def link CSVDelimiter Conceal
 else
-    exe "syn match CSVDelimiter /" . col . "/ms=e-1 contained"
+    " The \%(.\)\@= make sure, the last char won't be concealed,
+    " if it isn't a delimiter
+    exe "syn match CSVDelimiter /" . col . '\%(.\)\@=/ms=e,me=e contained'
     hi def link CSVDelimiter Ignore
 endif
 
 
 " Last match is prefered.
-exe 'syn match CSVColumnEven nextgroup=CSVColumnOdd excludenl /'
+
+exe 'syn match CSVColumnEven nextgroup=CSVColumnOdd /'
 	    \ . col . '/ contains=CSVDelimiter'
-exe 'syn match CSVColumnOdd nextgroup=CSVColumnEven excludenl /'
+exe 'syn match CSVColumnOdd nextgroup=CSVColumnEven /'
 	    \ . col . '/ contains=CSVDelimiter'
 
-exe 'syn match CSVColumnHeaderEven nextgroup=CSVColumnHeaderOdd excludenl /\%1l'
+exe 'syn match CSVColumnHeaderEven nextgroup=CSVColumnHeaderOdd /\%1l'
 	    \. col . '/ contains=CSVDelimiter'
-
-exe 'syn match CSVColumnHeaderOdd nextgroup=CSVColumnHeaderEven excludenl /\%1l'
+exe 'syn match CSVColumnHeaderOdd nextgroup=CSVColumnHeaderEven /\%1l'
 	    \. col . '/ contains=CSVDelimiter'
-
-
 
 let b:current_syntax="csv"
