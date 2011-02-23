@@ -49,14 +49,26 @@ fu! <SID>Init() "{{{3
 	call <SID>Warn("No delimiter found. See :h csv-delimiter to set it manually!")
     endif
     
+    let s:del='\%(' . b:delimiter . '\|$\)'
     " Pattern for matching a single column
-    if !exists("g:csv_strict_columns")
-	let b:col='\%(\%([^' . b:delimiter . ']*"[^"]*"[^' . 
-		    \ b:delimiter . ']*' . b:delimiter . '\)\|\%([^' . 
-		    \ b:delimiter . ']*\%(' . b:delimiter . '\|$\)\)\)'
+    if !exists("g:csv_strict_columns") && !exists("g:csv_col")
+	" - Allow double quotes as escaped quotes only insides double quotes
+	" - Allow linebreaks only, if g:csv_nl isn't set (this is
+	"   only allowed in double quoted strings see RFC4180)
+	" - optionally allow whitespace in front of the fields (to make it 
+	"   work with :ArrangeCol (that is actually not RFC4180 valid))
+	" - Should work with most ugly solutions that are available
+	let b:col='\%(\%(\%(' . (b:delimiter !~ '\s' ? '\s*' : '') . 
+		    \ '"\%(' . (exists("g:csv_nl") ? '\_' : '' ) . 
+		    \ '[^"]\|""\)*"\)' . s:del . 
+		    \	'\)\|\%(' . 
+		    \  '[^' .  b:delimiter . ']*' . s:del . '\)\)'
+    elseif !exists("g:csv_col") " g:csv_strict_columns is set
+	let b:col='\%([^' . b:delimiter . ']*' . s:del . '\)'
     else
-	let b:col='\%([^' . b:delimiter . ']*' . b:delimiter . '\|$\)'
+	let b:col = g:csv_col
     endif
+    
 
     " define buffer-local commands
     call <SID>CommandDefinitions()
@@ -234,7 +246,8 @@ fu! <SID>WColumn() "{{{3
     let _cur = getpos('.')
     let line=getline('.')
     " move cursor to end of field
-    call search(b:col, 'ec', line('.'))
+    "call search(b:col, 'ec', line('.'))
+    call search(b:col, 'ec')
     let end=col('.')-1
     let fields=(split(line[0:end],b:col.'\zs'))
     call setpos('.',_cur)
@@ -401,23 +414,23 @@ fu! <SID>MoveCol(forward, line) "{{{3
     " Generate search pattern
     if colnr == 1
 	let pat = '^' . <SID>GetColPat(colnr-1,0) 
-	let pat = pat . '\%' . line . 'l'
+	"let pat = pat . '\%' . line . 'l'
     elseif colnr == 0
 	let pat = '^' . '\%' . line . 'l'
     elseif colnr == maxcol + 1
 	let pat='\%' . line . 'l$'
     else
 	let pat='^'. <SID>GetColPat(colnr-1,1) . b:col
-	let pat = pat . '\%' . line . 'l'
+	"let pat = pat . '\%' . line . 'l'
     endif
 
     " Search
     if a:forward > 0
-	call search(pat, 'cW')
+	call search(pat, 'W')
     elseif a:forward < 0
 	call search(pat, 'bWe')
     else
-	call search(pat, 'c')
+	call search(pat)
     endif
 endfun
 
