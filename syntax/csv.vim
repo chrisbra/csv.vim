@@ -43,11 +43,17 @@ if has("conceal") && !exists("g:csv_noconceal")
     exe "syn match CSVDelimiter /" . col . 
     \ '\%(.\)\@=/ms=e,me=e contained conceal cchar=' .
     \ (&enc == "utf-8" ? "│" : '|')
+    exe "syn match CSVDelimiterEOL /" . del . 
+    \ '$/ contained conceal cchar=' .
+    \ (&enc == "utf-8" ? "│" : '|')
     hi def link CSVDelimiter Conceal
+    hi def link CSVDelimiterEOL Conceal
 else
     " The \%(.\)\@= make sure, the last char won't be concealed,
     " if it isn't a delimiter
     exe "syn match CSVDelimiter /" . col . '\%(.\)\@=/ms=e,me=e contained'
+    exe "syn match CSVDelimiterEOL /" . del . 
+    \ '$/ contained'
     hi def link CSVDelimiter Ignore
 endif
 
@@ -55,13 +61,13 @@ endif
 " Last match is prefered.
 
 exe 'syn match CSVColumnEven nextgroup=CSVColumnOdd /'
-	    \ . col . '/ contains=CSVDelimiter'
+	    \ . col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
 exe 'syn match CSVColumnOdd nextgroup=CSVColumnEven /'
-	    \ . col . '/ contains=CSVDelimiter'
+	    \ . col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
 
 exe 'syn match CSVColumnHeaderEven nextgroup=CSVColumnHeaderOdd /\%1l'
-	    \. col . '/ contains=CSVDelimiter'
+	    \. col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
 exe 'syn match CSVColumnHeaderOdd nextgroup=CSVColumnHeaderEven /\%1l'
-	    \. col . '/ contains=CSVDelimiter'
+	    \. col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
 
 let b:current_syntax="csv"
