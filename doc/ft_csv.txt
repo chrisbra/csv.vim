@@ -484,6 +484,9 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 ==============================================================================
 5. CSV Changelog					       *csv-changelog*
 
+0.12 Feb 24, 2011       -bugfix release:
+			-don't use |:noa| when switching between windows
+			-make sure, colwidth() doesn't throw an error
 0.11 Feb 24, 2011       -new command |Copy_CSV|
 			-|Search_CSV| did not find anything in the last
 			 if no delimiter was given (reported by chroyer)

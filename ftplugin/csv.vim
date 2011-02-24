@@ -3,9 +3,9 @@
 " Version: 0.11
 " Script:  http://www.vim.org/scripts/script.php?script_id=2830
 " License: VIM License
-" Last Change: Thu, 24 Feb 2011 21:28:45 +0100
+" Last Change: Thu, 24 Feb 2011 22:14:59 +0100
 " Documentation: see :help ft_csv.txt
-" GetLatestVimScripts: 2830 12 :AutoInstall: csv.vim
+" GetLatestVimScripts: 2830 13 :AutoInstall: csv.vim
 "
 " Some ideas are take from the wiki http://vim.wikia.com/wiki/VimTip667
 " though, implementation differs.
@@ -375,7 +375,7 @@ fu! <SID>SplitHeaderLine(lines, bang, hor) "{{{3
 	if a:hor
 	    setl scrollopt=hor scrollbind
 	    let lines = empty(a:lines) ? 1 : a:lines
-	    noa sp
+	    sp
 	    1
 	    exe "resize" . lines
 	    setl scrollopt=hor scrollbind winfixheight
@@ -389,9 +389,11 @@ fu! <SID>SplitHeaderLine(lines, bang, hor) "{{{3
 	    let b=b:col
 	    let a=[]
 	    let a=<sid>CopyCol('',1)
+	    " Force recalculating columns width
+	    unlet! b:buffer_content
 	    let width = <sid>ColWidth(1)
 	    let b=b:col
-	    noa vsp +enew
+	    vsp +enew
 	    let b:col=b
 	    call append(0, a)
 	    $d _
@@ -403,14 +405,14 @@ fu! <SID>SplitHeaderLine(lines, bang, hor) "{{{3
 	    let win = winnr()
 	endif
 	call matchadd("CSVHeaderLine", b:col)
-	exe "noa wincmd p"
+	exe "wincmd p"
 	let b:CSV_SplitWindow = win
     else
 	" Close split window
 	if !exists("b:CSV_SplitWindow")
 	    return
 	endif
-	exe "noa" b:CSV_SplitWindow "wincmd w"
+	exe b:CSV_SplitWindow . "wincmd w"
 	if exists("_stl")
 	    let &l_stl = _stl
 	endif
