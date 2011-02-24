@@ -1,7 +1,7 @@
 *ft_csv.txt*	For Vim version 7.3	Last change: 2011 Feb 17
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.10
+Version:	0.1
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -24,7 +24,8 @@ works differently. For instructions on installing this file, type
     2.7 InitCSV.................................|InitCSV|
     2.8 Header..................................|Header_CSV|
     2.9 Sort....................................|Sort_CSV|
-    2.10 Normal mode commands...................|csv-motion|
+    2.10 CopyColumn.............................|Copy_CSV|
+    2.11 Normal mode commands...................|csv-motion|
 3. CSV Filetype configuration...................|csv-configuration|
     3.1 Delimiter...............................|csv-delimiter|
     3.2 Column..................................|csv-column|
@@ -188,6 +189,22 @@ To close the header window, use >
 
     :Header!
 
+Note, this won't work with linebreaks in the column.
+
+							 *VHeader_CSV*
+
+If you want a vertical header line, use :VHeader. This works similar to the
+|Header_CSV| command, except that it will open a vertical split window with
+the first column always visible. It will always open the first column in the
+new split window. Use the '!' to close the window.
+Note, this won't work with linebreaks in the column.
+
+				*VHeaderToggle_CSV* *HeaderToggle_CSV*
+
+Use the :HeaderToggle and :VHeaderToggle command to toggle displaying the
+horizontal or vertical header line.
+
+
 2.9 Sort							*Sort_CSV*
 --------
 
@@ -204,7 +221,19 @@ While this command >
 
 reverses the order based on column 3.
 
-2.10 Normal mode commands					 *csv-motion*
+2.10 Copy Column        					 *Copy_CSV*
+----------------
+
+If you need to copy a specific column, you can use the command :Column >
+
+    :[N]Column [a]
+
+Copy column N into register a. If you don't specify N, the column of the
+current cursor position is used. If no register is given, the default register
+|quotequote| is used. 
+
+
+2.11 Normal mode commands					 *csv-motion*
 -------------------------
 
 The csv filetype plugin redefines the following keys as:
@@ -455,11 +484,21 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 ==============================================================================
 5. CSV Changelog					       *csv-changelog*
 
-0.10 (unreleased)	-Only conceal real delimiters
+0.11 Feb 24, 2011       -new command |Copy_CSV|
+			-|Search_CSV| did not find anything in the last
+			 if no delimiter was given (reported by chroyer)
+			- |VHeader_CSV| display the first column as
+			 Header similar to how |Header_CSV| works
+			- |HeaderToggle_CSV| and |VHeaderToggle_CSV| commands
+			 that toggle displaying the header lines/columns
+0.10 Feb 23, 2011	-Only conceal real delimiters
 			-document g:csv_no_conceal variable
 			-document g:csv_nl variable
 			-document conceal feature and syntax highlighting
 			-Normal mode command <Up>/<Down> work like K/J
+			-More robust regular expression engine, that can
+			 also handle newlines inside quoted strings.
+			-Slightly adjusted syntax highlighting
 0.9 Feb 19, 2011        -use conceal char depending on encoding
 			-Map normal mode keys also for visual/select and
 			 operator pending mode
