@@ -110,11 +110,18 @@ fu! <SID>SearchColumn(arg) "{{{3
 	if len(arglist) == 1
 	   let colnr=<SID>WColumn()
 	   let pat=substitute(arglist[0], '^\(.\)\(.*\)\1$', '\2', '')
+	   if pat == arglist[0]
+	       throw "E684"
+	    endif
 	else
 	    let colnr=arglist[0]
 	    let pat=substitute(arglist[1], '^\(.\)\(.*\)\1$', '\2', '')
+	   if pat == arglist[1]
+	       throw "E684"
+	    endif
 	endif
-    catch /^Vim\%((\a\+)\)\=:E684/	" catch error index out of bounds
+    "catch /^Vim\%((\a\+)\)\=:E684/	
+    catch /E684/	" catch error index out of bounds
 	call <SID>Warn("Error! Usage :SearchInColumn [<colnr>] /pattern/")
 	return 1
     endtry
@@ -129,15 +136,22 @@ fu! <SID>SearchColumn(arg) "{{{3
     " TODO:
     " Is there a better way, than running a substitute command on '\zs', may be using a flag
     " with GetColPat(zsflag, colnr)?
-    if colnr > 1
+    if colnr > 1 && colnr < maxcolnr
 	"let @/=<SID>GetColPat(colnr-1,0) . '*\zs' . pat . '\ze\([^' . b:delimiter . ']*' . b:delimiter .'\)\?' . <SID>GetColPat(maxcolnr-colnr-1,0)
 	"let @/= '^' . <SID>GetColPat(colnr-1,0) . '[^' . b:delimiter . ']*\zs' . pat . '\ze[^' . b:delimiter . ']*'.b:delimiter . <SID>GetColPat(maxcolnr-colnr,0) . '$'
 	"let @/= '^' . <SID>GetColPat(colnr-1,0) . b:col1 . '\?\zs' . pat . '\ze' . b:col1 .'\?' . <SID>GetColPat(maxcolnr-colnr,0) " . '$'
-	let @/= '^' . <SID>GetColPat(colnr-1,0) . '\%([^' . b:delimiter .']*\)\?\zs' . pat . '\ze' . '\%([^' . b:delimiter .']*\)\?' . b:delimiter . <SID>GetColPat(maxcolnr-colnr,0)  . '$'
-    else
+	let @/= '^' . <SID>GetColPat(colnr-1,0) . '\%([^' . b:delimiter .
+		\ ']*\)\?\zs' . pat . '\ze' . '\%([^' . b:delimiter .']*\)\?' . 
+		\ b:delimiter . <SID>GetColPat(maxcolnr-colnr,0)  . '$'
+    elseif colnr == maxcolnr
+	let @/= '^' . <SID>GetColPat(colnr-1,0) . '\%([^' . b:delimiter .
+		\ ']*\)\?\zs' . pat . '\ze' 
+    else " colnr = 1
 	"let @/= '^\zs' . pat . '\ze' . substitute((<SID>GetColPat(maxcolnr - colnr)), '\\zs', '', 'g')
 	"let @/= '^\zs' . b:col1 . '\?' . pat . '\ze' . b:col1 . '\?' .  <SID>GetColPat(maxcolnr,0) . '$'
-	let @/= '^' . '\%([^' . b:delimiter . ']*\)\?\zs' . pat . '\ze\%([^' . b:delimiter . ']*\)\?' . b:delimiter .  <SID>GetColPat(maxcolnr-1,0) . '$'
+	let @/= '^' . '\%([^' . b:delimiter . ']*\)\?\zs' . pat .
+		\ '\ze\%([^' . b:delimiter . ']*\)\?' . b:delimiter .
+		\ <SID>GetColPat(maxcolnr-1,0) . '$'
     endif
     try
 	norm! n
@@ -353,30 +367,50 @@ fu! <SID>GetColPat(colnr, zs_flag) "{{{3
     return pat . (a:zs_flag ? '\zs' : '')
 endfu
 
-fu! <SID>SplitHeaderLine(lines, bang) "{{{3
+fu! <SID>SplitHeaderLine(lines, bang, hor) "{{{3
     if !a:bang && !exists("b:CSV_SplitWindow")
 	" Split Window
 	let _stl = &l:stl
 	let _sbo = &sbo
-	setl scrollopt=hor scrollbind
-	let lines = empty(a:lines) ? 1 : a:lines
-	noa sp
-	1
-	exe "resize" . lines
-	setl scrollopt=hor scrollbind winfixheight
-	"let &l:stl=repeat(' ', winwidth(0))
-	let &l:stl="%#Normal#".repeat(' ',winwidth(0))
-	" Highlight first row
+	if a:hor
+	    setl scrollopt=hor scrollbind
+	    let lines = empty(a:lines) ? 1 : a:lines
+	    noa sp
+	    1
+	    exe "resize" . lines
+	    setl scrollopt=hor scrollbind winfixheight
+	    "let &l:stl=repeat(' ', winwidth(0))
+	    let &l:stl="%#Normal#".repeat(' ',winwidth(0))
+	    " Highlight first row
+	    let win = winnr()
+	else
+	    setl scrollopt=ver scrollbind
+	    0
+	    let b=b:col
+	    let a=[]
+	    let a=<sid>CopyCol('',1)
+	    let width = <sid>ColWidth(1)
+	    let b=b:col
+	    noa vsp +enew
+	    let b:col=b
+	    call append(0, a)
+	    $d _
+	    sil %s/.*/\=printf("%.*s", width, submatch(0))/eg
+	    0
+	    exe "vert res" width
+	    setl scrollopt=ver scrollbind winfixwidth 
+	    setl buftype=nowrite bufhidden=hide noswapfile nobuflisted
+	    let win = winnr()
+	endif
 	call matchadd("CSVHeaderLine", b:col)
-	let b:CSV_SplitWindow = winnr()
 	exe "noa wincmd p"
+	let b:CSV_SplitWindow = win
     else
 	" Close split window
 	if !exists("b:CSV_SplitWindow")
 	    return
 	endif
 	exe "noa" b:CSV_SplitWindow "wincmd w"
-	unlet b:CSV_SplitWindow
 	if exists("_stl")
 	    let &l_stl = _stl
 	endif
@@ -385,6 +419,15 @@ fu! <SID>SplitHeaderLine(lines, bang) "{{{3
 	endif
 	setl noscrollbind
 	wincmd c
+	unlet! b:CSV_SplitWindow
+    endif
+endfu
+
+fu! <SID>SplitHeaderToggle(hor) "{{{3
+    if !exists("b:CSV_SplitWindow")
+	:call <sid>SplitHeaderLine(1,0,a:hor)
+    else
+	:call <sid>SplitHeaderLine(1,1,a:hor)
     endif
 endfu
 
@@ -451,6 +494,21 @@ fu! CSV_WCol() "{{{3
     return printf(" %d/%d", <SID>WColumn(), <SID>MaxColumns())
 endfun
 
+fu! <sid>CopyCol(reg, col) "{{{3
+    let col = a:col == "0" ? <sid>WColumn() : a:col+0
+    let mcol = <sid>MaxColumns()
+    if col == '$' || col > mcol
+	let col = mcol
+    endif
+    let a=getline(1, '$')
+    call map(a, 'split(v:val, ''^'' . b:col . ''\zs'')[col-1]')
+    if a:reg =~ '[-"0-9a-zA-Z*+]'
+	exe  ':let @' . a:reg . ' = "' . join(a, "\n") . '"'
+    else
+	return a
+    endif
+endfu
+
 fu! <SID>CommandDefinitions() "{{{3
     if !exists(":WhatColumn")
 	command! -buffer WhatColumn :echo <SID>WColumn()
@@ -474,10 +532,22 @@ fu! <SID>CommandDefinitions() "{{{3
 	command! -buffer InitCSV :call <SID>Init()
     endif
     if !exists(":Header")
-	command! -buffer -bang -nargs=? Header :call <SID>SplitHeaderLine(<q-args>,<bang>0)
+	command! -buffer -bang -nargs=? Header :call <SID>SplitHeaderLine(<q-args>,<bang>0,1)
+    endif
+    if !exists(":VHeader")
+	command! -buffer -bang -nargs=? VHeader :call <SID>SplitHeaderLine(<q-args>,<bang>0,0)
+    endif
+    if !exists(":HeaderToggle")
+	command! -buffer HeaderToggle :call <SID>SplitHeaderToggle(1)
+    endif
+    if !exists(":VHeaderToggle")
+	command! -buffer VHeaderToggle :call <SID>SplitHeaderToggle(0)
     endif
     if !exists(":Sort")
 	command! -buffer -nargs=1 -bang -range=% -complete=custom,<SID>SortComplete Sort :<line1>,<line2>call <SID>Sort(<bang>0,<args>)
+    endif
+    if !exists(":Column")
+	command! -buffer -count -register Column :call <SID>CopyCol(empty(<q-reg>) ? '"' : <q-reg>,<q-count>)
     endif
 endfu
 
