@@ -438,7 +438,8 @@ this: >
 		let csv = ''
 	    endif
 	    return stl.csv
-	endfunc
+	endif
+    endfunc
     set stl=%!MySTL()
 <
 
@@ -484,6 +485,13 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 ==============================================================================
 5. CSV Changelog					       *csv-changelog*
 
+0.13 (unreleased)       -documentation update
+			-https://github.com/chrisbra/csv.vim/issues#issue/2
+			 ('splitbelow' breaks |Header_CSV|, fix this; thanks
+			 lespea!)
+			-https://github.com/chrisbra/csv.vim/issues#issue/3
+			 ('gdefault' breaks |ArrangeColumn_CSV|, fix this;
+			 thanks lespea!)
 0.12 Feb 24, 2011       -bugfix release:
 			-don't use |:noa| when switching between windows
 			-make sure, colwidth() doesn't throw an error
