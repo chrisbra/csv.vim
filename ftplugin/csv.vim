@@ -375,7 +375,7 @@ fu! <SID>SplitHeaderLine(lines, bang, hor) "{{{3
 	if a:hor
 	    setl scrollopt=hor scrollbind
 	    let lines = empty(a:lines) ? 1 : a:lines
-	    sp
+	    abo sp
 	    1
 	    exe "resize" . lines
 	    setl scrollopt=hor scrollbind winfixheight
@@ -393,7 +393,7 @@ fu! <SID>SplitHeaderLine(lines, bang, hor) "{{{3
 	    unlet! b:buffer_content
 	    let width = <sid>ColWidth(1)
 	    let b=b:col
-	    vsp +enew
+	    abo vsp +enew
 	    let b:col=b
 	    call append(0, a)
 	    $d _
