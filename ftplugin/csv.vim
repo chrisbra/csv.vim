@@ -321,7 +321,7 @@ fu! <SID>ArrangeCol() range "{{{3
        setl noro
    endif
    exe a:firstline . ',' . a:lastline .'s/' . (b:col) .
-  \ '/\=<SID>Columnize(submatch(0))/g'
+  \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
    setl ro
    call setpos('.', _cur)
 endfu
