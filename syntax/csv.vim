@@ -23,7 +23,7 @@ hi CSVColumnHeaderEven ctermfg=0 ctermbg=8 guibg=grey50 guifg=black
 
 " Sane defaults ?
 let del_def = ','
-let col_def = '\%([^' . del_cmn . ']*' . del_cmn . '\|$\)'
+let col_def = '\%([^' . del_def . ']*' . del_def . '\|$\)'
 
 " Check for filetype plugin. This syntax script relies on the filetype plugin,
 " else, it won't work properly.
