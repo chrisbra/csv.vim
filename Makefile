@@ -4,7 +4,9 @@ PLUGIN=csv
 .PHONY : csv.vba csv
 
 
-all: $(PLUGIN) $(PLUGIN).vba
+all: vimball
+
+release: $(PLUGIN) $(PLUGIN).vba
 
 clean:
 	find . -type f \( -name "*.vba" -o -name "*.orig" -o -name "*.~*" \
