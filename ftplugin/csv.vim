@@ -307,7 +307,9 @@ fu! <SID>ColWidth(colnr) "{{{3
 endfu
 
 fu! <SID>ArrangeCol() range "{{{3
-    let _cur=getpos('.')
+    "TODO: Why doesn't that work?
+    " is this because of the range flag?
+    "let cur=winsaveview()
     " Force recalculation of Column width
     if exists("b:col_width")
       unlet b:col_width
@@ -325,7 +327,7 @@ fu! <SID>ArrangeCol() range "{{{3
    exe a:firstline . ',' . a:lastline .'s/' . (b:col) .
   \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
    setl ro
-   call setpos('.', _cur)
+   "call winrestview(cur)
 endfu
 
 fu! <SID>Columnize(field) "{{{3
@@ -530,7 +532,7 @@ fu! <SID>CommandDefinitions() "{{{3
 	command! -buffer -nargs=? DeleteColumn :call <SID>DelColumn(<q-args>)
     endif
     if !exists(":ArrangeColumn")
-	command! -buffer -range ArrangeColumn :<line1>,<line2>call <SID>ArrangeCol()
+	command! -buffer -range ArrangeColumn :let s:a=winsaveview()|:<line1>,<line2>call <SID>ArrangeCol()|call winrestview(s:a)
     endif
     if !exists(":InitCSV")
 	command! -buffer InitCSV :call <SID>Init()
