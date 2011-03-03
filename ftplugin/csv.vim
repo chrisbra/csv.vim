@@ -169,6 +169,7 @@ endfu
 
 fu! <SID>DelColumn(colnr) "{{{3
     let maxcolnr = <SID>MaxColumns()
+    let _p = getpos('.')
 
     if empty(a:colnr)
        let colnr=<SID>WColumn()
@@ -190,6 +191,7 @@ fu! <SID>DelColumn(colnr) "{{{3
        setl noro
     endif
     exe ':%s/' . escape(pat, '/') . '//'
+    call setpos('.', _p)
 endfu
 
 fu! <SID>HiCol(colnr) "{{{3
