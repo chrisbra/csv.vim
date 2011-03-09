@@ -478,8 +478,10 @@ fu! <SID>MoveCol(forward, line) "{{{3
 	call search(pat, 'W')
     elseif a:forward < 0
 	call search(pat, 'bWe')
-    else
+    elseif line >= line('.')
 	call search(pat)
+    elseif line < line('.')
+	call search(pat, 'b')
     endif
 endfun
 
