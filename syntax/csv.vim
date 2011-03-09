@@ -73,9 +73,9 @@ call <sid>CheckSaneSearchPattern()
 
 " Check for filetype plugin. This syntax script relies on the filetype plugin,
 " else, it won't work properly.
-redir => a |sil filetype | redir end
-let a=split(a, "\n")[0]
-if match(a, '\cplugin:off') > 0
+redir => s:a |sil filetype | redir end
+let s:a=split(s:a, "\n")[0]
+if match(s:a, '\cplugin:off') > 0
     call <sid>Warning("No filetype support, only simple highlighting using\n" .
 		\ s:del_def . " as delimiter! See :h csv-installation")
 endif
