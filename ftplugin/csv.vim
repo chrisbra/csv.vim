@@ -449,6 +449,9 @@ endfu
 fu! <SID>MoveCol(forward, line) "{{{3
     let colnr=<SID>WColumn()
     let maxcol=<SID>MaxColumns()
+    let cpos=getpos('.')[2]
+    call search(b:col, 'bc', line('.'))
+    let spos=getpos('.')[2]
 
     " Check for valid column
     " a:forward == 1 : search next col
@@ -489,13 +492,20 @@ fu! <SID>MoveCol(forward, line) "{{{3
     elseif a:forward < 0
 	call search(pat, 'bWe')
     " Moving upwards/downwards
-    " TODO: Don't change the column nr, need a way to 
-    "       jump into the correct screen column relative
-    "       within the csv column
     elseif line >= line('.')
-	call search(pat)
+	call search(pat . '\%' . line . 'l', '', line)
+	" Move to the correct screen column
+	" This is a best effort approach, we might still 
+	" leave the column (if the next column is shorter)
+	let a=getpos('.')
+	let a[2]+=cpos-spos
+	call setpos('.', a)
     elseif line < line('.')
-	call search(pat . '\%' . line . 'l', 'b')
+	call search(pat . '\%' . line . 'l', 'b', line)
+	" Move to the correct screen column
+	let a=getpos('.')
+	let a[2]+=cpos-spos
+	call setpos('.', a)
     endif
 endfun
 
