@@ -259,7 +259,7 @@ fu! <SID>GetDelimiter() "{{{3
     endif
 endfu
 
-fu! <SID>WColumn() "{{{3
+fu! <SID>WColumn(...) "{{{3
     " Return on which column the cursor is
     let _cur = getpos('.')
     let line=getline('.')
@@ -268,8 +268,17 @@ fu! <SID>WColumn() "{{{3
     call search(b:col, 'ec')
     let end=col('.')-1
     let fields=(split(line[0:end],b:col.'\zs'))
+    let ret=len(fields)
+    if exists("a:1") && a:1 > 0
+	" bang attribute
+	let head  = split(getline(1),b:col.'\zs')
+	" remove preceeding whitespace
+	let ret   = substitute(head[ret-1], '^\s\+', '', '')
+	" remove delimiter
+	let ret   = substitute(ret, b:delimiter. '$', '', '')
+    endif
     call setpos('.',_cur)
-    return len(fields)
+    return ret
 endfu 
 
 fu! <SID>MaxColumns() "{{{3
@@ -474,14 +483,19 @@ fu! <SID>MoveCol(forward, line) "{{{3
     endif
 
     " Search
+    " move left/right
     if a:forward > 0
 	call search(pat, 'W')
     elseif a:forward < 0
 	call search(pat, 'bWe')
+    " Moving upwards/downwards
+    " TODO: Don't change the column nr, need a way to 
+    "       jump into the correct screen column relative
+    "       within the csv column
     elseif line >= line('.')
 	call search(pat)
     elseif line < line('.')
-	call search(pat, 'b')
+	call search(pat . '\%' . line . 'l', 'b')
     endif
 endfun
 
@@ -519,7 +533,7 @@ endfu
 
 fu! <SID>CommandDefinitions() "{{{3
     if !exists(":WhatColumn")
-	command! -buffer WhatColumn :echo <SID>WColumn()
+	command! -buffer -bang WhatColumn :echo <SID>WColumn(<bang>0)
     endif
     if !exists(":NrColumns")
 	command! -buffer NrColumns :echo <SID>MaxColumns()
