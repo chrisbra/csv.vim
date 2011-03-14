@@ -1,7 +1,7 @@
 *ft_csv.txt*	For Vim version 7.3	Last change: 2011 Feb 17
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.12
+Version:	0.13
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -10,7 +10,8 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
 This is a filetype plugin for CSV files. It was heavily influenced by
 the Vim Wiki Tip667 (http://vim.wikia.com/wiki/VimTip667), though it
 works differently. For instructions on installing this file, type
-:help add-local-help |add-local-help| inside Vim.
+:help add-local-help |add-local-help| inside Vim. For a screenshot, of
+how the plugin can be used, see http://www.256bit.org/~chrisbra/csv.gif
 
                                                            *csv-toc*
 1. Installation.................................|csv-installation|
@@ -105,6 +106,10 @@ The CSV ftplugin provides several Commands:
 
 If you would like to know, on which column the cursor is, use >
     :WhatColumn
+
+Use the bang attribute, if you have a heading in the first line and you want
+to know the name of the column in which the cursor is: >
+    :WhatColumn!
 <
 
 2.2 NrColumns                                                 *NrColumns_CSV*
@@ -438,7 +443,8 @@ this: >
 		let csv = ''
 	    endif
 	    return stl.csv
-	endfunc
+	endif
+    endfunc
     set stl=%!MySTL()
 <
 
@@ -484,6 +490,17 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 ==============================================================================
 5. CSV Changelog					       *csv-changelog*
 
+0.13 Mar 14, 2011       -documentation update
+			-https://github.com/chrisbra/csv.vim/issues#issue/2
+			 ('splitbelow' breaks |Header_CSV|, fix this; thanks
+			 lespea!)
+			-https://github.com/chrisbra/csv.vim/issues#issue/3
+			 ('gdefault' breaks |ArrangeColumn_CSV|, fix this;
+			 thanks lespea!)
+			-https://github.com/chrisbra/csv.vim/issues#issue/1
+			 (make syntax highlighting more robust, thanks lespea!)
+			-fix some small annoying bugs
+			-WhatColumn! displays column name
 0.12 Feb 24, 2011       -bugfix release:
 			-don't use |:noa| when switching between windows
 			-make sure, colwidth() doesn't throw an error
