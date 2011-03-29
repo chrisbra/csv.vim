@@ -80,7 +80,7 @@ if match(s:a, '\cplugin:off') > 0
 		\ s:del_def . " as delimiter! See :h csv-installation")
 endif
 
-if has("conceal") && !exists("g:csv_noconceal")
+if has("conceal") && !exists("g:csv_no_conceal")
     exe "syn match CSVDelimiter /" . s:col . 
 	\ '\%(.\)\@=/ms=e,me=e contained conceal cchar=' .
 	\ (&enc == "utf-8" ? "│" : '|')
