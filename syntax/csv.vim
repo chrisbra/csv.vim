@@ -10,6 +10,7 @@ endif
 
 " Helper functions "{{{2
 fu! <sid>Warning(msg) "{{{3
+    redraw!
     echohl WarningMsg
     echomsg "CSV Syntax:" . a:msg
     echohl Normal
