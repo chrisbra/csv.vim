@@ -490,6 +490,13 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 ==============================================================================
 5. CSV Changelog					       *csv-changelog*
 
+0.14 (unreleased)	-really use g:csv_no_conceal variable
+			 (reported by Antonio Ospite, thanks!)
+			-Force redrawing before displaying error messages in
+			 syntax script (reported by Antonio Ospite, thanks!)
+			-Make syntax highlighting work better with different
+			 terminals (Should work now with 8, 88 and 256 color
+			 terminals, tested with linux konsole, xterm and rxvt)
 0.13 Mar 14, 2011       -documentation update
 			-https://github.com/chrisbra/csv.vim/issues#issue/2
 			 ('splitbelow' breaks |Header_CSV|, fix this; thanks
