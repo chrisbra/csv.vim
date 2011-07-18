@@ -235,7 +235,7 @@ endfu
 
 fu! <SID>GetDelimiter() "{{{3
     let _cur = getpos('.')
-    let Delim={0: ';', 1:  ','}
+    let Delim={0: ';', 1:  ',', 2: '|'}
     let temp={}
     for i in  values(Delim)
 	redir => temp[i]
