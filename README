@@ -1,7 +1,7 @@
 *ft_csv.txt*	For Vim version 7.3	Last change: 2011 Feb 17
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.13
+Version:	0.14
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -490,6 +490,16 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 ==============================================================================
 5. CSV Changelog					       *csv-changelog*
 
+0.14 Jul 20, 2011	-really use g:csv_no_conceal variable
+			 (reported by Antonio Ospite, thanks!)
+			-Force redrawing before displaying error messages in
+			 syntax script (reported by Antonio Ospite, thanks!)
+			-Make syntax highlighting work better with different
+			 terminals (Should work now with 8, 88 and 256 color
+			 terminals, tested with linux konsole, xterm and rxvt)
+			 (https://github.com/chrisbra/csv.vim/issues/4)
+			-Automatically detect '|' as field separator for csv
+			 files
 0.13 Mar 14, 2011       -documentation update
 			-https://github.com/chrisbra/csv.vim/issues#issue/2
 			 ('splitbelow' breaks |Header_CSV|, fix this; thanks
