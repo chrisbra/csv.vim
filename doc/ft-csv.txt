@@ -239,6 +239,10 @@ While this command >
 
 reverses the order based on column 3.
 
+Instead of a column, you can give the flag 'n' to have it sort numerically.
+When no column number is given, it will sort by the column, on which the
+cursor is currently.
+
 2.10 Copy Column        					 *Copy_CSV*
 ----------------
 
