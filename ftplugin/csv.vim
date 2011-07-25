@@ -627,11 +627,11 @@ fu! <sid>MoveColumn(start, stop, ...) range "{{{3
     
 endfu
 
-fu <sid>SumColumn(list) "{{{3
+fu! <sid>SumColumn(list) "{{{3
     return eval(join(a:list, '+'))
 endfu
 
-fu csv#EvalColumn(nr, func, first, last) range "{{{3
+fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     let save = winsaveview()
     let col = (empty(a:nr) ? <sid>WColumn() : a:nr)
     let start = a:first - 1
