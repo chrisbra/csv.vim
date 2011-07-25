@@ -644,6 +644,8 @@ plugin call it for a column like this:
 			 cursor is (|csv-hicol|)
 			-Header/VHeader command should work better now
 			 (|Header_CSV|, |VHeader_CSV|)
+			-Use setreg() for setting the register for the
+		 	 |Column_CSV| command and make sure it is blockwise.
 0.14 Jul 20, 2011	-really use g:csv_no_conceal variable
 			 (reported by Antonio Ospite, thanks!)
 			-Force redrawing before displaying error messages in
