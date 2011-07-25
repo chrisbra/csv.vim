@@ -446,6 +446,27 @@ and to disable it, simply unlet the variable >
 
 You should reinitialize the plugin afterwards |InitCSV|
 
+If you want to customize the syntax colors, you can define your own groups.
+The CSV plugin will use already defined highlighting groups, if they are
+already defined, otherwise it will define its own defaults which should be
+visible with 8, 16, 88 and 256 color terminals. For that it uses the
+CSVColumnHeaderOdd and CSVColumnHeaderEven highlight groups for syntax
+coloring the first line. All other lines get either the CSVColumnOdd or
+CSVColumnEven highlighting.
+
+In case you want to define your own highlighting groups, you can define your
+own syntax highlighting like this in your |.vimrc| >
+
+    hi CSVColumnEven term=bold ctermbg=4 guibg=DarkBlue
+    hi CSVColumnOdd  term=bold ctermbg=5 guibg=DarkMagenta
+    hi CSVColumnHeaderEven ...
+    hi CSVColumnHeaderOdd ...
+
+<
+
+Note, these changes won't take effect, until you restart Vim.
+
+
 3.7 Newlines						*csv-newline*
 ------------
 
