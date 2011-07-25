@@ -1,6 +1,7 @@
 SCRIPT=ftplugin/csv.vim
 DOC=doc/ft-csv.txt
 PLUGIN=csv
+VERSION=$(shell sed -n '/Version:/{s/^.*\(\S\.\S\+\)$$/\1/;p}' $(SCRIPT))
 .PHONY : csv.vba csv
 
 
