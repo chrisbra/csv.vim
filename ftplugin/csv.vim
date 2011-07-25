@@ -39,12 +39,14 @@ fu! <SID>Init() "{{{3
 	let s:hiHeader = g:csv_hiHeader
     endif
     exe "hi link CSVHeaderLine" s:hiHeader
+    
     " Determine default Delimiter
     if !exists("g:csv_delim")
 	let b:delimiter=<SID>GetDelimiter()
     else
 	let b:delimiter=g:csv_delim
     endif
+
     if empty(b:delimiter)
 	call <SID>Warn("No delimiter found. See :h csv-delimiter to set it manually!")
     endif
@@ -76,6 +78,24 @@ fu! <SID>Init() "{{{3
     call <SID>CommandDefinitions()
     " CSV specific mappings
     call <SID>CSVMappings()
+
+    " Highlight column, on which the cursor is?
+    if exists("g:csv_highlight_column") && g:csv_highlight_column =~? 'y' &&
+		\ !exists("#CSV_HI#CursorMoved")
+	aug CSV_HI
+	    au!
+	    au CursorMoved <buffer> HiColumn
+	aug end
+	" Set highlighting for column, on which the cursor is currently
+	HiColumn
+    elseif exists("#CSV_HI#CursorMoved")
+	aug CSV_HI
+	    au! CursorMoved <buffer>
+	aug end
+	aug! CSV_HI
+	" Remove any existing highlighting
+	HiColumn!
+    endif
 
     " force reloading CSV Syntax Highlighting
     if exists("b:current_syntax")
@@ -372,6 +392,7 @@ fu! <SID>Columnize(field) "{{{3
 endfun
 
 fu! <SID>GetColPat(colnr, zs_flag) "{{{3
+    " Return Pattern for given column
     if a:colnr > 1
 	let pat=b:col . '\{' . (a:colnr) . '\}' 
     else
@@ -381,7 +402,12 @@ fu! <SID>GetColPat(colnr, zs_flag) "{{{3
 endfu
 
 fu! <SID>SplitHeaderLine(lines, bang, hor) "{{{3
-    if !a:bang && !exists("b:CSV_SplitWindow")
+    if !a:bang 
+	" A Split Header Window already exists, 
+	" first close the already existing Window
+	if exists("b:CSV_SplitWindow")
+	    call <sid>SplitHeaderLine(a:lines, 1, a:hor)
+	endif
 	" Split Window
 	let _stl = &l:stl
 	let _sbo = &sbo
@@ -519,7 +545,8 @@ fu! <SID>Sort(bang, colnr) range "{{{3
     else
 	let pat= '^' . <SID>GetColPat(a:colnr,0) 
     endif
-    exe ":sort" . (a:bang ? '!' : '') . ' r /' . pat . '/'
+    exe a:firstline ',' a:lastline . "sort" . (a:bang ? '!' : '') .
+		\' r /' . pat . '/'
 endfun
 
 fu! CSV_WCol() "{{{3
@@ -527,6 +554,7 @@ fu! CSV_WCol() "{{{3
 endfun
 
 fu! <sid>CopyCol(reg, col) "{{{3
+    " Return Specified Column into register reg
     let col = a:col == "0" ? <sid>WColumn() : a:col+0
     let mcol = <sid>MaxColumns()
     if col == '$' || col > mcol
@@ -535,51 +563,140 @@ fu! <sid>CopyCol(reg, col) "{{{3
     let a=getline(1, '$')
     call map(a, 'split(v:val, ''^'' . b:col . ''\zs'')[col-1]')
     if a:reg =~ '[-"0-9a-zA-Z*+]'
-	exe  ':let @' . a:reg . ' = "' . join(a, "\n") . '"'
+	"exe  ':let @' . a:reg . ' = "' . join(a, "\n") . '"'
+	" set the register to blockwise mode
+	call setreg(a:reg, join(a, "\n"), 'b')
     else
 	return a
     endif
 endfu
 
+fu! <sid>MoveColumn(start, stop, ...) range "{{{3
+    " Move column behind dest
+    " Explicitly give the range as argument,
+    " cause otherwise, Vim would move the cursor
+    let wsv = winsaveview()
+
+    let col = <sid>WColumn()
+    let max = <sid>MaxColumns()
+
+    " If no argument is given, move current column after last column
+    let source=(exists("a:1") && a:1 > 0 && a:1 <= max ? a:1 : col)
+    let dest  =(exists("a:2") && a:2 > 0 && a:2 <= max ? a:2 : max)
+
+    " translate 1 based columns into zero based list index
+    let source -= 1
+    let dest   -= 1
+
+    if source >= dest
+	call <sid>Warn("Destination column before source column, aborting!")
+        return
+    endif
+
+    " Swap lines by lines, instead of reading the whole range into memory
+
+    for i in range(a:start, a:stop)
+	let fields=split(getline(i), b:col . '\zs')
+
+	" Add delimiter to destination column, in case there was none,
+	" remove delimiter from source, in case destination did not have one
+	if matchstr(fields[dest], '.$') !~? b:delimiter
+	    let fields[dest] = fields[dest] . b:delimiter
+	    if matchstr(fields[source], '.$') =~? b:delimiter
+		let fields[source] = substitute(fields[source],
+		    \ '^\(.*\).$', '\1', '')
+	    endif
+	endif
+
+	let fields= (source == 0 ? [] : fields[0 : (source-1)])
+		    \ + fields[ (source+1) : dest ]
+		    \ + [ fields[source] ] + fields[(dest+1):]
+
+	call setline(i, join(fields, ''))
+    endfor
+
+    call winrestview(wsv)
+    
+endfu
+
+fu <sid>SumColumn(list) "{{{3
+    return eval(join(a:list, '+'))
+endfu
+
+fu csv#EvalColumn(nr, func, first, last) range "{{{3
+    let save = winsaveview()
+    let col = (empty(a:nr) ? <sid>WColumn() : a:nr)
+    let start = a:first - 1
+    let stop  = a:last  - 1
+
+    let column = <sid>CopyCol('', col)[start : stop]
+    " Delete delimiter
+    call map(column, 'substitute(v:val, b:delimiter, "", "g")')
+    try
+	let result=call(function(a:func), [column])
+	return result
+    catch
+	" Evaluation of expression failed
+	echohl Title
+	echomsg "Evaluating" a:func "failed for column" col "!"
+	echohl Normal
+	return ''
+    finally
+	call winrestview(save)
+    endtry
+endfu
+
+
 fu! <SID>CommandDefinitions() "{{{3
-    if !exists(":WhatColumn")
+    if !exists(":WhatColumn") "{{{4
 	command! -buffer -bang WhatColumn :echo <SID>WColumn(<bang>0)
     endif
-    if !exists(":NrColumns")
+    if !exists(":NrColumns") "{{{4
 	command! -buffer NrColumns :echo <SID>MaxColumns()
     endif
-    if !exists(":HiColumn")
+    if !exists(":HiColumn") "{{{4
 	command! -buffer -bang -nargs=? HiColumn :call <SID>HiCol(<q-args>.<q-bang>)
     endif
-    if !exists(":SearchInColumn")
+    if !exists(":SearchInColumn") "{{{4
 	command! -buffer -nargs=* SearchInColumn :call <SID>SearchColumn(<q-args>)
     endif
-    if !exists(":DeleteColumn")
+    if !exists(":DeleteColumn") "{{{4
 	command! -buffer -nargs=? DeleteColumn :call <SID>DelColumn(<q-args>)
     endif
-    if !exists(":ArrangeColumn")
-	command! -buffer -range ArrangeColumn :let s:a=winsaveview()|:<line1>,<line2>call <SID>ArrangeCol()|call winrestview(s:a)
+    if !exists(":ArrangeColumn") "{{{4
+	command! -buffer -range ArrangeColumn :let s:a=winsaveview()
+		    \|:<line1>,<line2>call <SID>ArrangeCol()|call winrestview(s:a)
     endif
-    if !exists(":InitCSV")
+    if !exists(":InitCSV") "{{{4
 	command! -buffer InitCSV :call <SID>Init()
     endif
-    if !exists(":Header")
+    if !exists(":Header") "{{{4
 	command! -buffer -bang -nargs=? Header :call <SID>SplitHeaderLine(<q-args>,<bang>0,1)
     endif
-    if !exists(":VHeader")
+    if !exists(":VHeader") "{{{4
 	command! -buffer -bang -nargs=? VHeader :call <SID>SplitHeaderLine(<q-args>,<bang>0,0)
     endif
-    if !exists(":HeaderToggle")
+    if !exists(":HeaderToggle") "{{{4
 	command! -buffer HeaderToggle :call <SID>SplitHeaderToggle(1)
     endif
-    if !exists(":VHeaderToggle")
+    if !exists(":VHeaderToggle") "{{{4
 	command! -buffer VHeaderToggle :call <SID>SplitHeaderToggle(0)
     endif
-    if !exists(":Sort")
-	command! -buffer -nargs=1 -bang -range=% -complete=custom,<SID>SortComplete Sort :<line1>,<line2>call <SID>Sort(<bang>0,<args>)
+    if !exists(":Sort") "{{{4
+	command! -buffer -nargs=1 -bang -range=% -complete=custom,
+		    \<SID>SortComplete Sort :<line1>,<line2>call <SID>Sort(<bang>0,<args>)
     endif
-    if !exists(":Column")
-	command! -buffer -count -register Column :call <SID>CopyCol(empty(<q-reg>) ? '"' : <q-reg>,<q-count>)
+    if !exists(":Column") "{{{4
+	command! -buffer -count -register Column :call <SID>CopyCol(
+		    \ empty(<q-reg>) ? '"' : <q-reg>,<q-count>)
+    endif
+    if !exists(":MoveCol") "{{{4
+	command! -buffer -range=% -nargs=* -complete=custom,<SID>SortComplete
+		    \ MoveCol :call <SID>MoveColumn(<line1>,<line2>,<f-args>)
+    endif
+    if !exists(":SumCol") "{{{4
+	command! -buffer -nargs=? -range=% -complete=custom,<SID>SortComplete
+		    \ SumCol :echo csv#EvalColumn(<q-args>, "<sid>SumColumn", <line1>,<line2>)
     endif
 endfu
 
