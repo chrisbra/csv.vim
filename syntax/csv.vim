@@ -51,16 +51,16 @@ syn spell toplevel
 syn case ignore
 
 if &t_Co < 88
-    hi CSVColumnHeaderOdd ctermfg=DarkRed ctermbg=15 guibg=grey80 guifg=black term=underline cterm=standout,bold gui=bold,underline 
-    hi CSVColumnOdd	  ctermfg=DarkRed ctermbg=15 guibg=grey80 guifg=black term=underline cterm=bold gui=underline
+    hi default CSVColumnHeaderOdd ctermfg=DarkRed ctermbg=15 guibg=grey80 guifg=black term=underline cterm=standout,bold gui=bold,underline 
+    hi default CSVColumnOdd	  ctermfg=DarkRed ctermbg=15 guibg=grey80 guifg=black term=underline cterm=bold gui=underline
 else
-    hi CSVColumnHeaderOdd ctermfg=darkblue ctermbg=white guibg=grey80 guifg=black cterm=standout,underline gui=bold,underline
-    hi CSVColumnOdd       ctermfg=darkblue ctermbg=white guibg=grey80 guifg=black cterm=reverse,underline gui=underline
+    hi default CSVColumnHeaderOdd ctermfg=darkblue ctermbg=white guibg=grey80 guifg=black cterm=standout,underline gui=bold,underline
+    hi default CSVColumnOdd       ctermfg=darkblue ctermbg=white guibg=grey80 guifg=black cterm=reverse,underline gui=underline
 endif
     
 " ctermbg=8 should be safe, even in 8 color terms
-hi CSVColumnHeaderEven    ctermfg=white ctermbg=darkgrey guibg=grey50 guifg=black term=bold cterm=standout,underline gui=bold,underline 
-hi CSVColumnEven	  ctermfg=white ctermbg=darkgrey guibg=grey50 guifg=black term=bold cterm=underline gui=bold,underline 
+hi default CSVColumnHeaderEven    ctermfg=white ctermbg=darkgrey guibg=grey50 guifg=black term=bold cterm=standout,underline gui=bold,underline 
+hi default CSVColumnEven	  ctermfg=white ctermbg=darkgrey guibg=grey50 guifg=black term=bold cterm=underline gui=bold,underline 
 
 " Make sure, we are using a sane, valid pattern for syntax
 " highlighting
