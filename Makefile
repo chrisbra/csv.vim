@@ -29,7 +29,7 @@ undo:
 
 csv.vba:
 	vim -N -c 'ru! vimballPlugin.vim' -c ':let g:vimball_home=getcwd()'  -c ':call append("0", ["ftplugin/csv.vim", "doc/ft-csv.txt", "syntax/csv.vim", "ftdetect/csv.vim"])' -c '$$d' -c ':%MkVimball! ${PLUGIN}' -c':q!'
-	ln -f $(PLUGIN)-$(VERSION).vba $(PLUGIN).vba
+	ln -f $(PLUGIN).vba $(PLUGIN)-$(VERSION).vba
 
 csv:
 	rm -f ${PLUGIN}.vba
