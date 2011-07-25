@@ -539,14 +539,22 @@ fu! <SID>SortComplete(A,L,P) "{{{3
     return join(range(1,<sid>MaxColumns()),"\n")
 endfun 
 
-fu! <SID>Sort(bang, colnr) range "{{{3
-    if a:colnr != '1'
-	let pat= '^' . <SID>GetColPat(a:colnr-1,1) . b:col
+fu! <SID>Sort(bang, line1, line2, colnr) range "{{{3
+    let wsv=winsaveview()
+    if a:colnr =~? 'n'
+	let numeric = 1
     else
-	let pat= '^' . <SID>GetColPat(a:colnr,0) 
+	let numeric = 0
     endif
-    exe a:firstline ',' a:lastline . "sort" . (a:bang ? '!' : '') .
-		\' r /' . pat . '/'
+    let col = (empty(a:colnr) || a:colnr !~? '\d\+') ? <sid>WColumn() : a:colnr+0
+    if col != 1
+	let pat= '^' . <SID>GetColPat(col-1,1) . b:col
+    else
+	let pat= '^' . <SID>GetColPat(col,0) 
+    endif
+    exe a:line1 ',' a:line2 . "sort" . (a:bang ? '!' : '') .
+		\' r ' . (numeric ? 'n' : '') . ' /' . pat . '/'
+    call winrestview(wsv)
 endfun
 
 fu! CSV_WCol() "{{{3
@@ -683,8 +691,8 @@ fu! <SID>CommandDefinitions() "{{{3
 	command! -buffer VHeaderToggle :call <SID>SplitHeaderToggle(0)
     endif
     if !exists(":Sort") "{{{4
-	command! -buffer -nargs=1 -bang -range=% -complete=custom,
-		    \<SID>SortComplete Sort :<line1>,<line2>call <SID>Sort(<bang>0,<args>)
+	command! -buffer -nargs=* -bang -range=% -complete=custom,
+		    \<SID>SortComplete Sort :call <SID>Sort(<bang>0,<line1>,<line2>,<q-args>)
     endif
     if !exists(":Column") "{{{4
 	command! -buffer -count -register Column :call <SID>CopyCol(
