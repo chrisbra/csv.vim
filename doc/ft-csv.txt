@@ -1,4 +1,4 @@
-*ft_csv.txt*	For Vim version 7.3	Last change: 2011 Feb 17
+*ft-csv.txt*	For Vim version 7.3	Last change: 2011 Feb 17
 
 Author:		Christian Brabandt <cb@256bit.org>
 Version:	0.14
@@ -26,7 +26,9 @@ how the plugin can be used, see http://www.256bit.org/~chrisbra/csv.gif
     2.8 Header..................................|Header_CSV|
     2.9 Sort....................................|Sort_CSV|
     2.10 CopyColumn.............................|Copy_CSV|
-    2.11 Normal mode commands...................|csv-motion|
+    2.11 MoveCol................................|MoveCol_CSV|
+    2.12 Sum of a column........................|SumCol_CSV|
+    2.13 Normal mode commands...................|csv-motion|
 3. CSV Filetype configuration...................|csv-configuration|
     3.1 Delimiter...............................|csv-delimiter|
     3.2 Column..................................|csv-column|
@@ -35,6 +37,7 @@ how the plugin can be used, see http://www.256bit.org/~chrisbra/csv.gif
     3.5 Multibyte Chars.........................|csv-mbyte|
     3.6 Concealing..............................|csv-conceal|
     3.7 Newlines................................|csv-newline|
+    3.8 Highlight column automatically..........|csv-hicol|
 4. CSV Tips and Tricks..........................|csv-tips|
     4.1 Statusline..............................|csv-stl|
     4.2 Slow ArrangeCol.........................|csv-slow|
@@ -145,6 +148,8 @@ cursor is. Use >
     :HiColumn!
 to remove any highlighting.
 
+If you want to automatically highlight a column, see |csv-hicol|
+
 2.5 ArrangeColumn                                          *ArrangeColumn_CSV*
 -----------------
 
@@ -175,8 +180,8 @@ will delete column 2.
 Reinitialize the Plugin. Use this, if you have changed the configuration
 of the plugin (see |csv-configuration| ).
 
-2.8 Header							 *Header_CSV*
-----------
+2.8 Header lines						 *Header_CSV*
+----------------
 
 This command splits the csv-buffer and adds a window, that holds a small
 fraction of the csv file. This is useful, if the first line contains
@@ -196,7 +201,14 @@ To close the header window, use >
 
 Note, this won't work with linebreaks in the column.
 
-							 *VHeader_CSV*
+Note also, that if you already have a horizontal header window (|VHeader_CSV|),
+this command will close the horizontal Header window. This is because of a
+limitation of Vim itsself, which doesn't allow to sync the scrolling between
+two windows horizontally and at the same time have another window only sync
+its scrolling vertically.
+
+
+							    *VHeader_CSV*
 
 If you want a vertical header line, use :VHeader. This works similar to the
 |Header_CSV| command, except that it will open a vertical split window with
@@ -204,7 +216,8 @@ the first column always visible. It will always open the first column in the
 new split window. Use the '!' to close the window.
 Note, this won't work with linebreaks in the column.
 
-				*VHeaderToggle_CSV* *HeaderToggle_CSV*
+
+					*VHeaderToggle_CSV* *HeaderToggle_CSV*
 
 Use the :HeaderToggle and :VHeaderToggle command to toggle displaying the
 horizontal or vertical header line.
@@ -238,7 +251,39 @@ current cursor position is used. If no register is given, the default register
 |quotequote| is used. 
 
 
-2.11 Normal mode commands					 *csv-motion*
+2.11 Move A Column        					 *MoveCol_CSV*
+------------------
+
+You can move one column behind another column by using the :MoveCol command >
+
+    :[range]MoveCol [source] [dest]
+
+This moves the column number source behind column nr destination.
+If both arguments are not given, move the column on which the cursor is behind
+the last column. If [range] is not given, MoveCol moves all columns,
+otherwise, it moves the columns only for the lines within the range, e.g.
+given that your first line is a header line, which you don't want to change >
+
+    :2,$MoveCol 1 $
+
+this would move column 1 behind the last column, while keeping the header line
+as is.
+
+
+2.12 Sum of a Column        					 *SumCol_CSV*
+--------------------
+
+You can let Vim output the sum of a column using the :SumCol command >
+
+    :[range]SumCol [nr]
+
+This outputs the result of the column <nr> within the range given. If no range
+is given, this will calculate the sum of the whole column. If <nr> is not
+given, this calculate the sum for the column the cursor is on. See also
+|csv-aggregate-functions|
+
+
+2.13 Normal mode commands					 *csv-motion*
 -------------------------
 
 The csv filetype plugin redefines the following keys as:
@@ -421,6 +466,23 @@ seems to change on cursor movements. This could possibly be a bug in the
 syntax highlighting engine of Vim. Also, |WhatColumn_CSV| can't handle
 newlines inside fields and will most certainly be wrong. 
 
+3.8 Highlight column automatically				*csv-hicol* 
+----------------------------------
+
+You can let vim automatically highlight the column on which the cursor is.
+This works by defining an |CursorMoved| autocommand to always highlight the
+column, when the cursor is moved in normal mode. Note, this does not update
+the highlighting, if the Cursor is moved in Insert mode. To enable this, 
+define the g:csv_highlight_column variable like this >
+
+    let g:csv_highlight_column = 'y'
+
+and to disable it again, simply unset the variable >
+
+    unlet g:csv_highlight_column
+
+It is a good idea to reinitialize the plugin afterwards |InitCSV|
+
 ==============================================================================
 4. CSV Tips and Tricks						*csv-tips*
 
@@ -487,9 +549,80 @@ in the whole file into memory. You can also try the LargeFile plugin available
 at http://www.vim.org/scripts/script.php?script_id=1506 which tunes several
 Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 
+
+
+4.3 Defining custom aggregate functions		    *csv-aggregate-functions*
+---------------------------------------
+
+The CSV plugin already defines the |SumCol_CSV|command, to let you calculate
+the sum of all values of a certain column within a given range. But it may be,
+that you don't need the sum, but would rather want to have the average of all
+values within a certain column. You can define your own function and let the
+plugin call it for a column like this:
+
+    1) You define your own custom function in the after directory of your
+       vimruntime path |after-directory| (see also #2 below) >
+
+	fun! My_CSV_Average(col)
+	    let sum=0
+	    for item in a:col
+		let sum+=item
+	    endfor
+	    return sum/len(a:col)
+	endfun
+<
+       This function takes a list as argument, and calculates the average for
+       all items in the list. You could also make use of Vim's |eval()|
+       function and write your own Product function like this >
+
+	fun! My_CSV_Product(col)
+	    return eval(join(a:col, '*'))
+	endfun
+<
+
+    2) Now define your own custom command, which should makes sure, this
+       function will be called for a certain column >
+       
+	    command! -buffer -nargs=? -range=% AvgCol :echo csv#EvalColumn(<q-args>,
+	    \ "My_CSV_Average", <line1>,<line2>)
+<
+        This command should best be put into a file called csv.vim and put
+	into your ~/.vim/after/ftplugin/ directory. Create directories that
+	don't exist yet. For Windows, this would be the
+	$VIMRUNTIME/vimfiles/after/ftplugin directory.
+
+    3) Make sure, your |.vimrc| includes a filetype plugin setting like this >
+
+	filetype plugin on
+<
+       This should make sure, that all the necessary scripts are loaded by
+       Vim.
+
+    After restarting Vim, you can now use your custom command definition
+    :AvgCol. Use a range, for the number of lines you want to evaluate and
+    optionally use an argument to specify which column you want to be
+    evaluated >
+
+	:2,$AvgCol 7
+<
+    This will evaluate the average of column seven (assuming, line 1 is the
+    header line, which should not be taken into account).
+
+
 ==============================================================================
 5. CSV Changelog					       *csv-changelog*
 
+0.15 (unreleased)       -Sort on the range, specified (reported by
+                         Peng Yu, thanks!)
+			-|MoveCol_CSV| to move a column behind another column
+			 (suggested by Peng Yu, thanks!)
+			-Document how to use custom functions with a column
+			 (|csv-aggregate-functions|)
+			-Use g:csv_highlight_column variable, to have Vim
+			 automatically highlight the column on which the
+			 cursor is (|csv-hicol|)
+			-Header/VHeader command should work better now
+			 (|Header_CSV|, |VHeader_CSV|)
 0.14 Jul 20, 2011	-really use g:csv_no_conceal variable
 			 (reported by Antonio Ospite, thanks!)
 			-Force redrawing before displaying error messages in
