@@ -28,6 +28,7 @@ undo:
 
 csv.vba:
 	vim -N -c 'ru! vimballPlugin.vim' -c ':let g:vimball_home=getcwd()'  -c ':call append("0", ["ftplugin/csv.vim", "doc/ft-csv.txt", "syntax/csv.vim", "ftdetect/csv.vim"])' -c '$$d' -c ':%MkVimball! ${PLUGIN}' -c':q!'
+	ln -f $(PLUGIN)-$(VERSION).vba $(PLUGIN).vba
 
 csv:
 	rm -f ${PLUGIN}.vba
@@ -36,4 +37,3 @@ csv:
 	perl -i -pne 'if (/Last Change:/) {s/(:\s+).*\n$$/sprintf(": %s", `date -R`)/e}' ${SCRIPT}
 	perl -i.orig -pne 'if (/Version:/) {s/\.(\d+).*/sprintf(".%d", 1+$$1)/e}' ${DOC}
 	cp -f $(DOC) README
-	ln -f $(PLUGIN)-$(VERSION).vba $(PLUGIN).vba
