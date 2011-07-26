@@ -202,10 +202,10 @@ fu! <SID>DelColumn(colnr) "{{{3
 	return 
     endif
 
-    if a:colnr != '1'
-	let pat= '^' . <SID>GetColPat(a:colnr-1,1) . b:col
+    if colnr != '1'
+	let pat= '^' . <SID>GetColPat(colnr-1,1) . b:col
     else
-	let pat= '^' . <SID>GetColPat(a:colnr,0) 
+	let pat= '^' . <SID>GetColPat(colnr,0) 
     endif
     if &ro
        setl noro
@@ -672,7 +672,8 @@ fu! <SID>CommandDefinitions() "{{{3
 	command! -buffer -nargs=* SearchInColumn :call <SID>SearchColumn(<q-args>)
     endif
     if !exists(":DeleteColumn") "{{{4
-	command! -buffer -nargs=? DeleteColumn :call <SID>DelColumn(<q-args>)
+	command! -buffer -nargs=? -complete=custom,
+	    \<SID>SortComplete DeleteColumn :call <SID>DelColumn(<q-args>)
     endif
     if !exists(":ArrangeColumn") "{{{4
 	command! -buffer -range ArrangeColumn
@@ -695,7 +696,8 @@ fu! <SID>CommandDefinitions() "{{{3
     endif
     if !exists(":Sort") "{{{4
 	command! -buffer -nargs=* -bang -range=% -complete=custom,
-		    \<SID>SortComplete Sort :call <SID>Sort(<bang>0,<line1>,<line2>,<q-args>)
+	    \<SID>SortComplete Sort :call
+	    \<SID>Sort(<bang>0,<line1>,<line2>,<q-args>)
     endif
     if !exists(":Column") "{{{4
 	command! -buffer -count -register Column :call <SID>CopyCol(

@@ -174,6 +174,9 @@ The command :DeleteColumn can be used to delete a specific column. >
 
 will delete column 2.
 
+If you don't specify a column number, it will delete the column on which the
+cursor is.
+
 2.7 InitCSV							*InitCSV*
 -----------
 
@@ -643,6 +646,8 @@ plugin call it for a column like this:
 - small cosmetic changes
 - small documentation updates
 - fold away changelog in help file
+- Document, that |DeleteColumn_CSV|deletes the column on which the cursor is,
+  if no column number has been specified
 
 0.16 Jul 25, 2011 {{{1
 
