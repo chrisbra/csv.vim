@@ -605,10 +605,11 @@ plugin call it for a column like this:
 	endfun
 <
 
-    2) Now define your own custom command, which should makes sure, this
-       function will be called for a certain column >
+    2) Now define your own custom command, that calls your custom function for
+    a certain column >
        
-	    command! -buffer -nargs=? -range=% AvgCol :echo csv#EvalColumn(<q-args>,
+	    command! -buffer -nargs=? -range=% AvgCol
+	    \ :echo csv#EvalColumn(<q-args>,
 	    \ "My_CSV_Average", <line1>,<line2>)
 <
         This command should best be put into a file called csv.vim and put
