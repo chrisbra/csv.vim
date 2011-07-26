@@ -638,103 +638,135 @@ plugin call it for a column like this:
 ==============================================================================
 5. CSV Changelog					       *csv-changelog*
 
-0.16 Jul 25, 2011       -Sort on the range, specified (reported by
-                         Peng Yu, thanks!)
-			-|MoveCol_CSV| to move a column behind another column
-			 (suggested by Peng Yu, thanks!)
-			-Document how to use custom functions with a column
-			 (|csv-aggregate-functions|)
-			-Use g:csv_highlight_column variable, to have Vim
-			 automatically highlight the column on which the
-			 cursor is (|csv-hicol|)
-			-Header/VHeader command should work better now
-			 (|Header_CSV|, |VHeader_CSV|)
-			-Use setreg() for setting the register for the
-		 	 |Column_CSV| command and make sure it is blockwise.
-			-Release 0.14 was not correctly uploaded to vim.org
-0.14 Jul 20, 2011	-really use g:csv_no_conceal variable
-			 (reported by Antonio Ospite, thanks!)
-			-Force redrawing before displaying error messages in
-			 syntax script (reported by Antonio Ospite, thanks!)
-			-Make syntax highlighting work better with different
-			 terminals (Should work now with 8, 88 and 256 color
-			 terminals, tested with linux konsole, xterm and rxvt)
-			 (https://github.com/chrisbra/csv.vim/issues/4)
-			-Automatically detect '|' as field separator for csv
-			 files
-0.13 Mar 14, 2011       -documentation update
-			-https://github.com/chrisbra/csv.vim/issues#issue/2
-			 ('splitbelow' breaks |Header_CSV|, fix this; thanks
-			 lespea!)
-			-https://github.com/chrisbra/csv.vim/issues#issue/3
-			 ('gdefault' breaks |ArrangeColumn_CSV|, fix this;
-			 thanks lespea!)
-			-https://github.com/chrisbra/csv.vim/issues#issue/1
-			 (make syntax highlighting more robust, thanks lespea!)
-			-fix some small annoying bugs
-			-WhatColumn! displays column name
-0.12 Feb 24, 2011       -bugfix release:
-			-don't use |:noa| when switching between windows
-			-make sure, colwidth() doesn't throw an error
-0.11 Feb 24, 2011       -new command |Copy_CSV|
-			-|Search_CSV| did not find anything in the last
-			 if no delimiter was given (reported by chroyer)
-			- |VHeader_CSV| display the first column as
-			 Header similar to how |Header_CSV| works
-			- |HeaderToggle_CSV| and |VHeaderToggle_CSV| commands
-			 that toggle displaying the header lines/columns
-0.10 Feb 23, 2011	-Only conceal real delimiters
-			-document g:csv_no_conceal variable
-			-document g:csv_nl variable
-			-document conceal feature and syntax highlighting
-			-Normal mode command <Up>/<Down> work like K/J
-			-More robust regular expression engine, that can
-			 also handle newlines inside quoted strings.
-			-Slightly adjusted syntax highlighting
-0.9 Feb 19, 2011        -use conceal char depending on encoding
-			-Map normal mode keys also for visual/select and
-			 operator pending mode
-0.8 Feb 17, 2011	-Better Error handling 
-			-HiColumn! removes highlighting
-			-Enable NrColumns, that was deactivated in v.0.7
-			-a ColorScheme autocommand makes sure, that the syntax
-			 highlighting is reapplied, after changing the
-			 colorscheme.
-			-SearchInColumn now searches in the current column,
-			 if no column has been specified
-			-A lot more documentation
-			-Syntax Highlighting conceales delimiter
-			-small performance improvements for
-			 |ArrangeColumn_CSV|
-0.7 Feb 16, 2011	-Make the motion commands 'W' and 'E' work more
-			 reliable
-			-Document how to setup filetype plugins
-			-Make |WhatColumn_CSV| work more reliable
-			 (report from http://vim.wikia.com/Script:3280)
-			-DeleteColumn deletes current column, if no argument
-			 given
-			-|ArrangeColumn_CSV| handles errors better
-			-Code cleanup
-			-Syntax highlighting
-			-'H' and 'L' move forward/backwards between csv fields
-			-'K' and 'J' move upwards/downwards within the same
-			 column
-			-|Sort_CSV| to sort on a certain column
-			-|csv-tips| on how to colorize the statusline
-0.6 Feb 15, 2011	-Make |ArrangeColumn_CSV| work more reliable
-			 (had problems with multibyte chars before)
-			-Add |Header_CSV| function
-			-'W' and 'E' move forward/backwards between csv fields
-			-provide a file ftdetect/csv.vim to detect csv files
-0.5  Apr 20 2010	-documentation update
-			-switched to a public repository:
-			 http://github.com/chrisbra/csv.vim
-			-enabled GLVS (see |GLVS|)
-0.4a Mar 11 2010	-fixed documentation
-0.4  Mar 11 2010	-introduce |InitCSV|
-			-better Error handling
-			-HiColumn now by default highlights the current
-			 column, if no argument is specified.
-0.3  Oct, 28 2010	-initial Version
+0.17 (unreleased) {{{1
 
-vim:tw=78:ts=8:ft=help:norl:
+- small cosmetic changes
+- small documentation updates
+- fold away changelog in help file
+
+0.16 Jul 25, 2011 {{{1
+
+- Sort on the range, specified (reported by Peng Yu, thanks!)
+- |MoveCol_CSV| to move a column behind another column (suggested by Peng Yu,
+  thanks!)
+- Document how to use custom functions with a column
+  (|csv-aggregate-functions|)
+- Use g:csv_highlight_column variable, to have Vim automatically highlight the
+  column on which the cursor is (|csv-hicol|)
+- Header/VHeader command should work better now (|Header_CSV|, |VHeader_CSV|)
+- Use setreg() for setting the register for the |Column_CSV| command and make
+  sure it is blockwise.
+- Release 0.14 was not correctly uploaded to vim.org
+
+0.14 Jul 20, 2011 {{{1
+
+- really use g:csv_no_conceal variable (reported by Antonio Ospite, thanks!)
+- Force redrawing before displaying error messages in syntax script (reported
+  by Antonio Ospite, thanks!)
+- Make syntax highlighting work better with different terminals (Should work
+  now with 8, 88 and 256 color terminals, tested with linux konsole, xterm and
+  rxvt) (https://github.com/chrisbra/csv.vim/issues/4)
+- Automatically detect '|' as field separator for csv files
+
+0.13 Mar 14, 2011 {{{1
+
+- documentation update
+- https://github.com/chrisbra/csv.vim/issues#issue/2 ('splitbelow' breaks
+  |Header_CSV|, fix this; thanks lespea!)
+- https://github.com/chrisbra/csv.vim/issues#issue/3 ('gdefault' breaks
+  |ArrangeColumn_CSV|, fix this; thanks lespea!)
+- https://github.com/chrisbra/csv.vim/issues#issue/1 (make syntax highlighting
+  more robust, thanks lespea!)
+- fix some small annoying bugs
+- WhatColumn! displays column name
+
+0.12 Feb 24, 2011 {{{1 
+
+- bugfix release:
+- don't use |:noa| when switching between windows
+- make sure, colwidth() doesn't throw an error
+
+0.11 Feb 24, 2011 {{{1
+
+- new command |Copy_CSV|
+- |Search_CSV| did not find anything in the last if no delimiter was given
+  (reported by chroyer)
+- |VHeader_CSV| display the first column as Header similar to how
+  |Header_CSV| works
+- |HeaderToggle_CSV| and |VHeaderToggle_CSV| commands that toggle displaying
+  the header lines/columns
+
+0.10 Feb 23, 2011 {{{1
+
+- Only conceal real delimiters
+- document g:csv_no_conceal variable
+- document g:csv_nl variable
+- document conceal feature and syntax highlighting
+- Normal mode command <Up>/<Down> work like K/J
+- More robust regular expression engine, that can also handle newlines inside
+  quoted strings.
+- Slightly adjusted syntax highlighting
+
+0.9 Feb 19, 2011 {{{1
+
+- use conceal char depending on encoding
+- Map normal mode keys also for visual/select and operator pending mode
+
+0.8 Feb 17, 2011 {{{1
+
+- Better Error handling 
+- HiColumn! removes highlighting
+- Enable NrColumns, that was deactivated in v.0.7
+- a ColorScheme autocommand makes sure, that the syntax highlighting is
+  reapplied, after changing the colorscheme.
+- SearchInColumn now searches in the current column, if no column has been
+  specified
+- A lot more documentation
+- Syntax Highlighting conceales delimiter
+- small performance improvements for |ArrangeColumn_CSV|
+
+0.7 Feb 16, 2011 {{{1
+
+- Make the motion commands 'W' and 'E' work more reliable
+- Document how to setup filetype plugins
+- Make |WhatColumn_CSV| work more reliable (report from
+  http://vim.wikia.com/Script:3280)
+- DeleteColumn deletes current column, if no argument given
+- |ArrangeColumn_CSV| handles errors better
+- Code cleanup
+- Syntax highlighting
+- 'H' and 'L' move forward/backwards between csv fields
+- 'K' and 'J' move upwards/downwards within the same column
+- |Sort_CSV| to sort on a certain column
+- |csv-tips| on how to colorize the statusline
+
+0.6 Feb 15, 2011 {{{1
+
+- Make |ArrangeColumn_CSV| work more reliable (had problems with multibyte
+  chars before)
+- Add |Header_CSV| function
+- 'W' and 'E' move forward/backwards between csv fields
+- provide a file ftdetect/csv.vim to detect csv files
+
+0.5  Apr 20 2010 {{{1
+
+- documentation update
+- switched to a public repository: http://github.com/chrisbra/csv.vim
+- enabled GLVS (see |GLVS|)
+
+0.4a Mar 11 2010 {{{1
+
+- fixed documentation
+
+0.4  Mar 11 2010 {{{1
+
+- introduce |InitCSV|
+- better Error handling
+- HiColumn now by default highlights the current column, if no argument is
+  specified.
+
+0.3  Oct, 28 2010 {{{1
+
+- initial Version
+
+vim:tw=78:ts=8:ft=help:norl:et:fdm=marker:fdl=0
