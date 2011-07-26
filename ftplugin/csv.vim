@@ -335,10 +335,13 @@ fu! <SID>ColWidth(colnr) "{{{3
     endtry
 endfu
 
-fu! <SID>ArrangeCol() range "{{{3
+fu! <SID>ArrangeCol(first, last) range "{{{3
     "TODO: Why doesn't that work?
     " is this because of the range flag?
-    "let cur=winsaveview()
+    " It's because of the way, Vim works with
+    " a:firstline and a:lastline parameter, therefore
+    " explicitly give the range as argument to the function
+    let cur=winsaveview()
     " Force recalculation of Column width
     if exists("b:col_width")
       unlet b:col_width
@@ -353,10 +356,10 @@ fu! <SID>ArrangeCol() range "{{{3
        " Warning: W10: Changing read-only file
        setl noro
    endif
-   exe a:firstline . ',' . a:lastline .'s/' . (b:col) .
+   exe a:first . ',' . a:last .'s/' . (b:col) .
   \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
    setl ro
-   "call winrestview(cur)
+   call winrestview(cur)
 endfu
 
 fu! <SID>Columnize(field) "{{{3
@@ -672,8 +675,8 @@ fu! <SID>CommandDefinitions() "{{{3
 	command! -buffer -nargs=? DeleteColumn :call <SID>DelColumn(<q-args>)
     endif
     if !exists(":ArrangeColumn") "{{{4
-	command! -buffer -range ArrangeColumn :let s:a=winsaveview()
-		    \|:<line1>,<line2>call <SID>ArrangeCol()|call winrestview(s:a)
+	command! -buffer -range ArrangeColumn
+		\ :call <SID>ArrangeCol(<line1>,<line2>)
     endif
     if !exists(":InitCSV") "{{{4
 	command! -buffer InitCSV :call <SID>Init()
