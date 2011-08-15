@@ -24,6 +24,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.11 MoveColumn.............................|MoveCol_CSV|
     3.12 Sum of a column........................|SumCol_CSV|
     3.13 Normal mode commands...................|csv-motion|
+    3.14 Convert CSV file.......................|csv-convert|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -318,6 +319,99 @@ The csv filetype plugin redefines the following keys as:
 
 <Down> or J		Move [count] lines downwards within the same column
 
+
+3.14 Normal mode commands					 *csv-convert*
+-------------------------
+
+You can convert your CSV file to a different format with the command >
+
+    ConvertData
+
+This command will interactively ask you for the definition of 3 variables.
+After which it will convert your csv file into a new format, defined by those
+3 variables and open the newly created file in a new window. Those 3 variables
+define how the text converted.
+
+First, You need to define what has to be done, before converting your column
+data. That is done with the "pre convert" variable. The content of this variable
+will be put in front of the new document.
+
+Second, you define, what has to be put after the converted content of your
+column data. This happens with the "post convert" variable. Basically the
+contents of this variable will be put after processing the columns.
+
+Last, the columns need to be converted into your format. For this you can
+specify a printf() format like string, that defines how your data will be
+converted. You can use '%s' to specify placeholders, which will later be
+replaced by the content of the actual column. 
+
+For example, suppose you want to convert your data into HTML, then you first
+call the >
+
+    ConvertData
+
+At this point, Vim will ask you for input. First, you need to specify, what
+needs to be done before processing the data:
+
+Pre convert text: <html><body><table>`
+
+This would specify to put the HTML Header before the actual data can be
+processed. If the variable g:csv_pre_convert is already defined, Vim will
+already show you its' content as default value. Simply pressing Enter will use
+this data. After that, Vim asks, what the end of the converted file needs to
+look like:
+
+Post convert text: </body></html>
+
+So here you are defining how to finish up the HTML file. If the variable
+g:csv_post_convert is already defined, Vim will already show you its' content
+as default value which you can confirm by pressing Enter. Last, you define,
+how your columns need to be converted. Again, Vim asks you for how to do that:
+
+Converted text, use %s for column input:
+<tr><td>%s</td><td>%s</td><td>%s</td></tr>
+
+This time, you can use '%s' expandos. They tell Vim, that they need to be
+replaced by the actual content of your file. It does by going from the first
+column in your file and replacing it with the corresponding %s in that order.
+If there are less '%s' expandos then columns in your file, Vim will skip the
+columns, that are not used. Again If the variable g:csv__convert is already
+defined, Vim will already show you its' content as default value which you can
+confirm by pressing Enter. 
+
+After you hit Enter, Vim will convert your data and put it into a new window.
+It may look like this:
+
+    <html><body><table> `
+    <tr><td>1,</td><td>2,</td><td>3,</td></tr> `
+    <tr><td>2,</td><td>2,</td><td>4,</td></tr> `
+    </body></html> `
+
+Note, this is only a proof of concept. A better version of converting your
+data to HTML is bundled with Vim (|:TOhtml|).
+
+But may be you want your data converted into SQL-insert statements. That could
+be done like this: >
+
+    Pre convert text: `
+
+(Leave this empty. It won't be used).
+
+    Post convert text: Commit;`
+
+After inserting the data, commit it into the database.
+
+    Converted text, use %s for column input: `
+    Insert into table foobar values ('%s', '%s', '%s'); `
+
+After hitting Enter, a new Window will be opened, which might look like this:
+
+Insert into table foobar values('Foobar,', '2,', '3,');
+Insert into table foobar values('Bar,', '2,', '3,');
+...
+Commit;           
+
+Now you copy it into your database, or further manipulate it.
 
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
@@ -685,6 +779,8 @@ plugin call it for a column like this:
 - fold away changelog in help file
 - Document, that |DeleteColumn_CSV|deletes the column on which the cursor is,
   if no column number has been specified
+- Support csv fixed width columns (|csv-fixedwidth|)
+- Support converting your csv file to a different format (|csv-convert|)
 
 0.16 Jul 25, 2011 {{{1
 
