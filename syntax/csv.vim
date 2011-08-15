@@ -17,7 +17,22 @@ fu! <sid>Warning(msg) "{{{3
 endfu
 
 fu! <sid>CheckSaneSearchPattern() "{{{3
-    " Sane defaults ?
+    " First: 
+    " Check for filetype plugin. This syntax script relies on the filetype plugin,
+    " else, it won't work properly.
+    redir => s:a |sil filetype | redir end
+    let s:a=split(s:a, "\n")[0]
+    if match(s:a, '\cplugin:off') > 0
+	call <sid>Warning("No filetype support, only simple highlighting using\n" .
+		    \ s:del_def . " as delimiter! See :h csv-installation")
+    endif
+
+    " Second: Check for sane defaults for the column pattern
+    " Not necessary to check for fixed width columns
+    if exists("b:csv_fixed_width_cols")
+	return
+    endif
+
     let s:del_def = ','
     let s:col_def = '\%([^' . s:del_def . ']*' . s:del_def . '\|$\)'
 
@@ -44,65 +59,86 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     endtry
 endfu
 
+fu! <sid>DoHighlight() "{{{3
+    if has("conceal") && !exists("g:csv_no_conceal") && !exists("b:csv_fixed_width_cols")
+	exe "syn match CSVDelimiter /" . s:col . 
+	    \ '\%(.\)\@=/ms=e,me=e contained conceal cchar=' .
+	    \ (&enc == "utf-8" ? "│" : '|')
+	exe "syn match CSVDelimiterEOL /" . s:del . 
+	    \ '$/ contained conceal cchar=' .
+	    \ (&enc == "utf-8" ? "│" : '|')
+	hi def link CSVDelimiter Conceal
+	hi def link CSVDelimiterEOL Conceal
+    elseif !exists("b:csv_fixed_width_cols")
+	" The \%(.\)\@= makes sure, the last char won't be concealed,
+	" if it isn't a delimiter
+	exe "syn match CSVDelimiter /" . s:col . '\%(.\)\@=/ms=e,me=e contained'
+	exe "syn match CSVDelimiterEOL /" . s:del . '$/ contained'
+	hi def link CSVDelimiter Ignore
+	hi def link CSVDelimiterEOL Ignore
+    endif " There is no delimiter for csv fixed width columns
+
+
+    if !exists("b:csv_fixed_width_cols")
+	exe 'syn match CSVColumnEven nextgroup=CSVColumnOdd /'
+		    \ . s:col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
+	exe 'syn match CSVColumnOdd nextgroup=CSVColumnEven /'
+		    \ . s:col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
+
+	exe 'syn match CSVColumnHeaderEven nextgroup=CSVColumnHeaderOdd /\%1l'
+		    \. s:col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
+	exe 'syn match CSVColumnHeaderOdd nextgroup=CSVColumnHeaderEven /\%1l'
+		    \. s:col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
+    else
+	for i in range(len(b:csv_fixed_width_cols))
+	    let pat = '/\%' . b:csv_fixed_width_cols[i] . 'c.*' .
+			\ ((i == len(b:csv_fixed_width_cols)-1) ? '/' : 
+			\ '\%' . b:csv_fixed_width_cols[i+1] . 'c/')
+
+	    let group  = "CSVColumn" . (i%2 ? "Odd"  : "Even" )
+	    let ngroup = "CSVColumn" . (i%2 ? "Even" : "Odd"  )
+	    exe "syn match " group pat " nextgroup=" . ngroup
+	endfor
+    endif
+endfun
+
+
 " Syntax rules {{{2
-syn spell toplevel
+fu! <sid>DoSyntaxDefinitions() "{{{3
+    syn spell toplevel
 
-" Not really needed
-syn case ignore
+    " Not really needed
+    syn case ignore
 
-if &t_Co < 88
-    hi default CSVColumnHeaderOdd ctermfg=DarkRed ctermbg=15 guibg=grey80 guifg=black term=underline cterm=standout,bold gui=bold,underline 
-    hi default CSVColumnOdd	  ctermfg=DarkRed ctermbg=15 guibg=grey80 guifg=black term=underline cterm=bold gui=underline
-else
-    hi default CSVColumnHeaderOdd ctermfg=darkblue ctermbg=white guibg=grey80 guifg=black cterm=standout,underline gui=bold,underline
-    hi default CSVColumnOdd       ctermfg=darkblue ctermbg=white guibg=grey80 guifg=black cterm=reverse,underline gui=underline
-endif
-    
-" ctermbg=8 should be safe, even in 8 color terms
-hi default CSVColumnHeaderEven    ctermfg=white ctermbg=darkgrey guibg=grey50 guifg=black term=bold cterm=standout,underline gui=bold,underline 
-hi default CSVColumnEven	  ctermfg=white ctermbg=darkgrey guibg=grey50 guifg=black term=bold cterm=underline gui=bold,underline 
+    if &t_Co < 88
+	if !exists("b:csv_fixed_width_cols")
+	    hi default CSVColumnHeaderOdd ctermfg=DarkRed ctermbg=15 guibg=grey80 guifg=black term=underline cterm=standout,bold gui=bold,underline 
+	endif
+	hi default CSVColumnOdd	  ctermfg=DarkRed ctermbg=15 guibg=grey80 guifg=black term=underline cterm=bold gui=underline
+    else
+	if !exists("b:csv_fixed_width_cols")
+	    hi default CSVColumnHeaderOdd ctermfg=darkblue ctermbg=white guibg=grey80 guifg=black cterm=standout,underline gui=bold,underline
+	endif
+	hi default CSVColumnOdd       ctermfg=darkblue ctermbg=white guibg=grey80 guifg=black cterm=reverse,underline gui=underline
+    endif
+	
+    " ctermbg=8 should be safe, even in 8 color terms
+    if !exists("b:csv_fixed_width_cols")
+	hi default CSVColumnHeaderEven    ctermfg=white ctermbg=darkgrey guibg=grey50 guifg=black term=bold cterm=standout,underline gui=bold,underline 
+    endif
+    hi default CSVColumnEven	  ctermfg=white ctermbg=darkgrey guibg=grey50 guifg=black term=bold cterm=underline gui=bold,underline 
+endfun
 
+" Main: {{{2 
 " Make sure, we are using a sane, valid pattern for syntax
 " highlighting
 call <sid>CheckSaneSearchPattern()
 
-" Check for filetype plugin. This syntax script relies on the filetype plugin,
-" else, it won't work properly.
-redir => s:a |sil filetype | redir end
-let s:a=split(s:a, "\n")[0]
-if match(s:a, '\cplugin:off') > 0
-    call <sid>Warning("No filetype support, only simple highlighting using\n" .
-		\ s:del_def . " as delimiter! See :h csv-installation")
-endif
+" Define all necessary syntax groups
+call <sid>DoSyntaxDefinitions()
 
-if has("conceal") && !exists("g:csv_no_conceal")
-    exe "syn match CSVDelimiter /" . s:col . 
-	\ '\%(.\)\@=/ms=e,me=e contained conceal cchar=' .
-	\ (&enc == "utf-8" ? "│" : '|')
-    exe "syn match CSVDelimiterEOL /" . s:del . 
-	\ '$/ contained conceal cchar=' .
-	\ (&enc == "utf-8" ? "│" : '|')
-    hi def link CSVDelimiter Conceal
-    hi def link CSVDelimiterEOL Conceal
-else
-    " The \%(.\)\@= makes sure, the last char won't be concealed,
-    " if it isn't a delimiter
-    exe "syn match CSVDelimiter /" . s:col . '\%(.\)\@=/ms=e,me=e contained'
-    exe "syn match CSVDelimiterEOL /" . s:del . '$/ contained'
-    hi def link CSVDelimiter Ignore
-    hi def link CSVDelimiterEOL Ignore
-endif
+" Highlight the file
+call <sid>DoHighlight()
 
-" Last match is prefered.
-
-exe 'syn match CSVColumnEven nextgroup=CSVColumnOdd /'
-	    \ . s:col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
-exe 'syn match CSVColumnOdd nextgroup=CSVColumnEven /'
-	    \ . s:col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
-
-exe 'syn match CSVColumnHeaderEven nextgroup=CSVColumnHeaderOdd /\%1l'
-	    \. s:col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
-exe 'syn match CSVColumnHeaderOdd nextgroup=CSVColumnHeaderEven /\%1l'
-	    \. s:col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
-
+" Set the syntax variable {{{2
 let b:current_syntax="csv"
