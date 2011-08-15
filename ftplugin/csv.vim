@@ -47,14 +47,14 @@ fu! <SID>Init() "{{{3
 	let b:delimiter=g:csv_delim
     endif
 
-    if empty(b:delimiter)
+    if empty(b:delimiter) && !exists("b:csv_fixed_width")
 	call <SID>Warn("No delimiter found. See :h csv-delimiter to set it manually!")
     endif
     
     let s:del='\%(' . b:delimiter . '\|$\)'
     " Pattern for matching a single column
     if !exists("g:csv_strict_columns") && !exists("g:csv_col") 
-		\ && !exists("g:csv_fixed_width")
+		\ && !exists("b:csv_fixed_width")
 	" - Allow double quotes as escaped quotes only insides double quotes
 	" - Allow linebreaks only, if g:csv_nl isn't set (this is
 	"   only allowed in double quoted strings see RFC4180), though this
@@ -71,10 +71,16 @@ fu! <SID>Init() "{{{3
     elseif !exists("g:csv_col") && exists("g:csv_strict_columns")
 	" strict columns
 	let b:col='\%([^' . b:delimiter . ']*' . s:del . '\)'
-    elseif exists("g:csv_fixed_width")
+    elseif exists("b:csv_fixed_width")
 	" Fixed width column
 	let b:col=''
-	let b:csv_fixed_width_cols=split(g:csv_fixed_width, ',')
+	" Check for sane default
+	if b:csv_fixed_width =~? '[^0-9,]'
+	    call <sid>Warn("Please specify the list of character columns" .
+			\ "like this: '1,3,5'. See also :h csv-fixedwidth")
+	    return
+	endif
+	let b:csv_fixed_width_cols=split(b:csv_fixed_width, ',')
 	" Force evaluating as numbers
 	call map(b:csv_fixed_width_cols, 'v:val+0')
     else
