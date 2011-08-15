@@ -816,7 +816,7 @@ fu! <sid>DoForEachColumn(start, stop) range "{{{3
 	return
     endif
 
-    if exists("g:csv_pre_convert")
+    if exists("g:csv_pre_convert") && !empty(g:csv_pre_connect)
 	call add(result, g:csv_pre_convert)
     endif
 
@@ -848,7 +848,7 @@ fu! <sid>DoForEachColumn(start, stop) range "{{{3
 	call add(result, t)
     endfor
 
-    if exists("g:csv_post_convert")
+    if exists("g:csv_post_convert") && !empty(g:csv_post_connect)
 	call add(result, g:csv_post_convert)
     endif
 
@@ -860,9 +860,9 @@ endfun
 
 fu! <sid>PrepareDoForEachColumn(start, stop) range"{{{3
     let pre = exists("g:csv_pre_convert") ? g:csv_pre_convert : ''
-    let g:csv_pre_convert=input('Pre text: ', pre)
+    let g:csv_pre_convert=input('Pre convert text: ', pre)
     let post = exists("g:csv_post_convert") ? g:csv_post_convert : ''
-    let g:csv_post_convert=input('Post text: ', post)
+    let g:csv_post_convert=input('Post convert text: ', post)
     let convert = exists("g:csv_convert") ? g:csv_convert : ''
     let g:csv_convert=input("Converted text, use %s for column input:\n", convert)
     call <sid>DoForEachColumn(a:start, a:stop)
@@ -920,9 +920,9 @@ fu! <SID>CommandDefinitions() "{{{3
 	command! -buffer -nargs=? -range=% -complete=custom,<SID>SortComplete
 		    \ SumCol :echo csv#EvalColumn(<q-args>, "<sid>SumColumn", <line1>,<line2>)
     endif
-    if !exists(":ForEachColumn") "{{{4
+    if !exists(":ConvertData") "{{{4
 	command! -buffer -nargs=? -range=% -complete=custom,<SID>SortComplete
-		    \ ForEachColumn :call <sid>PrepareDoForEachColumn(<line1>,<line2>)
+		    \ ConvertData :call <sid>PrepareDoForEachColumn(<line1>,<line2>)
     endif
 endfu
 
