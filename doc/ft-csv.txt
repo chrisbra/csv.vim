@@ -321,8 +321,8 @@ The csv filetype plugin redefines the following keys as:
 
 
                                                             *ConvertData_CSV*
-3.14 Normal mode commands					 *csv-convert*
--------------------------
+3.14 Converting a CSV File					 *csv-convert*
+--------------------------
 
 You can convert your CSV file to a different format with the command >
 
