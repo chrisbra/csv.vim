@@ -1,11 +1,53 @@
 *ft-csv.txt*	For Vim version 7.3	Last change: 2011 Feb 17
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.16
+Version:	0.17
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
 NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
+
+                                                           *csv-toc*
+1. Introduction.................................|csv-intro|
+2. Installation.................................|csv-installation|
+3. CSV Commands.................................|csv-commands|
+    3.1 WhatColumn..............................|WhatColumn_CSV|
+    3.2 NrColumns...............................|NrColumns_CSV|
+    3.3 SearchInColumn..........................|SearchInColumn_CSV|
+    3.4 HiColumn................................|HiColumn_CSV|
+    3.5 ArrangeColumn...........................|ArrangeColumn_CSV|
+    3.6 DeleteColumn............................|DeleteColumn_CSV|
+    3.7 InitCSV.................................|InitCSV|
+    3.8 Header..................................|Header_CSV|
+    3.9 Sort....................................|Sort_CSV|
+    3.10 CopyColumn.............................|Copy_CSV|
+    3.11 MoveColumn.............................|MoveCol_CSV|
+    3.12 Sum of a column........................|SumCol_CSV|
+    3.13 Normal mode commands...................|csv-motion|
+    3.14 Convert CSV file.......................|csv-convert|
+4. CSV Filetype configuration...................|csv-configuration|
+    4.1 Delimiter...............................|csv-delimiter|
+    4.2 Column..................................|csv-column|
+    4.3 HiGroup.................................|csv-higroup|
+    4.4 Strict Columns..........................|csv-strict|
+    4.5 Multibyte Chars.........................|csv-mbyte|
+    4.6 Concealing..............................|csv-conceal|
+    4.7 Newlines................................|csv-newline|
+    4.8 Highlight column automatically..........|csv-hicol|
+    4.9 Fixed width columns.....................|csv-fixedwidth|
+5. CSV Tips and Tricks..........................|csv-tips|
+    5.1 Statusline..............................|csv-stl|
+    5.2 Slow ArrangeCol.........................|csv-slow|
+    5.3 Defining custom aggregate functions.....|csv-aggregate-functions|
+6. CSV Changelog................................|csv-changelog|
+
+==============================================================================
+1. Introduction                                                    *csv-intro*
+
+This plugin is used for handling column separated data with Vim. Usually those
+files are called csv files and use the ',' as delimiter, though sometimes they
+use e.g. the '|' or ';' as delimiter and there also exists fixedwidth columns.
+The aim of this plugin is to ease handling these kinds of files.
 
 This is a filetype plugin for CSV files. It was heavily influenced by
 the Vim Wiki Tip667 (http://vim.wikia.com/wiki/VimTip667), though it
@@ -13,38 +55,8 @@ works differently. For instructions on installing this file, type
 :help add-local-help |add-local-help| inside Vim. For a screenshot, of
 how the plugin can be used, see http://www.256bit.org/~chrisbra/csv.gif
 
-                                                           *csv-toc*
-1. Installation.................................|csv-installation|
-2. CSV Commands.................................|csv-commands|
-    2.1 WhatColumn..............................|WhatColumn_CSV|
-    2.2 NrColumns...............................|NrColumns_CSV|
-    2.3 SearchInColumn..........................|SearchInColumn_CSV|
-    2.4 HiColumn................................|HiColumn_CSV|
-    2.5 ArrangeColumn...........................|ArrangeColumn_CSV|
-    2.6 DeleteColumn............................|DeleteColumn_CSV|
-    2.7 InitCSV.................................|InitCSV|
-    2.8 Header..................................|Header_CSV|
-    2.9 Sort....................................|Sort_CSV|
-    2.10 CopyColumn.............................|Copy_CSV|
-    2.11 MoveCol................................|MoveCol_CSV|
-    2.12 Sum of a column........................|SumCol_CSV|
-    2.13 Normal mode commands...................|csv-motion|
-3. CSV Filetype configuration...................|csv-configuration|
-    3.1 Delimiter...............................|csv-delimiter|
-    3.2 Column..................................|csv-column|
-    3.3 HiGroup.................................|csv-higroup|
-    3.4 Strict Columns..........................|csv-strict|
-    3.5 Multibyte Chars.........................|csv-mbyte|
-    3.6 Concealing..............................|csv-conceal|
-    3.7 Newlines................................|csv-newline|
-    3.8 Highlight column automatically..........|csv-hicol|
-4. CSV Tips and Tricks..........................|csv-tips|
-    4.1 Statusline..............................|csv-stl|
-    4.2 Slow ArrangeCol.........................|csv-slow|
-5. CSV Changelog................................|csv-changelog|
-
 ==============================================================================
-1. Installation						*csv-installation*
+2. Installation						*csv-installation*
 
 In order to have vim automatically detect csv files, you need to have
 |ftplugins| enabled (e.g. by having this line in your |.vimrc| file: >
@@ -100,11 +112,11 @@ To have Vim automatically detect csv files, you need to do the following.
       names end with .csv.
 
 ==============================================================================
-2. Commands							*csv-commands*
+3. Commands							*csv-commands*
 
 The CSV ftplugin provides several Commands:
 
-2.1 WhatColumn                                                *WhatColumn_CSV*
+3.1 WhatColumn                                                *WhatColumn_CSV*
 --------------
 
 If you would like to know, on which column the cursor is, use >
@@ -115,14 +127,14 @@ to know the name of the column in which the cursor is: >
     :WhatColumn!
 <
 
-2.2 NrColumns                                                 *NrColumns_CSV*
+3.2 NrColumns                                                 *NrColumns_CSV*
 --------------
 
 :NrColumns outputs the maximum number of columns available. It does this by
 testing the first 10 lines for the number of columns. This usually should be
 enough.
 
-2.3 SearchInColumn                                          *SearchInColumn_CSV*
+3.3 SearchInColumn                                          *SearchInColumn_CSV*
 ------------------
 
 Use :SearchInColumn to search for a pattern within a specific column. The
@@ -137,7 +149,7 @@ So if you would like to search in Column 1 for the word foobar, you enter >
 Instead of / as delimiter, you can use any other delimiter you like. If you
 don't enter a column, the current column will be used.
 
-2.4 HiColumn                                                    *HiColumn_CSV*
+3.4 HiColumn                                                    *HiColumn_CSV*
 ------------
 
 :HiColumn <nr> can be used to highlight Column <nr>. Currently the plugin uses
@@ -150,7 +162,7 @@ to remove any highlighting.
 
 If you want to automatically highlight a column, see |csv-hicol|
 
-2.5 ArrangeColumn                                          *ArrangeColumn_CSV*
+3.5 ArrangeColumn                                          *ArrangeColumn_CSV*
 -----------------
 
 If you would like all columns to be visually arranged, you can use the >
@@ -163,9 +175,10 @@ experimental.
 column size. Note, this can be very slow on large files or many columns (see
 |csv-slow| on how to increase performance for this command).
 To prevent you from accidently changing your csv file, the buffer will be set
-'readonly' afterwards.
+'readonly' afterwards. Note: this command does not work for fixed width
+columns |csv-fixedwidth|
 
-2.6 DeleteColumn                                           *DeleteColumn_CSV*
+3.6 DeleteColumn                                           *DeleteColumn_CSV*
 ----------------
 
 The command :DeleteColumn can be used to delete a specific column. >
@@ -174,13 +187,16 @@ The command :DeleteColumn can be used to delete a specific column. >
 
 will delete column 2.
 
-2.7 InitCSV							*InitCSV*
+If you don't specify a column number, it will delete the column on which the
+cursor is.
+
+3.7 InitCSV							*InitCSV*
 -----------
 
 Reinitialize the Plugin. Use this, if you have changed the configuration
 of the plugin (see |csv-configuration| ).
 
-2.8 Header lines						 *Header_CSV*
+3.8 Header lines						 *Header_CSV*
 ----------------
 
 This command splits the csv-buffer and adds a window, that holds a small
@@ -207,6 +223,7 @@ limitation of Vim itsself, which doesn't allow to sync the scrolling between
 two windows horizontally and at the same time have another window only sync
 its scrolling vertically.
 
+Note: this command does not work for fixed width columns |csv-fixedwidth|
 
 							    *VHeader_CSV*
 
@@ -214,7 +231,9 @@ If you want a vertical header line, use :VHeader. This works similar to the
 |Header_CSV| command, except that it will open a vertical split window with
 the first column always visible. It will always open the first column in the
 new split window. Use the '!' to close the window.
+
 Note, this won't work with linebreaks in the column.
+Note also: this command does not work for fixed width columns |csv-fixedwidth|
 
 
 					*VHeaderToggle_CSV* *HeaderToggle_CSV*
@@ -223,7 +242,7 @@ Use the :HeaderToggle and :VHeaderToggle command to toggle displaying the
 horizontal or vertical header line.
 
 
-2.9 Sort							*Sort_CSV*
+3.9 Sort							*Sort_CSV*
 --------
 
 This command can be used to sort the csv file on a certain column. If no range
@@ -243,7 +262,7 @@ Instead of a column, you can give the flag 'n' to have it sort numerically.
 When no column number is given, it will sort by the column, on which the
 cursor is currently.
 
-2.10 Copy Column        					 *Copy_CSV*
+3.10 Copy Column        					 *Copy_CSV*
 ----------------
 
 If you need to copy a specific column, you can use the command :Column >
@@ -255,16 +274,16 @@ current cursor position is used. If no register is given, the default register
 |quotequote| is used. 
 
 
-2.11 Move A Column        					 *MoveCol_CSV*
+3.11 Move A Column        					 *MoveCol_CSV*
 ------------------
 
-You can move one column behind another column by using the :MoveCol command >
+You can move one column behind another column by using the :MoveColumn command >
 
-    :[range]MoveCol [source] [dest]
+    :[range]MoveColumn [source] [dest]
 
 This moves the column number source behind column nr destination.
 If both arguments are not given, move the column on which the cursor is behind
-the last column. If [range] is not given, MoveCol moves all columns,
+the last column. If [range] is not given, MoveColumn moves all columns,
 otherwise, it moves the columns only for the lines within the range, e.g.
 given that your first line is a header line, which you don't want to change >
 
@@ -274,7 +293,7 @@ this would move column 1 behind the last column, while keeping the header line
 as is.
 
 
-2.12 Sum of a Column        					 *SumCol_CSV*
+3.12 Sum of a Column        					 *SumCol_CSV*
 --------------------
 
 You can let Vim output the sum of a column using the :SumCol command >
@@ -287,7 +306,7 @@ given, this calculate the sum for the column the cursor is on. See also
 |csv-aggregate-functions|
 
 
-2.13 Normal mode commands					 *csv-motion*
+3.13 Normal mode commands					 *csv-motion*
 -------------------------
 
 The csv filetype plugin redefines the following keys as:
@@ -301,8 +320,112 @@ The csv filetype plugin redefines the following keys as:
 <Down> or J		Move [count] lines downwards within the same column
 
 
+                                                            *ConvertData_CSV*
+3.14 Normal mode commands					 *csv-convert*
+-------------------------
+
+You can convert your CSV file to a different format with the command >
+
+    ConvertData
+
+Use the the ! attribute, to convert your data without the delimiter.
+
+This command will interactively ask you for the definition of 3 variables.
+After which it will convert your csv file into a new format, defined by those
+3 variables and open the newly created file in a new window. Those 3 variables
+define how the text converted.
+
+First, You need to define what has to be done, before converting your column
+data. That is done with the "pre convert" variable. The content of this
+variable will be put in front of the new document.
+
+Second, you define, what has to be put after the converted content of your
+column data. This happens with the "post convert" variable. Basically the
+contents of this variable will be put after processing the columns.
+
+Last, the columns need to be converted into your format. For this you can
+specify a printf() format like string, that defines how your data will be
+converted. You can use '%s' to specify placeholders, which will later be
+replaced by the content of the actual column. 
+
+For example, suppose you want to convert your data into HTML, then you first
+call the >
+
+    ConvertData
+
+At this point, Vim will ask you for input. First, you need to specify, what
+needs to be done before processing the data:
+
+Pre convert text: <html><body><table>`
+
+This would specify to put the HTML Header before the actual data can be
+processed. If the variable g:csv_pre_convert is already defined, Vim will
+already show you its' content as default value. Simply pressing Enter will use
+this data. After that, Vim asks, what the end of the converted file needs to
+look like:
+
+Post convert text: </body></html>
+
+So here you are defining how to finish up the HTML file. If the variable
+g:csv_post_convert is already defined, Vim will already show you its' content
+as default value which you can confirm by pressing Enter. Last, you define,
+how your columns need to be converted. Again, Vim asks you for how to do that:
+
+Converted text, use %s for column input:
+<tr><td>%s</td><td>%s</td><td>%s</td></tr>
+
+This time, you can use '%s' expandos. They tell Vim, that they need to be
+replaced by the actual content of your file. It does by going from the first
+column in your file and replacing it with the corresponding %s in that order.
+If there are less '%s' expandos then columns in your file, Vim will skip the
+columns, that are not used. Again If the variable g:csv__convert is already
+defined, Vim will already show you its' content as default value which you can
+confirm by pressing Enter. 
+
+After you hit Enter, Vim will convert your data and put it into a new window.
+It may look like this:
+
+    <html><body><table> `
+    <tr><td>1,</td><td>2,</td><td>3,</td></tr> `
+    <tr><td>2,</td><td>2,</td><td>4,</td></tr> `
+    </body></html> `
+
+Note, this is only a proof of concept. A better version of converting your
+data to HTML is bundled with Vim (|:TOhtml|).
+
+But may be you want your data converted into SQL-insert statements. That could
+be done like this: >
+    
+    ConvertData!
+    Pre convert text: `
+
+(Leave this empty. It won't be used).
+
+    Post convert text: Commit;`
+
+After inserting the data, commit it into the database.
+
+    Converted text, use %s for column input: `
+    Insert into table foobar values ('%s', '%s', %s); `
+
+Note, that the last argument is not included within single quotation marks,
+since in this case the data is assumed to be integer and won't need to be
+quoted for the database.
+
+After hitting Enter, a new Window will be opened, which might look like this:
+
+Insert into table foobar values('Foobar', '2', 2011);
+Insert into table foobar values('Bar', '1', 2011);
+...
+Commit;           
+
+Since the command was used with the bang attribute (!), the converted data
+doesn't include the column delimiters.
+
+Now you can copy it into your database, or further manipulate it.
+
 ==============================================================================
-3. CSV Configuration					 *csv-configuration*
+4. CSV Configuration					 *csv-configuration*
 
 The CSV plugin tries to automatically detect the field delimiter for your
 file, cause although often the file is called CSV (comma separated values), a
@@ -310,10 +433,10 @@ semicolon is actually used. The column separator is stored in the buffer-local
 variable b:delimiter. This delimiter is heavily used, because you need
 it to define a column. Almost all commands use this variable therefore.
 
-3.1 Delimiter							*csv-delimiter*
+4.1 Delimiter							*csv-delimiter*
 -------------
 
-So to override the automatic detection of the plugin and define the separator
+To override the automatic detection of the plugin and define the separator
 manually, use: >
 
     :let g:csv_delim=','
@@ -321,10 +444,13 @@ manually, use: >
 to let the comma be the delimiter. This sets the buffer local delimiter
 variable b:delimiter.
 
+If your file does not consist of delimited columns, but rather is a fixed
+width csv file, see |csv-fixedwidth| for configuring the plugin appropriately.
+
 If you changed the delimiter, you should reinitiliaze the plugin using
 |InitCSV|
 
-3.2 Column							*csv-column*
+4.2 Column							*csv-column*
 ----------
 
 The definition, of what a column is, is defined as buffer-local variable
@@ -360,7 +486,7 @@ contained inside a field), similar to how |csv-strict| works.
 
 You should reinitialize the plugin afterwards |InitCSV|
 
-3.3 Hilighting Group                                         *csv-higroup*
+4.3 Hilighting Group                                         *csv-higroup*
 --------------------
 
 By default the csv ftplugin uses the WildMenu highlighting Group to define how
@@ -386,7 +512,7 @@ variable: >
 
 You should reinitialize the plugin afterwards |InitCSV|
 
-3.4 Strict Columns						*csv-strict*
+4.4 Strict Columns						*csv-strict*
 ------------------
 
 The default regular expression to define a column is quite complex
@@ -413,7 +539,7 @@ You can disable the effect if you |unlet| the variable: >
 
 You should reinitialize the plugin afterwards |InitCSV|
 
-3.5 Multibyte Chars						*csv-mbyte*
+4.5 Multibyte Chars						*csv-mbyte*
 -------------------
 
 Unfortunately, when using the |ArrangeColumn_CSV| command, multibyte chars
@@ -432,7 +558,7 @@ And to force calculating the byte width of each column |unlet| the variable: >
 
 You should reinitialize the plugin afterwards |InitCSV|
 
-3.6 Concealing					*csv-syntax*	*csv-conceal*
+4.6 Concealing					*csv-syntax*	*csv-conceal*
 -------------------
 
 The CSV plugin comes with a function to syntax highlight csv files. Basically
@@ -471,7 +597,7 @@ own syntax highlighting like this in your |.vimrc| >
 Note, these changes won't take effect, until you restart Vim.
 
 
-3.7 Newlines						*csv-newline*
+4.7 Newlines						*csv-newline*
 ------------
 
 RFC4180 allows newlines in double quoted strings. By default, the csv-plugin
@@ -491,7 +617,7 @@ seems to change on cursor movements. This could possibly be a bug in the
 syntax highlighting engine of Vim. Also, |WhatColumn_CSV| can't handle
 newlines inside fields and will most certainly be wrong. 
 
-3.8 Highlight column automatically				*csv-hicol* 
+4.8 Highlight column automatically				*csv-hicol* 
 ----------------------------------
 
 You can let vim automatically highlight the column on which the cursor is.
@@ -508,13 +634,35 @@ and to disable it again, simply unset the variable >
 
 It is a good idea to reinitialize the plugin afterwards |InitCSV|
 
+4.9 Fixed width columns                                        *csv-fixedwidth*
+-----------------------
+
+Sometimes there are no real columns, but rather the file is fixed width with
+no distinct delimiters between each column. The CSV plugin allows you to
+handle such virtual columns like csv columns, if you define where each column
+starts. You can do this, by setting the buffer-local variable
+b:csv_fixed_width like this >
+
+    let b:csv_fixed_width="1,5,9,13,17,21"
+
+This defines that each column starts at multiples of 4. Be sure, to issue this
+command in the buffer, that contains your file, otherwise, it won't have an
+effect, since this is a buffer-local option (|local-option|)
+
+Except for |ArrangeColumn_CSV| and the |Header_CSV| commands, all commands
+work in either mode. Those two commands won't do anything in the case of
+fixedwidth columns, since they don't really make sense here.
+
+After setting this variable, you should reinitialize the plugins using
+|InitCSV|
+
 ==============================================================================
-4. CSV Tips and Tricks						*csv-tips*
+5. CSV Tips and Tricks						*csv-tips*
 
 Here, there you'll find some small tips and tricks that might help when
 working with CSV files.
 
-4.1 Statusline							*csv-stl*
+5.1 Statusline							*csv-stl*
 --------------
 Suppose you want to include the column, on which the cursor is, into your
 statusline. You can do this, by defining in your .vimrc the 'statusline' like
@@ -543,7 +691,7 @@ desired 'statusline' settings as |expression|. Note the section starting with
 'if exists(..)' guards against not having loaded the filetype plugin.
 
 
-4.2 Slow ArrangeCol						*csv-slow*
+5.2 Slow ArrangeCol						*csv-slow*
 -------------------
 
 Processing a csv file using |ArrangeColumn_CSV| can be quite slow, because Vim
@@ -576,7 +724,7 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 
 
 
-4.3 Defining custom aggregate functions		    *csv-aggregate-functions*
+5.3 Defining custom aggregate functions		    *csv-aggregate-functions*
 ---------------------------------------
 
 The CSV plugin already defines the |SumCol_CSV|command, to let you calculate
@@ -605,10 +753,11 @@ plugin call it for a column like this:
 	endfun
 <
 
-    2) Now define your own custom command, which should makes sure, this
-       function will be called for a certain column >
+    2) Now define your own custom command, that calls your custom function for
+    a certain column >
        
-	    command! -buffer -nargs=? -range=% AvgCol :echo csv#EvalColumn(<q-args>,
+	    command! -buffer -nargs=? -range=% AvgCol
+	    \ :echo csv#EvalColumn(<q-args>,
 	    \ "My_CSV_Average", <line1>,<line2>)
 <
         This command should best be put into a file called csv.vim and put
@@ -635,105 +784,142 @@ plugin call it for a column like this:
 
 
 ==============================================================================
-5. CSV Changelog					       *csv-changelog*
+6. CSV Changelog					       *csv-changelog*
 
-0.16 Jul 25, 2011       -Sort on the range, specified (reported by
-                         Peng Yu, thanks!)
-			-|MoveCol_CSV| to move a column behind another column
-			 (suggested by Peng Yu, thanks!)
-			-Document how to use custom functions with a column
-			 (|csv-aggregate-functions|)
-			-Use g:csv_highlight_column variable, to have Vim
-			 automatically highlight the column on which the
-			 cursor is (|csv-hicol|)
-			-Header/VHeader command should work better now
-			 (|Header_CSV|, |VHeader_CSV|)
-			-Use setreg() for setting the register for the
-		 	 |Column_CSV| command and make sure it is blockwise.
-			-Release 0.14 was not correctly uploaded to vim.org
-0.14 Jul 20, 2011	-really use g:csv_no_conceal variable
-			 (reported by Antonio Ospite, thanks!)
-			-Force redrawing before displaying error messages in
-			 syntax script (reported by Antonio Ospite, thanks!)
-			-Make syntax highlighting work better with different
-			 terminals (Should work now with 8, 88 and 256 color
-			 terminals, tested with linux konsole, xterm and rxvt)
-			 (https://github.com/chrisbra/csv.vim/issues/4)
-			-Automatically detect '|' as field separator for csv
-			 files
-0.13 Mar 14, 2011       -documentation update
-			-https://github.com/chrisbra/csv.vim/issues#issue/2
-			 ('splitbelow' breaks |Header_CSV|, fix this; thanks
-			 lespea!)
-			-https://github.com/chrisbra/csv.vim/issues#issue/3
-			 ('gdefault' breaks |ArrangeColumn_CSV|, fix this;
-			 thanks lespea!)
-			-https://github.com/chrisbra/csv.vim/issues#issue/1
-			 (make syntax highlighting more robust, thanks lespea!)
-			-fix some small annoying bugs
-			-WhatColumn! displays column name
-0.12 Feb 24, 2011       -bugfix release:
-			-don't use |:noa| when switching between windows
-			-make sure, colwidth() doesn't throw an error
-0.11 Feb 24, 2011       -new command |Copy_CSV|
-			-|Search_CSV| did not find anything in the last
-			 if no delimiter was given (reported by chroyer)
-			- |VHeader_CSV| display the first column as
-			 Header similar to how |Header_CSV| works
-			- |HeaderToggle_CSV| and |VHeaderToggle_CSV| commands
-			 that toggle displaying the header lines/columns
-0.10 Feb 23, 2011	-Only conceal real delimiters
-			-document g:csv_no_conceal variable
-			-document g:csv_nl variable
-			-document conceal feature and syntax highlighting
-			-Normal mode command <Up>/<Down> work like K/J
-			-More robust regular expression engine, that can
-			 also handle newlines inside quoted strings.
-			-Slightly adjusted syntax highlighting
-0.9 Feb 19, 2011        -use conceal char depending on encoding
-			-Map normal mode keys also for visual/select and
-			 operator pending mode
-0.8 Feb 17, 2011	-Better Error handling 
-			-HiColumn! removes highlighting
-			-Enable NrColumns, that was deactivated in v.0.7
-			-a ColorScheme autocommand makes sure, that the syntax
-			 highlighting is reapplied, after changing the
-			 colorscheme.
-			-SearchInColumn now searches in the current column,
-			 if no column has been specified
-			-A lot more documentation
-			-Syntax Highlighting conceales delimiter
-			-small performance improvements for
-			 |ArrangeColumn_CSV|
-0.7 Feb 16, 2011	-Make the motion commands 'W' and 'E' work more
-			 reliable
-			-Document how to setup filetype plugins
-			-Make |WhatColumn_CSV| work more reliable
-			 (report from http://vim.wikia.com/Script:3280)
-			-DeleteColumn deletes current column, if no argument
-			 given
-			-|ArrangeColumn_CSV| handles errors better
-			-Code cleanup
-			-Syntax highlighting
-			-'H' and 'L' move forward/backwards between csv fields
-			-'K' and 'J' move upwards/downwards within the same
-			 column
-			-|Sort_CSV| to sort on a certain column
-			-|csv-tips| on how to colorize the statusline
-0.6 Feb 15, 2011	-Make |ArrangeColumn_CSV| work more reliable
-			 (had problems with multibyte chars before)
-			-Add |Header_CSV| function
-			-'W' and 'E' move forward/backwards between csv fields
-			-provide a file ftdetect/csv.vim to detect csv files
-0.5  Apr 20 2010	-documentation update
-			-switched to a public repository:
-			 http://github.com/chrisbra/csv.vim
-			-enabled GLVS (see |GLVS|)
-0.4a Mar 11 2010	-fixed documentation
-0.4  Mar 11 2010	-introduce |InitCSV|
-			-better Error handling
-			-HiColumn now by default highlights the current
-			 column, if no argument is specified.
-0.3  Oct, 28 2010	-initial Version
+0.17 Aug 16, 2011 {{{1
 
-vim:tw=78:ts=8:ft=help:norl:
+- small cosmetic changes
+- small documentation updates
+- fold away changelog in help file
+- Document, that |DeleteColumn_CSV| deletes the column on which the cursor
+  is, if no column number has been specified
+- Support csv fixed width columns (|csv-fixedwidth|)
+- Support to interactively convert your csv file to a different
+  format (|csv-convert|)
+
+0.16 Jul 25, 2011 {{{1
+
+- Sort on the range, specified (reported by Peng Yu, thanks!)
+- |MoveCol_CSV| to move a column behind another column (suggested by Peng Yu,
+  thanks!)
+- Document how to use custom functions with a column
+  (|csv-aggregate-functions|)
+- Use g:csv_highlight_column variable, to have Vim automatically highlight the
+  column on which the cursor is (|csv-hicol|)
+- Header/VHeader command should work better now (|Header_CSV|, |VHeader_CSV|)
+- Use setreg() for setting the register for the |Column_CSV| command and make
+  sure it is blockwise.
+- Release 0.14 was not correctly uploaded to vim.org
+
+0.14 Jul 20, 2011 {{{1
+
+- really use g:csv_no_conceal variable (reported by Antonio Ospite, thanks!)
+- Force redrawing before displaying error messages in syntax script (reported
+  by Antonio Ospite, thanks!)
+- Make syntax highlighting work better with different terminals (Should work
+  now with 8, 88 and 256 color terminals, tested with linux konsole, xterm and
+  rxvt) (https://github.com/chrisbra/csv.vim/issues/4)
+- Automatically detect '|' as field separator for csv files
+
+0.13 Mar 14, 2011 {{{1
+
+- documentation update
+- https://github.com/chrisbra/csv.vim/issues#issue/2 ('splitbelow' breaks
+  |Header_CSV|, fix this; thanks lespea!)
+- https://github.com/chrisbra/csv.vim/issues#issue/3 ('gdefault' breaks
+  |ArrangeColumn_CSV|, fix this; thanks lespea!)
+- https://github.com/chrisbra/csv.vim/issues#issue/1 (make syntax highlighting
+  more robust, thanks lespea!)
+- fix some small annoying bugs
+- WhatColumn! displays column name
+
+0.12 Feb 24, 2011 {{{1 
+
+- bugfix release:
+- don't use |:noa| when switching between windows
+- make sure, colwidth() doesn't throw an error
+
+0.11 Feb 24, 2011 {{{1
+
+- new command |Copy_CSV|
+- |Search_CSV| did not find anything in the last column if no delimiter
+  was given (reported by chroyer)
+- |VHeader_CSV| display the first column as Header similar to how
+  |Header_CSV| works
+- |HeaderToggle_CSV| and |VHeaderToggle_CSV| commands that toggle displaying
+  the header lines/columns
+
+0.10 Feb 23, 2011 {{{1
+
+- Only conceal real delimiters
+- document g:csv_no_conceal variable
+- document g:csv_nl variable
+- document conceal feature and syntax highlighting
+- Normal mode command <Up>/<Down> work like K/J
+- More robust regular expression engine, that can also handle newlines inside
+  quoted strings.
+- Slightly adjusted syntax highlighting
+
+0.9 Feb 19, 2011 {{{1
+
+- use conceal char depending on encoding
+- Map normal mode keys also for visual/select and operator pending mode
+
+0.8 Feb 17, 2011 {{{1
+
+- Better Error handling 
+- HiColumn! removes highlighting
+- Enable NrColumns, that was deactivated in v.0.7
+- a ColorScheme autocommand makes sure, that the syntax highlighting is
+  reapplied, after changing the colorscheme.
+- SearchInColumn now searches in the current column, if no column has been
+  specified
+- A lot more documentation
+- Syntax Highlighting conceales delimiter
+- small performance improvements for |ArrangeColumn_CSV|
+
+0.7 Feb 16, 2011 {{{1
+
+- Make the motion commands 'W' and 'E' work more reliable
+- Document how to setup filetype plugins
+- Make |WhatColumn_CSV| work more reliable (report from
+  http://vim.wikia.com/Script:3280)
+- DeleteColumn deletes current column, if no argument given
+- |ArrangeColumn_CSV| handles errors better
+- Code cleanup
+- Syntax highlighting
+- 'H' and 'L' move forward/backwards between csv fields
+- 'K' and 'J' move upwards/downwards within the same column
+- |Sort_CSV| to sort on a certain column
+- |csv-tips| on how to colorize the statusline
+
+0.6 Feb 15, 2011 {{{1
+
+- Make |ArrangeColumn_CSV| work more reliable (had problems with multibyte
+  chars before)
+- Add |Header_CSV| function
+- 'W' and 'E' move forward/backwards between csv fields
+- provide a file ftdetect/csv.vim to detect csv files
+
+0.5  Apr 20 2010 {{{1
+
+- documentation update
+- switched to a public repository: http://github.com/chrisbra/csv.vim
+- enabled GLVS (see |GLVS|)
+
+0.4a Mar 11 2010 {{{1
+
+- fixed documentation
+
+0.4  Mar 11 2010 {{{1
+
+- introduce |InitCSV|
+- better Error handling
+- HiColumn now by default highlights the current column, if no argument is
+  specified.
+
+0.3  Oct, 28 2010 {{{1
+
+- initial Version
+
+vim:tw=78:ts=8:ft=help:norl:et:fdm=marker:fdl=0
