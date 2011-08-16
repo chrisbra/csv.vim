@@ -320,6 +320,7 @@ The csv filetype plugin redefines the following keys as:
 <Down> or J		Move [count] lines downwards within the same column
 
 
+                                                            *ConvertData_CSV*
 3.14 Normal mode commands					 *csv-convert*
 -------------------------
 
@@ -327,14 +328,16 @@ You can convert your CSV file to a different format with the command >
 
     ConvertData
 
+Use the the ! attribute, to convert your data without the delimiter.
+
 This command will interactively ask you for the definition of 3 variables.
 After which it will convert your csv file into a new format, defined by those
 3 variables and open the newly created file in a new window. Those 3 variables
 define how the text converted.
 
 First, You need to define what has to be done, before converting your column
-data. That is done with the "pre convert" variable. The content of this variable
-will be put in front of the new document.
+data. That is done with the "pre convert" variable. The content of this
+variable will be put in front of the new document.
 
 Second, you define, what has to be put after the converted content of your
 column data. This happens with the "post convert" variable. Basically the
@@ -392,7 +395,8 @@ data to HTML is bundled with Vim (|:TOhtml|).
 
 But may be you want your data converted into SQL-insert statements. That could
 be done like this: >
-
+    
+    ConvertData!
     Pre convert text: `
 
 (Leave this empty. It won't be used).
@@ -402,16 +406,23 @@ be done like this: >
 After inserting the data, commit it into the database.
 
     Converted text, use %s for column input: `
-    Insert into table foobar values ('%s', '%s', '%s'); `
+    Insert into table foobar values ('%s', '%s', %s); `
+
+Note, that the last argument is not included within single quotation marks,
+since in this case the data is assumed to be integer and won't need to be
+quoted for the database.
 
 After hitting Enter, a new Window will be opened, which might look like this:
 
-Insert into table foobar values('Foobar,', '2,', '3,');
-Insert into table foobar values('Bar,', '2,', '3,');
+Insert into table foobar values('Foobar', '2', 2011);
+Insert into table foobar values('Bar', '1', 2011);
 ...
 Commit;           
 
-Now you copy it into your database, or further manipulate it.
+Since the command was used with the bang attribute (!), the converted data
+doesn't include the column delimiters.
+
+Now you can copy it into your database, or further manipulate it.
 
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
@@ -425,13 +436,16 @@ it to define a column. Almost all commands use this variable therefore.
 4.1 Delimiter							*csv-delimiter*
 -------------
 
-So to override the automatic detection of the plugin and define the separator
+To override the automatic detection of the plugin and define the separator
 manually, use: >
 
     :let g:csv_delim=','
 
 to let the comma be the delimiter. This sets the buffer local delimiter
 variable b:delimiter.
+
+If your file does not consist of delimited columns, but rather is a fixed
+width csv file, see |csv-fixedwidth| for configuring the plugin appropriately.
 
 If you changed the delimiter, you should reinitiliaze the plugin using
 |InitCSV|
@@ -772,15 +786,16 @@ plugin call it for a column like this:
 ==============================================================================
 6. CSV Changelog					       *csv-changelog*
 
-0.17 (unreleased) {{{1
+0.17 Aug 16, 2011 {{{1
 
 - small cosmetic changes
 - small documentation updates
 - fold away changelog in help file
-- Document, that |DeleteColumn_CSV|deletes the column on which the cursor is,
-  if no column number has been specified
+- Document, that |DeleteColumn_CSV| deletes the column on which the cursor
+  is, if no column number has been specified
 - Support csv fixed width columns (|csv-fixedwidth|)
-- Support converting your csv file to a different format (|csv-convert|)
+- Support to interactively convert your csv file to a different
+  format (|csv-convert|)
 
 0.16 Jul 25, 2011 {{{1
 
@@ -827,8 +842,8 @@ plugin call it for a column like this:
 0.11 Feb 24, 2011 {{{1
 
 - new command |Copy_CSV|
-- |Search_CSV| did not find anything in the last if no delimiter was given
-  (reported by chroyer)
+- |Search_CSV| did not find anything in the last column if no delimiter
+  was given (reported by chroyer)
 - |VHeader_CSV| display the first column as Header similar to how
   |Header_CSV| works
 - |HeaderToggle_CSV| and |VHeaderToggle_CSV| commands that toggle displaying
