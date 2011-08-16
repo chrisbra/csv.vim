@@ -833,18 +833,16 @@ fu! <sid>DoForEachColumn(start, stop, bang) range "{{{3
 	endif
 
 	if !exists("b:csv_fixed_width_cols")
-	    if !exists("b:csv_fixed_width_cols")
-		let fields=split(line, b:col . '\zs')
-		if a:bang
-		    call map(fields, 'substitute(v:val, b:delimiter .
-			\ ''\?$'' , "", "")')
-		endif
-	    else
-		let fields=[]
-		for j in range(1, columns, 1)
-		    call add(fields, matchstr(line, <sid>GetColPat(j,0)))
-		endfor
+	    let fields=split(line, b:col . '\zs')
+	    if a:bang
+		call map(fields, 'substitute(v:val, b:delimiter .
+		    \ ''\?$'' , "", "")')
 	    endif
+	else
+	    let fields=[]
+	    for j in range(1, columns, 1)
+		call add(fields, matchstr(line, <sid>GetColPat(j,0)))
+	    endfor
 	endif
 	for j in range(1, columns, 1)
 	    let t=substitute(t, '%s', fields[j-1], '')
