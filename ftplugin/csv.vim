@@ -799,7 +799,7 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
 endfu
 
 
-fu! <sid>DoForEachColumn(start, stop) range "{{{3
+fu! <sid>DoForEachColumn(start, stop, bang) range "{{{3
     " Do something for each column,
     " e.g. generate SQL-Statements, convert to HTML,
     " something like this
@@ -816,7 +816,7 @@ fu! <sid>DoForEachColumn(start, stop) range "{{{3
 	return
     endif
 
-    if exists("g:csv_pre_convert") && !empty(g:csv_pre_connect)
+    if exists("g:csv_pre_convert") && !empty(g:csv_pre_convert)
 	call add(result, g:csv_pre_convert)
     endif
 
@@ -827,7 +827,7 @@ fu! <sid>DoForEachColumn(start, stop) range "{{{3
 	let columns = len(context)
 	if columns > <sid>MaxColumns()
 	    let columns = <sid>MaxColumns()
-	elseif columns == 0
+	elseif columns == 1
 	    call <sid>Warn("No Columns defined in your g:csv_convert variable, Aborting")
 	    return
 	endif
@@ -835,6 +835,10 @@ fu! <sid>DoForEachColumn(start, stop) range "{{{3
 	if !exists("b:csv_fixed_width_cols")
 	    if !exists("b:csv_fixed_width_cols")
 		let fields=split(line, b:col . '\zs')
+		if a:bang
+		    call map(fields, 'substitute(v:val, b:delimiter .
+			\ ''\?$'' , "", "")')
+		endif
 	    else
 		let fields=[]
 		for j in range(1, columns, 1)
@@ -848,7 +852,7 @@ fu! <sid>DoForEachColumn(start, stop) range "{{{3
 	call add(result, t)
     endfor
 
-    if exists("g:csv_post_convert") && !empty(g:csv_post_connect)
+    if exists("g:csv_post_convert") && !empty(g:csv_post_convert)
 	call add(result, g:csv_post_convert)
     endif
 
@@ -858,14 +862,14 @@ fu! <sid>DoForEachColumn(start, stop) range "{{{3
 
 endfun
 
-fu! <sid>PrepareDoForEachColumn(start, stop) range"{{{3
+fu! <sid>PrepareDoForEachColumn(start, stop, bang) range"{{{3
     let pre = exists("g:csv_pre_convert") ? g:csv_pre_convert : ''
     let g:csv_pre_convert=input('Pre convert text: ', pre)
     let post = exists("g:csv_post_convert") ? g:csv_post_convert : ''
     let g:csv_post_convert=input('Post convert text: ', post)
     let convert = exists("g:csv_convert") ? g:csv_convert : ''
     let g:csv_convert=input("Converted text, use %s for column input:\n", convert)
-    call <sid>DoForEachColumn(a:start, a:stop)
+    call <sid>DoForEachColumn(a:start, a:stop, a:bang)
 endfun
 fu! <SID>CommandDefinitions() "{{{3
     if !exists(":WhatColumn") "{{{4
@@ -921,8 +925,9 @@ fu! <SID>CommandDefinitions() "{{{3
 		    \ SumCol :echo csv#EvalColumn(<q-args>, "<sid>SumColumn", <line1>,<line2>)
     endif
     if !exists(":ConvertData") "{{{4
-	command! -buffer -nargs=? -range=% -complete=custom,<SID>SortComplete
-		    \ ConvertData :call <sid>PrepareDoForEachColumn(<line1>,<line2>)
+	command! -buffer -bang -nargs=? -range=%
+	    \ -complete=custom,<SID>SortComplete ConvertData
+	    \ :call <sid>PrepareDoForEachColumn(<line1>,<line2>, <bang>0)
     endif
 endfu
 
