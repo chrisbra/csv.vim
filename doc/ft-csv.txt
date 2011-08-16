@@ -155,9 +155,12 @@ don't enter a column, the current column will be used.
 :HiColumn <nr> can be used to highlight Column <nr>. Currently the plugin uses
 the WildMenu Highlight Group. If you would like to change this, you need to
 define the variable |g:csv_hiGroup|.
-If you do not specify a <nr>, HiColumn will hilight the column on which the
+
+If you do not specify a <nr>, HiColumn will highlight the column on which the
 cursor is. Use >
+
     :HiColumn!
+
 to remove any highlighting.
 
 If you want to automatically highlight a column, see |csv-hicol|
@@ -287,7 +290,7 @@ the last column. If [range] is not given, MoveColumn moves all columns,
 otherwise, it moves the columns only for the lines within the range, e.g.
 given that your first line is a header line, which you don't want to change >
 
-    :2,$MoveCol 1 $
+    :2,$MoveColumn 1 $
 
 this would move column 1 behind the last column, while keeping the header line
 as is.
@@ -364,7 +367,7 @@ already show you its' content as default value. Simply pressing Enter will use
 this data. After that, Vim asks, what the end of the converted file needs to
 look like:
 
-Post convert text: </body></html>
+Post convert text: </table></body></html>
 
 So here you are defining how to finish up the HTML file. If the variable
 g:csv_post_convert is already defined, Vim will already show you its' content
@@ -388,7 +391,7 @@ It may look like this:
     <html><body><table> `
     <tr><td>1,</td><td>2,</td><td>3,</td></tr> `
     <tr><td>2,</td><td>2,</td><td>4,</td></tr> `
-    </body></html> `
+    </table></body></html> `
 
 Note, this is only a proof of concept. A better version of converting your
 data to HTML is bundled with Vim (|:TOhtml|).
@@ -486,8 +489,8 @@ contained inside a field), similar to how |csv-strict| works.
 
 You should reinitialize the plugin afterwards |InitCSV|
 
-4.3 Hilighting Group                                         *csv-higroup*
---------------------
+4.3 Highlighting Group                                         *csv-higroup*
+----------------------
 
 By default the csv ftplugin uses the WildMenu highlighting Group to define how
 the |HiColumn| command highlights columns. If you would like to define a
