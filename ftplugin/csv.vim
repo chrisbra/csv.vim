@@ -934,6 +934,9 @@ fu! <SID>CSVMappings() "{{{3
     noremap <silent> <buffer> E :<C-U>call <SID>MoveCol(-1, line('.'))<CR>
     noremap <silent> <buffer> K :<C-U>call <SID>MoveCol(0, line('.')-v:count1)<CR>
     noremap <silent> <buffer> J :<C-U>call <SID>MoveCol(0, line('.')+v:count1)<CR>
+    " Remap J and K to a sane backup
+    noremap <silent> <buffer> <LocalLeader>J J
+    noremap <silent> <buffer> <LocalLeader>K K
     " Map C-Right and C-Left as alternative to W and E
     map <silent> <buffer> <C-Right> W
     map <silent> <buffer> <C-Left>  E

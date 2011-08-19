@@ -322,6 +322,13 @@ The csv filetype plugin redefines the following keys as:
 
 <Down> or J		Move [count] lines downwards within the same column
 
+Note, that the K and J overlap Vim's default mapping for |J| and |K|
+respectively. Therefore, this functionality has been mapped to a sane default
+of <Localleader>J and <LocalLeader>K. If you haven't changed the |<Leader>| or
+|<LocalLeader>| variables, those the <Localleader> is equival to a single
+backslash '\', e.g. \K would run the lookup function on the word under the
+cursor and \J would join this line with the previous line.
+
 
                                                             *ConvertData_CSV*
 3.14 Converting a CSV File					 *csv-convert*
@@ -792,6 +799,8 @@ plugin call it for a column like this:
 0.18 (unreleased) {{{1
 
 - fix small typos in documentation
+- document, that 'K' and 'J' have been remapped and the originial function is
+  available as \K and \J
 
 0.17 Aug 16, 2011 {{{1
 
