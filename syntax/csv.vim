@@ -61,19 +61,23 @@ endfu
 
 fu! <sid>DoHighlight() "{{{3
     if has("conceal") && !exists("g:csv_no_conceal") && !exists("b:csv_fixed_width_cols")
+	" old val
+	    "\ '\%(.\)\@=/ms=e,me=e contained conceal cchar=' .
+	    " Has a problem with the last line!
 	exe "syn match CSVDelimiter /" . s:col . 
-	    \ '\%(.\)\@<=/ms=e,me=e contained conceal cchar=' .
+	    \ '\n\=/ms=e,me=e contained conceal cchar=' .
 	    \ (&enc == "utf-8" ? "│" : '|')
-	exe "syn match CSVDelimiterEOL /" . s:del . 
-	    \ '$/ contained conceal cchar=' .
-	    \ (&enc == "utf-8" ? "│" : '|')
+	"exe "syn match CSVDelimiterEOL /" . s:del . 
+	"    \ '\?$/ contained conceal cchar=' .
+	"    \ (&enc == "utf-8" ? "│" : '|')
 	hi def link CSVDelimiter Conceal
 	hi def link CSVDelimiterEOL Conceal
     elseif !exists("b:csv_fixed_width_cols")
 	" The \%(.\)\@<= makes sure, the last char won't be concealed,
 	" if it isn't a delimiter
-	exe "syn match CSVDelimiter /" . s:col . '\%(.\)\@<=/ms=e,me=e contained'
-	exe "syn match CSVDelimiterEOL /" . s:del . '$/ contained'
+	"exe "syn match CSVDelimiter /" . s:col . '\%(.\)\@<=/ms=e,me=e contained'
+	exe "syn match CSVDelimiter /" . s:col . '\n\=/ms=e,me=e contained'
+	"exe "syn match CSVDelimiterEOL /" . s:del . '\?$/ contained'
 	hi def link CSVDelimiter Ignore
 	hi def link CSVDelimiterEOL Ignore
     endif " There is no delimiter for csv fixed width columns
