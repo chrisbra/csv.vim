@@ -801,6 +801,8 @@ plugin call it for a column like this:
 - fix small typos in documentation
 - document, that 'K' and 'J' have been remapped and the originial function is
   available as \K and \J
+- Delimiters should not be highlighted within a column, only when used
+  as actual delimiters (suggested by Peng Yu, thanks!)
 
 0.17 Aug 16, 2011 {{{1
 
