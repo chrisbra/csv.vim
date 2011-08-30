@@ -1,7 +1,7 @@
 *ft-csv.txt*	For Vim version 7.3	Last change: 2011 Feb 17
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.17
+Version:	0.18
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -155,28 +155,39 @@ don't enter a column, the current column will be used.
 :HiColumn <nr> can be used to highlight Column <nr>. Currently the plugin uses
 the WildMenu Highlight Group. If you would like to change this, you need to
 define the variable |g:csv_hiGroup|.
-If you do not specify a <nr>, HiColumn will hilight the column on which the
+
+If you do not specify a <nr>, HiColumn will highlight the column on which the
 cursor is. Use >
+
     :HiColumn!
+
 to remove any highlighting.
 
 If you want to automatically highlight a column, see |csv-hicol|
 
+                                                          *:ArrangeColumn*
 3.5 ArrangeColumn                                          *ArrangeColumn_CSV*
 -----------------
 
 If you would like all columns to be visually arranged, you can use the >
-    :ArrangeColumn
+    :ArrangeColumn[!]
 
-command. Beware, that this will change your file and depending
-on the size of your file may slow down Vim significantly. This is highly
-experimental.
+command. Beware, that this will change your file and depending on the size of
+your file may slow down Vim significantly. This is highly experimental.
 :ArrangeCommand will try to vertically align all columns by their maximum
-column size. Note, this can be very slow on large files or many columns (see
-|csv-slow| on how to increase performance for this command).
-To prevent you from accidently changing your csv file, the buffer will be set
-'readonly' afterwards. Note: this command does not work for fixed width
-columns |csv-fixedwidth|
+column size.
+
+Use the bang attribute to force recalculating the column width. This is
+slower, but especially if you have modified the file, this will correctly
+calculate the width of each column so that they can be correctly aligned. If
+no column width has been calculated before, the width will be calculated, even
+if the '!' has not been given.
+
+Note, this can be very slow on large files or many columns (see
+|csv-slow| on how to increase performance for this command). To prevent you
+from accidently changing your csv file, the buffer will be set 'readonly'
+afterwards. Note: this command does not work for fixed width columns
+|csv-fixedwidth|
 
 3.6 DeleteColumn                                           *DeleteColumn_CSV*
 ----------------
@@ -287,7 +298,7 @@ the last column. If [range] is not given, MoveColumn moves all columns,
 otherwise, it moves the columns only for the lines within the range, e.g.
 given that your first line is a header line, which you don't want to change >
 
-    :2,$MoveCol 1 $
+    :2,$MoveColumn 1 $
 
 this would move column 1 behind the last column, while keeping the header line
 as is.
@@ -319,10 +330,17 @@ The csv filetype plugin redefines the following keys as:
 
 <Down> or J		Move [count] lines downwards within the same column
 
+Note, that the K and J overlap Vim's default mapping for |J| and |K|
+respectively. Therefore, this functionality has been mapped to a sane default
+of <Localleader>J and <LocalLeader>K. If you haven't changed the |<Leader>| or
+|<LocalLeader>| variables, those the <Localleader> is equival to a single
+backslash '\', e.g. \K would run the lookup function on the word under the
+cursor and \J would join this line with the previous line.
+
 
                                                             *ConvertData_CSV*
-3.14 Normal mode commands					 *csv-convert*
--------------------------
+3.14 Converting a CSV File					 *csv-convert*
+--------------------------
 
 You can convert your CSV file to a different format with the command >
 
@@ -364,7 +382,7 @@ already show you its' content as default value. Simply pressing Enter will use
 this data. After that, Vim asks, what the end of the converted file needs to
 look like:
 
-Post convert text: </body></html>
+Post convert text: </table></body></html>
 
 So here you are defining how to finish up the HTML file. If the variable
 g:csv_post_convert is already defined, Vim will already show you its' content
@@ -388,7 +406,7 @@ It may look like this:
     <html><body><table> `
     <tr><td>1,</td><td>2,</td><td>3,</td></tr> `
     <tr><td>2,</td><td>2,</td><td>4,</td></tr> `
-    </body></html> `
+    </table></body></html> `
 
 Note, this is only a proof of concept. A better version of converting your
 data to HTML is bundled with Vim (|:TOhtml|).
@@ -486,8 +504,8 @@ contained inside a field), similar to how |csv-strict| works.
 
 You should reinitialize the plugin afterwards |InitCSV|
 
-4.3 Hilighting Group                                         *csv-higroup*
---------------------
+4.3 Highlighting Group                                         *csv-higroup*
+----------------------
 
 By default the csv ftplugin uses the WildMenu highlighting Group to define how
 the |HiColumn| command highlights columns. If you would like to define a
@@ -701,6 +719,12 @@ to be quite big. Remember, for a file with 10,000 lines and 50 columns Vim
 needs to process each cell, which accumulates to 500,000 substitutions. It
 might take some time, until Vim is finished.
 
+You can speed up things a little bit, if you omit the '!' attribute to the
+|ArrangeColumn| (but this will only work, if the width has been calculated
+before, e.g. by issuing a :1ArrangeColumn command to arrange only the first
+line. Additionally you can also configure how this command behaves by setting
+some configuration variables.
+
 Here are some performance meassurements on how the various
 configuration settings influence the |ArrangeColumn_CSV| command on a file
 with 34 columns (on a 2.2GHz Core2Duo processor):
@@ -785,6 +809,15 @@ plugin call it for a column like this:
 
 ==============================================================================
 6. CSV Changelog					       *csv-changelog*
+
+0.18 Aug 30, 2011 {{{1
+
+- fix small typos in documentation
+- document, that 'K' and 'J' have been remapped and the originial function is
+  available as \K and \J
+- Delimiters should not be highlighted within a column, only when used
+  as actual delimiters (suggested by Peng Yu, thanks!)
+- Performance improvements for |:ArrangeColumn|
 
 0.17 Aug 16, 2011 {{{1
 
