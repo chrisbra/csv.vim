@@ -376,22 +376,25 @@ fu! <SID>ColWidth(colnr) "{{{3
     " Internal function, not called from extern,
     " does not work with fixed width columns
     let width=20 "Fallback (wild guess)
+    let tlist=[]
 
     if !exists("b:csv_fixed_width_cols")
-	if !exists("b:buffer_content")
+	if !exists("b:csv_list")
 	    let b:csv_list=getline(1,'$')
-	    let b:buffer_content=1
+	    call map(b:csv_list, 'split(v:val, b:col.''\zs'')')
 	endif
-	let list=copy(b:csv_list)
+	for item in b:csv_list
+	    call add(tlist, item[a:colnr-1])
+	endfor
 	try
 	    " we have a list of the first 10 rows
 	    " Now transform it to a list of field a:colnr
 	    " and then return the maximum strlen
 	    " That could be done in 1 line, but that would look ugly
-	    call map(list, 'split(v:val, b:col."\\zs")[a:colnr-1]')
-	    call map(list, 'substitute(v:val, ".", "x", "g")')
-	    call map(list, 'strlen(v:val)')
-	    return max(list)
+	    "call map(list, 'split(v:val, b:col."\\zs")[a:colnr-1]')
+	    call map(tlist, 'substitute(v:val, ".", "x", "g")')
+	    call map(tlist, 'strlen(v:val)')
+	    return max(tlist)
 	catch
 	    return width
 	endtry
@@ -402,7 +405,7 @@ fu! <SID>ColWidth(colnr) "{{{3
     endif
 endfu
 
-fu! <SID>ArrangeCol(first, last) range "{{{3
+fu! <SID>ArrangeCol(first, last, bang) range "{{{3
     "TODO: Why doesn't that work?
     " is this because of the range flag?
     " It's because of the way, Vim works with
@@ -414,13 +417,9 @@ fu! <SID>ArrangeCol(first, last) range "{{{3
 	return
     endif
     let cur=winsaveview()
-    " Force recalculation of Column width
-    if exists("b:col_width")
-      unlet b:col_width
-    endif
-    " Force recalculation of column width
-    if exists("b:buffer_content")
-      unlet b:buffer_content
+    if a:bang || !exists("b:col_width")
+	" Force recalculation of Column width
+	call <sid>CalculateColumnWidth()
     endif
 
    if &ro
@@ -430,29 +429,46 @@ fu! <SID>ArrangeCol(first, last) range "{{{3
    endif
    exe a:first . ',' . a:last .'s/' . (b:col) .
   \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
+   " Clean up variables, that were only needed for <sid>Columnize() function
+   unlet! s:columnize_count s:max_cols
    setl ro
    call winrestview(cur)
+endfu
+
+fu! <SID>CalculateColumnWidth() "{{{3
+   " Internal function, not called from external,
+   " does not work with fixed width columns
+    let b:col_width=[]
+    " Force recalculating the Column width
+    unlet! b:csv_list
+    let s:max_cols=<SID>MaxColumns()
+    for i in range(1,s:max_cols)
+	call add(b:col_width, <SID>ColWidth(i))
+    endfor
+    " delete buffer content in variable b:csv_list,
+    " this was only necessary for calculating the max width
+    unlet! b:csv_list
 endfu
 
 fu! <SID>Columnize(field) "{{{3
    " Internal function, not called from external,
    " does not work with fixed width columns
-   if !exists("b:col_width")
-	let b:col_width=[]
-	let max_cols=<SID>MaxColumns()
-	for i in range(1,max_cols)
-	    call add(b:col_width, <SID>ColWidth(i))
-	endfor
-	if exists("b:csv_list")
-	    " delete buffer content in variable b:csv_list,
-	    " this was only necessary for calculating the max width
-	    unlet b:csv_list
-	endif
+   if !exists("s:columnize_count")
+       let s:columnize_count = 0
+   endif
+   if !exists("s:max_cols")
+       let s:max_cols = len(b:col_width)
    endif
    " convert zero based indexed list to 1 based indexed list,
    " Default: 20 width, in case that column width isn't defined
-   let width=get(b:col_width,<SID>WColumn()-1,20)
-   if !exists("g:csv_no_multibyte")
+   " Careful: Keep this fast! Using 
+   "let width=get(b:col_width,<SID>WColumn()-1,20)
+   " is too slow, so we are using:
+   let width=get(b:col_width, (s:columnize_count % s:max_cols), 20)
+
+   let s:columnize_count += 1
+   if !exists("g:csv_no_multibyte") && 
+	\ match(a:field, '[^ -~]') != -1   " match characters outside the ascii range
        let a = split(a:field, '\zs')
        let add = eval(join(map(a, 'len(v:val)'), '+'))
        let add -= len(a)
@@ -460,6 +476,11 @@ fu! <SID>Columnize(field) "{{{3
        let add = 0
    endif
    
+   if width + add + 1 == strlen(a:field)
+       " Column has correct length, don't use printf()
+       return a:field
+   endif
+
    " Add one for the frame
    " plus additional width for multibyte chars,
    " since printf(%*s..) uses byte width!
@@ -525,7 +546,7 @@ fu! <SID>SplitHeaderLine(lines, bang, hor) "{{{3
 	    let a=[]
 	    let a=<sid>CopyCol('',1)
 	    " Force recalculating columns width
-	    unlet! b:buffer_content
+	    unlet! b:csv_list
 	    let width = <sid>ColWidth(1)
 	    let b=b:col
 	    abo vsp +enew
@@ -887,8 +908,8 @@ fu! <SID>CommandDefinitions() "{{{3
 	    \<SID>SortComplete DeleteColumn :call <SID>DelColumn(<q-args>)
     endif
     if !exists(":ArrangeColumn") "{{{4
-	command! -buffer -range ArrangeColumn
-		\ :call <SID>ArrangeCol(<line1>,<line2>)
+	command! -buffer -range -bang ArrangeColumn
+		\ :call <SID>ArrangeCol(<line1>,<line2>, <bang>0)
     endif
     if !exists(":InitCSV") "{{{4
 	command! -buffer InitCSV :call <SID>Init()
