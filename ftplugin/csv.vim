@@ -383,10 +383,10 @@ fu! <SID>ColWidth(colnr) "{{{3
 	    let b:csv_list=getline(1,'$')
 	    call map(b:csv_list, 'split(v:val, b:col.''\zs'')')
 	endif
-	for item in b:csv_list
-	    call add(tlist, item[a:colnr-1])
-	endfor
 	try
+	    for item in b:csv_list
+		call add(tlist, item[a:colnr-1])
+	    endfor
 	    " we have a list of the first 10 rows
 	    " Now transform it to a list of field a:colnr
 	    " and then return the maximum strlen
@@ -430,7 +430,7 @@ fu! <SID>ArrangeCol(first, last, bang) range "{{{3
    exe a:first . ',' . a:last .'s/' . (b:col) .
   \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
    " Clean up variables, that were only needed for <sid>Columnize() function
-   unlet! s:columnize_count s:max_cols
+   unlet! s:columnize_count s:max_cols s:prev_line
    setl ro
    call winrestview(cur)
 endfu
@@ -456,9 +456,19 @@ fu! <SID>Columnize(field) "{{{3
    if !exists("s:columnize_count")
        let s:columnize_count = 0
    endif
+
+
    if !exists("s:max_cols")
        let s:max_cols = len(b:col_width)
    endif
+
+   if exists("s:prev_line")
+       if s:prev_line != line('.')
+           let s:columnize_count = 0
+       endif
+   endif
+
+   let s:prev_line = line('.')
    " convert zero based indexed list to 1 based indexed list,
    " Default: 20 width, in case that column width isn't defined
    " Careful: Keep this fast! Using 
