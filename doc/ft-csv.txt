@@ -810,6 +810,10 @@ plugin call it for a column like this:
 ==============================================================================
 6. CSV Changelog					       *csv-changelog*
 
+0.19 (unreleased) {{{1
+
+- Make |:ArrangeColumn| more robust
+
 0.18 Aug 30, 2011 {{{1
 
 - fix small typos in documentation
