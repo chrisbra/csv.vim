@@ -78,8 +78,13 @@ fu! <sid>DoHighlight() "{{{3
 	"exe "syn match CSVDelimiter /" . s:col . '\%(.\)\@<=/ms=e,me=e contained'
 	exe "syn match CSVDelimiter /" . s:col . '\n\=/ms=e,me=e contained'
 	"exe "syn match CSVDelimiterEOL /" . s:del . '\?$/ contained'
-	hi def link CSVDelimiter Ignore
-	hi def link CSVDelimiterEOL Ignore
+	if has("conceal")
+	    hi def link CSVDelimiter Conceal
+	    hi def link CSVDelimiterEOL Conceal
+	else
+	    hi def link CSVDelimiter Ignore
+	    hi def link CSVDelimiterEOL Ignore
+	endif
     endif " There is no delimiter for csv fixed width columns
 
 
