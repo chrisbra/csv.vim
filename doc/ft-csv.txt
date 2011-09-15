@@ -593,6 +593,8 @@ and to disable it, simply unlet the variable >
     unlet g:csv_no_conceal
 
 You should reinitialize the plugin afterwards |InitCSV|
+Note: You can also set the 'conceallevel' option to control how the concealed
+chars will be displayed.
 
 If you want to customize the syntax colors, you can define your own groups.
 The CSV plugin will use already defined highlighting groups, if they are
@@ -611,7 +613,6 @@ own syntax highlighting like this in your |.vimrc| >
     hi CSVColumnHeaderOdd ...
 
 <
-
 Note, these changes won't take effect, until you restart Vim.
 
 
@@ -708,6 +709,25 @@ second line of the function. In the third line of your function, put your
 desired 'statusline' settings as |expression|. Note the section starting with
 'if exists(..)' guards against not having loaded the filetype plugin.
 
+                                                                 *CSV_WCol*
+
+The CSV_WCol() function controls, what will be outputed. In the simplest case,
+when no argument is given, it simply returns on which column the cursor is.
+This would look like '1/10' which means the cursor is on the first of 10
+columns. If you rather like to know the name of the column, simply give as
+parameter to the function the string "Name". This will return the column name
+as it is printed on the first line of that column. This can be adjusted, to
+have the column name printed into the statusline (see |csv-stl| above) by
+replacing the line >
+
+    let csv = '%1*%{&ft=~"csv" ? CSV_WCol() : ""}%*'
+<
+by e.g.
+
+    let csv = '%1*%{&ft=~"csv" ? CSV_WCol("Name") . " " . CSV_WCol() : ""}%*'
+
+which will output "Name 2/10" if the cursor is in the second column
+which is named "Name".
 
 5.2 Slow ArrangeCol						*csv-slow*
 -------------------
@@ -813,6 +833,11 @@ plugin call it for a column like this:
 0.19 (unreleased) {{{1
 
 - Make |:ArrangeColumn| more robust
+- Link CSVDelimiter to the Conceal highlighting group for Vim's that have
+  +conceal feature (suggested by John Orr, thanks!)
+- allow the possibility to return the Column name in the statusline |csv-stl|
+  (suggested by John Orr, thanks!)
+- documentation updates
 
 0.18 Aug 30, 2011 {{{1
 
