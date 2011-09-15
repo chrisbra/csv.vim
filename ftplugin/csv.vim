@@ -720,8 +720,12 @@ fu! <SID>Sort(bang, line1, line2, colnr) range "{{{3
     call winrestview(wsv)
 endfun
 
-fu! CSV_WCol() "{{{3
-    return printf(" %d/%d", <SID>WColumn(), <SID>MaxColumns())
+fu! CSV_WCol(...) "{{{3
+    if exists("a:1") && (a:1 == 'Name' || a:1 == 1)
+	return printf("%s", <sid>WColumn(1))
+    else
+	return printf(" %d/%d", <SID>WColumn(), <SID>MaxColumns())
+    endif
 endfun
 
 fu! <sid>CopyCol(reg, col) "{{{3
