@@ -960,7 +960,7 @@ fu! <sid>FoldValue(lnum, val) "{{{3
     endif
 endfu
 
-fu! <sid>PrepareFolding(add) "{{{3
+fu! <sid>PrepareFolding(add)  "{{{3
     if !has("folding")
 	return
     endif
@@ -1028,8 +1028,12 @@ fu! <sid>PrepareFolding(add) "{{{3
     for val in sort(values(b:csv_filter), '<sid>SortFilter')
 	let @/ .= val.pat . (val.id == s:filter_count ? '' : '\&')
     endfor
-    setl foldexpr=s:FoldValue(v:lnum,@/)
-    setl fen fdm=expr fdl=0 fdc=2
+    let sid = <sid>GetSID()
+    " Don't put spaces between the arguments!
+    exe 'setl foldexpr=' . sid . '_FoldValue(v:lnum,@/,)'
+    "setl foldexpr=s:FoldValue(v:lnum,@/)
+    " Be sure to also fold away single screen lines
+    setl fen fdm=expr fdl=0 fdc=2 fml=0
 endfu
 
 fu! <sid>OutputFilters() "{{{3
@@ -1049,8 +1053,8 @@ fu! <sid>OutputFilters() "{{{3
 	let items = values(b:csv_filter)
 	call sort(items, "<sid>SortFilter")
 	for item in items
-	    if !s:csv_fold_headerline
-		echo printf("%02d\t%02d\t%s\t\t%s", 
+	    if s:csv_fold_headerline
+		echo printf("%02d\t%02d\t%10.10s\t%s", 
 		    \ item.id, item.col, <sid>GetColumn(1, item.col),
 		    \ item.orig)
 	    else
@@ -1072,7 +1076,7 @@ fu! <sid>GetColumn(line, col) "{{{3
     if !exists("b:csv_fixed_width_cols")
 	return split(a, '^' . b:col . '\zs')[a:col - 1]
     else
-	return matchstr(a, <sid>GetColPat(col, 0))
+	return matchstr(a, <sid>GetColPat(a:col, 0))
     endif
 endfu
 
@@ -1088,13 +1092,13 @@ fu! <sid>DisableFolding() "{{{3
     setl nofen fdm=manual fdc=0 fdl=0
 endfu
 
-"fu! <sid>GetSID() "{{{3
-"    if v:version > 703 || v:version == 703 && has("patch032")
-"	return '<SNR>' . maparg('W', "", "", 1).sid
-"    else
-"	return substitute(maparg('W'), '\(<SNR>\d\+\)_', '\1', '')
-"    endif
-"endfu
+fu! <sid>GetSID() "{{{3
+    if v:version > 703 || v:version == 703 && has("patch032")
+	return '<SNR>' . maparg('W', "", "", 1).sid
+    else
+	return substitute(maparg('W'), '\(<SNR>\d\+\)_', '\1', '')
+    endif
+endfu
 
 fu! <sid>CheckHeaderLine() "{{{3
     if !exists("b:csv_headerline")
