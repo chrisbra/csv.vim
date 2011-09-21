@@ -10,7 +10,9 @@ endif
 
 " Helper functions "{{{2
 fu! <sid>Warning(msg) "{{{3
-    redraw!
+    " Don't redraw, so we are not overwriting messages from the ftplugin
+    " script
+    "redraw!
     echohl WarningMsg
     echomsg "CSV Syntax:" . a:msg
     echohl Normal
@@ -51,8 +53,7 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
 	" we catch every exception
 	let s:col = s:col_def
 	let s:del = s:del_def
-	call <sid>Warning("Invalid column pattern, using default pattern " .
-		    \ s:col_def)
+	call <sid>Warning("Invalid column pattern, using default pattern " . s:col_def)
     finally
 	let @/ = _s
 	call setpos('.', _p)
