@@ -86,7 +86,8 @@ fu! <sid>Init() "{{{3
 	" User given column definition
 	let b:col = g:csv_col
     endif
-    
+    " Check Header line
+    call <sid>CheckHeaderLine()
 
     " define buffer-local commands
     call <SID>CommandDefinitions()
@@ -124,6 +125,7 @@ fu! <sid>Init() "{{{3
 	    au ColorScheme *.csv,*.dat do Syntax
 	augroup end
     endif
+    call <sid>DisableFolding()
     silent do Syntax
 
     " undo when setting a new filetype
@@ -537,6 +539,7 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
 	call <sid>Warn("Header does not work with fixed width column!")
 	return
     endif
+    call <sid>CheckHeaderLine()
     if !a:bang 
 	" A Split Header Window already exists, 
 	" first close the already existing Window
@@ -548,7 +551,7 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
 	let _sbo = &sbo
 	if a:hor
 	    setl scrollopt=hor scrollbind
-	    let lines = empty(a:lines) ? 1 : a:lines
+	    let lines = empty(a:lines) ? s:csv_fold_headerline : a:lines
 	    abo sp
 	    1
 	    exe "resize" . lines
@@ -919,9 +922,13 @@ fu! <sid>CSVMappings() "{{{3
     noremap <silent> <buffer> J :<C-U>call <SID>MoveCol(0, line('.')+v:count1)<CR>
     nnoremap <silent> <buffer> <CR> :<C-U>call <SID>PrepareFolding(1)<CR>
     nnoremap <silent> <buffer> <BS> :<C-U>call <SID>PrepareFolding(0)<CR>
-    " Remap <CR>, J and K to a sane backup
+    " Remap <CR> original values to a sane backup
     noremap <silent> <buffer> <LocalLeader>J J
     noremap <silent> <buffer> <LocalLeader>K K
+    noremap <silent> <buffer> <LocalLeader>W W
+    noremap <silent> <buffer> <LocalLeader>E E
+    noremap <silent> <buffer> <LocalLeader>H H
+    noremap <silent> <buffer> <LocalLeader>L L
     nnoremap <silent> <buffer> <LocalLeader><CR> <CR>
     nnoremap <silent> <buffer> <LocalLeader><BS> <BS>
     " Map C-Right and C-Left as alternative to W and E
@@ -937,21 +944,19 @@ fu! <sid>EscapeValue(val) "{{{3
     return '\V' . escape(a:val, '\')
 endfu
 
-fu! <sid>FoldValue(lnum, val, col, maxcol) "{{{3
-    if (a:lnum==1 && !exists("g:csv_fold_firstline"))
+fu! <sid>FoldValue(lnum, val) "{{{3
+    call <sid>CheckHeaderLine()
+
+    if (a:lnum == s:csv_fold_headerline)
 	" Don't fold away the header line
 	return 0
     endif
 
-    "let pat=<sid>GetPat(a:col, a:maxcol, <sid>EscapeValue(a:val) . '\m')
-
     " Match literally, don't use regular expressions for matching
     if (getline(a:lnum) =~ a:val)
 	return 0
-    elseif (getline(a:lnum-1) =~ a:val || getline(a:lnum+1) =~ a:val)
-	return 1
     else
-	return 2
+	return 1
     endif
 endfu
 
@@ -960,82 +965,144 @@ fu! <sid>PrepareFolding(add) "{{{3
 	return
     endif
 
-    let col=<sid>WColumn()
-    let max = <sid>MaxColumns()
-    if !exists("s:csv_fold_patterns")
-	let s:csv_fold_patterns=[]
+    if !exists("s:csv_filter")
+	let s:csv_filter = {}
+    endif
+    if !exists("s:filter_count") || s:filter_count < 1
+	let s:filter_count = 0
     endif
 
-    if !exists("b:csv_fixed_width_cols")
-	let a = split(getline('.'), '^' . b:col . '\zs')[col-1]
-    else
-	let a = matchstr(getline('.'), <sid>GetColPat(col, 0))
-    endif
-
-    try
-	" strip leading whitespace
-	if (a !~ '\s\+'. b:delimiter . '$')
-	    let b = split(a, '^\s\+\ze\S')[0]
-	else
-	    let b = a
-	endif
-    catch /^Vim\%((\a\+)\)\=:E684/
-	" empty pattern - should match only empty columns
-	let b = a
-    endtry
-    
-    " strip trailing delimiter
-    try
-	let a = split(b, b:delimiter . '$')[0]
-    catch /^Vim\%((\a\+)\)\=:E684/
-	let a = b 
-    endtry
-
-    " Make a column pattern
-    let a= '\%(' .
-            \ (exists("b:csv_fixed_width") ? '.*' : '') .
-	    \ <sid>GetPat(col, max, <sid>EscapeValue(a) . '\m') .
-	    \ '\)'
-
-    if a:add
-	call add(s:csv_fold_patterns, a)
-    else
-	" remove last added item
-	if len(s:csv_fold_patterns) > 0
-	    call remove(s:csv_fold_patterns, -1)
-	    if len(s:csv_fold_patterns) == 0
+    if !a:add
+	" remove last added item from filter
+	if len(s:csv_filter) > 0
+	    call <sid>RemoveLastItem(s:filter_count)
+	    let s:filter_count -= 1
+	    if len(s:csv_filter) == 0
 		call <sid>DisableFolding()
 		return
 	    endif
 	else
 	    " Disable folding, if no pattern available
 	    call <sid>DisableFolding()
-	    nohls
 	    return
 	endif
-    endif
+    else
 
+	let col = <sid>WColumn()
+	let max = <sid>MaxColumns()
+	let a   = <sid>GetColumn(line('.'), col)
+
+	try
+	    " strip leading whitespace
+	    if (a !~ '\s\+'. b:delimiter . '$')
+		let b = split(a, '^\s\+\ze\S')[0]
+	    else
+		let b = a
+	    endif
+	catch /^Vim\%((\a\+)\)\=:E684/
+	    " empty pattern - should match only empty columns
+	    let b = a
+	endtry
+	
+	" strip trailing delimiter
+	try
+	    let a = split(b, b:delimiter . '$')[0]
+	catch /^Vim\%((\a\+)\)\=:E684/
+	    let a = b 
+	endtry
+
+	" Make a column pattern
+	let b= '\%(' .
+		\ (exists("b:csv_fixed_width") ? '.*' : '') .
+		\ <sid>GetPat(col, max, <sid>EscapeValue(a) . '\m') .
+		\ '\)'
+
+	let s:filter_count += 1
+	let s:csv_filter[col] = { 'pat': b, 'id': s:filter_count, 
+		    \ 'col': col, 'orig': a }
+
+    endif
     " Put the pattern into the search register, so they will also
     " be highlighted
-    let @/ = join(s:csv_fold_patterns, '\&')
-    let sid = <sid>GetSID()
-    exe 'setl foldexpr=' . sid . '_FoldValue(v:lnum,@/,' . col 
-		\ . ',' . max . ')'
+    let @/ = ''
+    for val in sort(values(s:csv_filter), '<sid>SortFilter')
+	let @/ .= val.pat . (val.id == s:filter_count ? '' : '\&')
+    endfor
+    setl foldexpr=s:FoldValue(v:lnum,@/)
     setl fen fdm=expr fdl=0 fdc=2
+endfu
+
+fu! <sid>OutputFilters() "{{{3
+    call <sid>CheckHeaderLine()
+    if s:csv_fold_headerline
+	let  title="Nr\tCol\t      Name\tValue"
+    else
+	let  title="Nr\tCol\tValue"
+    endif
+    echohl "Title"
+    echo   printf("%s", title)
+    echo   printf("%s", repeat("=",strdisplaywidth(title)))
+    echohl "Normal"
+    if !exists("s:csv_filter") || len(s:csv_filter) == 0
+	echo printf("%s", "No active filter")
+    else
+	let items = values(s:csv_filter)
+	call sort(items, "<sid>SortFilter")
+	for item in items
+	    if !s:csv_fold_headerline
+		echo printf("%02d\t%02d\t%s\t\t%s", 
+		    \ item.id, item.col, <sid>GetColumn(1, item.col),
+		    \ item.orig)
+	    else
+		echo printf("%02d\t%02d\t%s", 
+		    \ item.id, item.col, item.orig)
+	    endif
+	endfor
+    endif
+endfu
+
+fu! <sid>SortFilter(a, b) "{{{3
+    return a:a.id == a:b.id ? 0 :
+	\  a:a.id >  a:b.id ? 1 : -1
+endfu
+
+fu! <sid>GetColumn(line, col) "{{{3
+    " Return Column content at a:line, a:col
+    let a=getline(a:line)
+    if !exists("b:csv_fixed_width_cols")
+	return split(a, '^' . b:col . '\zs')[a:col - 1]
+    else
+	return matchstr(a, <sid>GetColPat(col, 0))
+    endif
+endfu
+
+fu! <sid>RemoveLastItem(count) "{{{3
+    for [key,value] in items(s:csv_filter)
+	if value.id == a:count
+	    call remove(s:csv_filter, key)
+	endif
+    endfor
 endfu
 
 fu! <sid>DisableFolding() "{{{3
     setl nofen fdm=manual fdc=0 fdl=0
 endfu
 
-fu! <sid>GetSID() "{{{3
-    if v:version > 703 || v:version == 703 && has("patch032")
-	return '<SNR>' . maparg('W', "", "", 1).sid
+"fu! <sid>GetSID() "{{{3
+"    if v:version > 703 || v:version == 703 && has("patch032")
+"	return '<SNR>' . maparg('W', "", "", 1).sid
+"    else
+"	return substitute(maparg('W'), '\(<SNR>\d\+\)_', '\1', '')
+"    endif
+"endfu
+
+fu! <sid>CheckHeaderLine() "{{{3
+    if !exists("b:csv_headerline")
+	let s:csv_fold_headerline = 1
     else
-	return substitute(maparg('W'), '\(<SNR>\d\+\)_', '\1', '')
+	let s:csv_fold_headerline = b:csv_headerline
     endif
 endfu
-
 fu! <sid>CommandDefinitions() "{{{3
     if !exists(":WhatColumn") "{{{4
 	command! -buffer -bang WhatColumn :echo <SID>WColumn(<bang>0)
@@ -1087,12 +1154,17 @@ fu! <sid>CommandDefinitions() "{{{3
     endif
     if !exists(":SumCol") "{{{4
 	command! -buffer -nargs=? -range=% -complete=custom,<SID>SortComplete
-		    \ SumCol :echo csv#EvalColumn(<q-args>, "<sid>SumColumn", <line1>,<line2>)
+		    \ SumCol :echo csv#EvalColumn(<q-args>, "<sid>SumColumn",
+		    \<line1>,<line2>)
     endif
     if !exists(":ConvertData") "{{{4
 	command! -buffer -bang -nargs=? -range=%
 	    \ -complete=custom,<SID>SortComplete ConvertData
 	    \ :call <sid>PrepareDoForEachColumn(<line1>,<line2>, <bang>0)
+    endif
+
+    if !exists(":Filters") "{{{4
+	command! -buffer -nargs=0 Filters :call <sid>OutputFilters()
     endif
 endfu
 
