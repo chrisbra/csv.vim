@@ -23,8 +23,9 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.10 CopyColumn.............................|Copy_CSV|
     3.11 MoveColumn.............................|MoveCol_CSV|
     3.12 Sum of a column........................|SumCol_CSV|
-    3.13 Normal mode commands...................|csv-motion|
+    3.13 Normal mode commands...................|csv-mapping|
     3.14 Convert CSV file.......................|csv-convert|
+    3.15 Dynamic filters........................|csv-filter|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -35,6 +36,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     4.7 Newlines................................|csv-newline|
     4.8 Highlight column automatically..........|csv-hicol|
     4.9 Fixed width columns.....................|csv-fixedwidth|
+    4.10 CSV Header lines.......................|csv-header|
 5. CSV Tips and Tricks..........................|csv-tips|
     5.1 Statusline..............................|csv-stl|
     5.2 Slow ArrangeCol.........................|csv-slow|
@@ -211,11 +213,12 @@ of the plugin (see |csv-configuration| ).
 ----------------
 
 This command splits the csv-buffer and adds a window, that holds a small
-fraction of the csv file. This is useful, if the first line contains
-some kind of a heading and you want always to display it. This works
-similar to fixing a certain line at the top. As optional argument, you
-can give the number of columns from the top, that shall be displayed. By
-default, 1 is used. Use the '!' to close this window. So this >
+fraction of the csv file. This is useful, if the first line contains some kind
+of a heading and you want always to display it. This works similar to fixing a
+certain line at the top. As optional argument, you can give the number of
+columns from the top, that shall be displayed. By default, 1 is used (You can
+define youre own default by setting the b:csv_headerline variable, see
+|csv-header|). Use the '!' to close this window. So this >
 
     :Header 3
 
@@ -317,7 +320,7 @@ given, this calculate the sum for the column the cursor is on. See also
 |csv-aggregate-functions|
 
 
-3.13 Normal mode commands					 *csv-motion*
+3.13 Normal mode commands					 *csv-mapping*
 -------------------------
 
 The csv filetype plugin redefines the following keys as:
@@ -330,12 +333,18 @@ The csv filetype plugin redefines the following keys as:
 
 <Down> or J		Move [count] lines downwards within the same column
 
-Note, that the K and J overlap Vim's default mapping for |J| and |K|
-respectively. Therefore, this functionality has been mapped to a sane default
-of <Localleader>J and <LocalLeader>K. If you haven't changed the |<Leader>| or
-|<LocalLeader>| variables, those the <Localleader> is equival to a single
-backslash '\', e.g. \K would run the lookup function on the word under the
-cursor and \J would join this line with the previous line.
+<Enter>                 Dynamically fold all lines away, that don't match
+                        the value in the current column. See |csv-filter|
+
+<BS>                    Remove last item from the dynamic filter.
+                        See |csv-filter|
+
+Note, that the <BS>, <CR>, K and J overlap Vim's default mapping for |<CR>|,
+|<BS>|, |J| and |K| respectively. Therefore, this functionality has been
+mapped to a sane default of <Localleader>J and <LocalLeader>K. If you haven't
+changed the |<Leader>| or |<LocalLeader>| variables, those the <Localleader>
+is equival to a single backslash '\', e.g. \K would run the lookup function on
+the word under the cursor and \J would join this line with the previous line.
 
 
                                                             *ConvertData_CSV*
@@ -441,6 +450,48 @@ Since the command was used with the bang attribute (!), the converted data
 doesn't include the column delimiters.
 
 Now you can copy it into your database, or further manipulate it.
+
+3.15 Dynamic filters      					 *csv-filter*
+--------------------      
+
+If you are one a value and only want to see lines, that have the same value in
+this column, you can dynamically filter the file and fold away all lines not
+matching the value in the current column. To do so, simply press <CR> (Enter).
+Now Vim will fold away all lines, that don't have the same value in this
+particular row. Note, that leading blanks and the delimiter is removed and the
+value is used literally when comparing with other values.
+
+The way this is done is, that the value from the column is extracted and a
+regular expression for that column is generated from it. In the end this
+regular expression is put into the search register (|quote_/|) and used for
+folding the file.
+
+A subsequent <CR> on another value, will add this value to the current applied
+filter (this is like using the logical AND between the currently active filter
+and the new value). To remove the last item from the filter, press <BS>
+(backspace). If all items from the filter are removed, folding will be
+disabled.
+
+By default, the first line is assumed to be the header and won't be folded
+away. See also |csv-header|.
+
+                                                         *:Filter* *Filter_CSV*
+To see the active filters, you can use the :Filter command. This will show you
+a small summary, of what filters are active and looks like this: 
+
+Nr      Col           Name              Value `
+============================================= `
+01      07          Price;              23.10   `
+
+This means, there is only one filter active. The current active filter is on
+column 7 (column name is Price) and the active value for the filter is 23.10.
+When removing one item from the filter by pressing <BS>, it will always remove
+the last item (highest number in NR column) from the active filter values.
+
+Note, that depending on your csv file and the number of filters you used,
+applying the filter might actually slow down vim, because a complex regular
+expression is generated that is applied by the fold expression. Look into the
+@/ (|quote_/|) register to see its value.
 
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
@@ -675,6 +726,19 @@ fixedwidth columns, since they don't really make sense here.
 After setting this variable, you should reinitialize the plugins using
 |InitCSV|
 
+4.10 CSV Header lines                                        *csv-header*
+---------------------
+
+By default, dynamic filtering |csv-filter| will not fold away the first line.
+If you don't like that, you can define your header line using the variable
+b:csv_fold_headerline, e.g. >
+    
+    let b:csv_headerline = 0
+
+to disable, that a header line won't be folded away. If your header line
+instead is on line 5, simply set this variable to 5. This also applies to the
+|Header_CSV| command.
+
 ==============================================================================
 5. CSV Tips and Tricks						*csv-tips*
 
@@ -838,6 +902,8 @@ plugin call it for a column like this:
 - allow the possibility to return the Column name in the statusline |csv-stl|
   (suggested by John Orr, thanks!)
 - documentation updates
+- Allow to dynamically add Filters, see |csv-filter|
+- Also display what filters are active, see |:Filter|
 
 0.18 Aug 30, 2011 {{{1
 
