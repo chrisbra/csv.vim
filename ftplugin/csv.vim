@@ -1,5 +1,4 @@
-" Filetype plugin for editing CSV files. "{{{1
-" Author:  Christian Brabandt <cb@256bit.org>
+" Filetype plugin for editing CSV files. "{{{1 " Author:  Christian Brabandt <cb@256bit.org>
 " Version: 0.18
 " Script:  http://www.vim.org/scripts/script.php?script_id=2830
 " License: VIM License
@@ -20,13 +19,13 @@ let s:cpo_save = &cpo
 set cpo&vim
 
 " Function definitions: "{{{2
-fu! <SID>Warn(mess) "{{{3
+fu! <sid>Warn(mess) "{{{3
     echohl WarningMsg
     echomsg "CSV: " . a:mess
     echohl Normal
 endfu
 
-fu! <SID>Init() "{{{3
+fu! <sid>Init() "{{{3
     " Hilight Group for Columns
     if exists("g:csv_hiGroup")
 	let s:hiGroup = g:csv_hiGroup
@@ -139,7 +138,46 @@ fu! <SID>Init() "{{{3
     endif
 endfu 
 
-fu! <SID>SearchColumn(arg) "{{{3
+fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
+    if a:colnr > 1 && a:colnr < a:maxcolnr
+	"let @/=<SID>GetColPat(colnr-1,0) . '*\zs' . pat . '\ze\([^' . b:delimiter . ']*' . b:delimiter .'\)\?' . <SID>GetColPat(maxcolnr-colnr-1,0)
+	"let @/= '^' . <SID>GetColPat(colnr-1,0) . '[^' . b:delimiter . ']*\zs' . pat . '\ze[^' . b:delimiter . ']*'.b:delimiter . <SID>GetColPat(maxcolnr-colnr,0) . '$'
+	"let @/= '^' . <SID>GetColPat(colnr-1,0) . b:col1 . '\?\zs' . pat . '\ze' . b:col1 .'\?' . <SID>GetColPat(maxcolnr-colnr,0) " . '$'
+	if !exists("b:csv_fixed_width_cols")
+	    return '^' . <SID>GetColPat(a:colnr-1,0) . '\%([^' . 
+		    \ b:delimiter . ']*\)\?\zs' . a:pat . '\ze' .
+		    \ '\%([^' . b:delimiter .']*\)\?' . 
+		    \ b:delimiter . <SID>GetColPat(a:maxcolnr - a:colnr, 0) . 
+		    \ '$'
+	else
+	    return '\%' . b:csv_fixed_width_cols[(a:colnr - 1)] . 'c\zs' 
+		    \ . a:pat . '.\{-}\ze\%'
+		    \ . (b:csv_fixed_width_cols[a:colnr]) . 'c\ze'
+	endif
+    elseif a:colnr == a:maxcolnr
+	if !exists("b:csv_fixed_width_cols")
+	    return '^' . <SID>GetColPat(a:colnr - 1,0) .
+		    \ '\%([^' . b:delimiter .
+		    \ ']*\)\?\zs' . a:pat . '\ze' 
+	else
+	    return '\%' . b:csv_fixed_width_cols[-1] .
+		    \ 'c\zs' . a:pat . '\ze'
+	endif
+    else " colnr = 1
+	"let @/= '^\zs' . pat . '\ze' . substitute((<SID>GetColPat(maxcolnr - colnr)), '\\zs', '', 'g')
+	"let @/= '^\zs' . b:col1 . '\?' . pat . '\ze' . b:col1 . '\?' .  <SID>GetColPat(maxcolnr,0) . '$'
+	if !exists("b:csv_fixed_width_cols")
+	    return '^' . '\%([^' . b:delimiter . ']*\)\?\zs' . a:pat .
+		\ '\ze\%([^' . b:delimiter . ']*\)\?' . b:delimiter .
+		\ <SID>GetColPat(a:maxcolnr -1 , 0) . '$'
+	else
+	    return a:pat . '\ze.\{-}\%' . b:csv_fixed_width_cols[1] . 'c'
+	endif
+    endif
+    return ''
+endfu
+
+fu! <sid>SearchColumn(arg) "{{{3
     try 
 	let arglist=split(a:arg)
 	if len(arglist) == 1
@@ -171,36 +209,7 @@ fu! <SID>SearchColumn(arg) "{{{3
     " TODO:
     " Is there a better way, than running a substitute command on '\zs', may be using a flag
     " with GetColPat(zsflag, colnr)?
-    if colnr > 1 && colnr < maxcolnr
-	"let @/=<SID>GetColPat(colnr-1,0) . '*\zs' . pat . '\ze\([^' . b:delimiter . ']*' . b:delimiter .'\)\?' . <SID>GetColPat(maxcolnr-colnr-1,0)
-	"let @/= '^' . <SID>GetColPat(colnr-1,0) . '[^' . b:delimiter . ']*\zs' . pat . '\ze[^' . b:delimiter . ']*'.b:delimiter . <SID>GetColPat(maxcolnr-colnr,0) . '$'
-	"let @/= '^' . <SID>GetColPat(colnr-1,0) . b:col1 . '\?\zs' . pat . '\ze' . b:col1 .'\?' . <SID>GetColPat(maxcolnr-colnr,0) " . '$'
-	if !exists("b:csv_fixed_width_cols")
-	    let @/= '^' . <SID>GetColPat(colnr-1,0) . '\%([^' . b:delimiter .
-		    \ ']*\)\?\zs' . pat . '\ze' . '\%([^' . b:delimiter .']*\)\?' . 
-		    \ b:delimiter . <SID>GetColPat(maxcolnr-colnr,0)  . '$'
-	else
-	    let @/ = '\%' . b:csv_fixed_width_cols[(colnr-1)] . 'c\zs' . pat
-	            \ . '.\{-}\ze\%' . (b:csv_fixed_width_cols[colnr]) . 'c\ze'
-	endif
-    elseif colnr == maxcolnr
-	if !exists("b:csv_fixed_width_cols")
-	    let @/= '^' . <SID>GetColPat(colnr-1,0) . '\%([^' . b:delimiter .
-		\ ']*\)\?\zs' . pat . '\ze' 
-	else
-	    let @/= '\%' . b:csv_fixed_width_cols[-1] . 'c\zs' . pat . '\ze'
-	endif
-    else " colnr = 1
-	"let @/= '^\zs' . pat . '\ze' . substitute((<SID>GetColPat(maxcolnr - colnr)), '\\zs', '', 'g')
-	"let @/= '^\zs' . b:col1 . '\?' . pat . '\ze' . b:col1 . '\?' .  <SID>GetColPat(maxcolnr,0) . '$'
-	if !exists("b:csv_fixed_width_cols")
-	    let @/= '^' . '\%([^' . b:delimiter . ']*\)\?\zs' . pat .
-		\ '\ze\%([^' . b:delimiter . ']*\)\?' . b:delimiter .
-		\ <SID>GetColPat(maxcolnr-1,0) . '$'
-	else
-	    let @/= pat . '\ze.\{-}\%' . b:csv_fixed_width_cols[1] . 'c'
-	endif
-    endif
+    let @/ = <sid>GetPat(colnr, maxcolnr, pat)
     try
 	norm! n
     catch /^Vim\%((\a\+)\)\=:E486/
@@ -215,7 +224,7 @@ fu! <SID>SearchColumn(arg) "{{{3
 endfu
 
 
-fu! <SID>DelColumn(colnr) "{{{3
+fu! <sid>DelColumn(colnr) "{{{3
     let maxcolnr = <SID>MaxColumns()
     let _p = getpos('.')
 
@@ -247,7 +256,7 @@ fu! <SID>DelColumn(colnr) "{{{3
     call setpos('.', _p)
 endfu
 
-fu! <SID>HiCol(colnr) "{{{3
+fu! <sid>HiCol(colnr) "{{{3
     if a:colnr > <SID>MaxColumns() && a:colnr[-1:] != '!'
 	call <SID>Warn("There exists no column " . a:colnr)
 	return
@@ -290,7 +299,7 @@ fu! <SID>HiCol(colnr) "{{{3
     endif
 endfu
 
-fu! <SID>GetDelimiter() "{{{3
+fu! <sid>GetDelimiter() "{{{3
     if !exists("b:csv_fixed_width_cols")
 	let _cur = getpos('.')
 	let Delim={0: ';', 1:  ',', 2: '|', 3: '	'}
@@ -321,7 +330,7 @@ fu! <SID>GetDelimiter() "{{{3
     endif
 endfu
 
-fu! <SID>WColumn(...) "{{{3
+fu! <sid>WColumn(...) "{{{3
     " Return on which column the cursor is
     let _cur = getpos('.')
     if !exists("b:csv_fixed_width_cols")
@@ -355,7 +364,7 @@ fu! <SID>WColumn(...) "{{{3
     return ret
 endfu 
 
-fu! <SID>MaxColumns() "{{{3
+fu! <sid>MaxColumns() "{{{3
     "return maximum number of columns in first 10 lines
     if !exists("b:csv_fixed_width_cols")
 	let l=getline(1,10)
@@ -371,10 +380,9 @@ fu! <SID>MaxColumns() "{{{3
     endif
 endfu
 
-fu! <SID>ColWidth(colnr) "{{{3
+fu! <sid>ColWidth(colnr) "{{{3
     " Return the width of a column
-    " Internal function, not called from extern,
-    " does not work with fixed width columns
+    " Internal function
     let width=20 "Fallback (wild guess)
     let tlist=[]
 
@@ -405,7 +413,7 @@ fu! <SID>ColWidth(colnr) "{{{3
     endif
 endfu
 
-fu! <SID>ArrangeCol(first, last, bang) range "{{{3
+fu! <sid>ArrangeCol(first, last, bang) range "{{{3
     "TODO: Why doesn't that work?
     " is this because of the range flag?
     " It's because of the way, Vim works with
@@ -435,7 +443,7 @@ fu! <SID>ArrangeCol(first, last, bang) range "{{{3
    call winrestview(cur)
 endfu
 
-fu! <SID>CalculateColumnWidth() "{{{3
+fu! <sid>CalculateColumnWidth() "{{{3
    " Internal function, not called from external,
    " does not work with fixed width columns
     let b:col_width=[]
@@ -450,7 +458,7 @@ fu! <SID>CalculateColumnWidth() "{{{3
     unlet! b:csv_list
 endfu
 
-fu! <SID>Columnize(field) "{{{3
+fu! <sid>Columnize(field) "{{{3
    " Internal function, not called from external,
    " does not work with fixed width columns
    if !exists("s:columnize_count")
@@ -499,7 +507,7 @@ fu! <SID>Columnize(field) "{{{3
    return printf("%*s", width ,  a:field)
 endfun
 
-fu! <SID>GetColPat(colnr, zs_flag) "{{{3
+fu! <sid>GetColPat(colnr, zs_flag) "{{{3
     " Return Pattern for given column
     if a:colnr > 1
 	if !exists("b:csv_fixed_width_cols")
@@ -524,7 +532,7 @@ fu! <SID>GetColPat(colnr, zs_flag) "{{{3
     return pat . (a:zs_flag ? '\zs' : '')
 endfu
 
-fu! <SID>SplitHeaderLine(lines, bang, hor) "{{{3
+fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
     if exists("b:csv_fixed_width_cols")
 	call <sid>Warn("Header does not work with fixed width column!")
 	return
@@ -591,7 +599,7 @@ fu! <SID>SplitHeaderLine(lines, bang, hor) "{{{3
     endif
 endfu
 
-fu! <SID>SplitHeaderToggle(hor) "{{{3
+fu! <sid>SplitHeaderToggle(hor) "{{{3
     if !exists("b:CSV_SplitWindow")
 	:call <sid>SplitHeaderLine(1,0,a:hor)
     else
@@ -600,7 +608,7 @@ fu! <SID>SplitHeaderToggle(hor) "{{{3
 endfu
 
 " TODO: from here on add logic for fixed-width csv files!
-fu! <SID>MoveCol(forward, line) "{{{3
+fu! <sid>MoveCol(forward, line) "{{{3
     " Move cursor position upwards/downwards left/right
     let colnr=<SID>WColumn()
     let maxcol=<SID>MaxColumns()
@@ -690,15 +698,15 @@ fu! <SID>MoveCol(forward, line) "{{{3
     endif
 endfun
 
-fu! <SID>SortComplete(A,L,P) "{{{3
+fu! <sid>SortComplete(A,L,P) "{{{3
     return join(range(1,<sid>MaxColumns()),"\n")
 endfun 
 
-fu! <SID>SortList(a1, a2) "{{{3
+fu! <sid>SortList(a1, a2) "{{{3
     return a:a1 == a:a2 ? 0 : a:a1 > a:a2 ? 1 : -1
 endfu
 
-fu! <SID>Sort(bang, line1, line2, colnr) range "{{{3
+fu! <sid>Sort(bang, line1, line2, colnr) range "{{{3
     let wsv=winsaveview()
     if a:colnr =~? 'n'
 	let numeric = 1
@@ -904,7 +912,131 @@ fu! <sid>PrepareDoForEachColumn(start, stop, bang) range"{{{3
     let g:csv_convert=input("Converted text, use %s for column input:\n", convert)
     call <sid>DoForEachColumn(a:start, a:stop, a:bang)
 endfun
-fu! <SID>CommandDefinitions() "{{{3
+fu! <sid>CSVMappings() "{{{3
+    noremap <silent> <buffer> W :<C-U>call <SID>MoveCol(1, line('.'))<CR>
+    noremap <silent> <buffer> E :<C-U>call <SID>MoveCol(-1, line('.'))<CR>
+    noremap <silent> <buffer> K :<C-U>call <SID>MoveCol(0, line('.')-v:count1)<CR>
+    noremap <silent> <buffer> J :<C-U>call <SID>MoveCol(0, line('.')+v:count1)<CR>
+    nnoremap <silent> <buffer> <CR> :<C-U>call <SID>PrepareFolding(1)<CR>
+    nnoremap <silent> <buffer> <BS> :<C-U>call <SID>PrepareFolding(0)<CR>
+    " Remap <CR>, J and K to a sane backup
+    noremap <silent> <buffer> <LocalLeader>J J
+    noremap <silent> <buffer> <LocalLeader>K K
+    nnoremap <silent> <buffer> <LocalLeader><CR> <CR>
+    nnoremap <silent> <buffer> <LocalLeader><BS> <BS>
+    " Map C-Right and C-Left as alternative to W and E
+    map <silent> <buffer> <C-Right> W
+    map <silent> <buffer> <C-Left>  E
+    map <silent> <buffer> H E
+    map <silent> <buffer> L W
+    map <silent> <buffer> <Up> K
+    map <silent> <buffer> <Down> J
+endfu
+
+fu! <sid>EscapeValue(val) "{{{3
+    return '\V' . escape(a:val, '\')
+endfu
+
+fu! <sid>FoldValue(lnum, val, col, maxcol) "{{{3
+    if (a:lnum==1 && !exists("g:csv_fold_firstline"))
+	" Don't fold away the header line
+	return 0
+    endif
+
+    "let pat=<sid>GetPat(a:col, a:maxcol, <sid>EscapeValue(a:val) . '\m')
+
+    " Match literally, don't use regular expressions for matching
+    if (getline(a:lnum) =~ a:val)
+	return 0
+    elseif (getline(a:lnum-1) =~ a:val || getline(a:lnum+1) =~ a:val)
+	return 1
+    else
+	return 2
+    endif
+endfu
+
+fu! <sid>PrepareFolding(add) "{{{3
+    if !has("folding")
+	return
+    endif
+
+    let col=<sid>WColumn()
+    let max = <sid>MaxColumns()
+    if !exists("s:csv_fold_patterns")
+	let s:csv_fold_patterns=[]
+    endif
+
+    if !exists("b:csv_fixed_width_cols")
+	let a = split(getline('.'), '^' . b:col . '\zs')[col-1]
+    else
+	let a = matchstr(getline('.'), <sid>GetColPat(col, 0))
+    endif
+
+    try
+	" strip leading whitespace
+	if (a !~ '\s\+'. b:delimiter . '$')
+	    let b = split(a, '^\s\+\ze\S')[0]
+	else
+	    let b = a
+	endif
+    catch /^Vim\%((\a\+)\)\=:E684/
+	" empty pattern - should match only empty columns
+	let b = a
+    endtry
+    
+    " strip trailing delimiter
+    try
+	let a = split(b, b:delimiter . '$')[0]
+    catch /^Vim\%((\a\+)\)\=:E684/
+	let a = b 
+    endtry
+
+    " Make a column pattern
+    let a= '\%(' .
+            \ (exists("b:csv_fixed_width") ? '.*' : '') .
+	    \ <sid>GetPat(col, max, <sid>EscapeValue(a) . '\m') .
+	    \ '\)'
+
+    if a:add
+	call add(s:csv_fold_patterns, a)
+    else
+	" remove last added item
+	if len(s:csv_fold_patterns) > 0
+	    call remove(s:csv_fold_patterns, -1)
+	    if len(s:csv_fold_patterns) == 0
+		call <sid>DisableFolding()
+		return
+	    endif
+	else
+	    " Disable folding, if no pattern available
+	    call <sid>DisableFolding()
+	    nohls
+	    return
+	endif
+    endif
+
+    " Put the pattern into the search register, so they will also
+    " be highlighted
+    let @/ = join(s:csv_fold_patterns, '\&')
+    let sid = <sid>GetSID()
+    exe 'setl foldexpr=' . sid . '_FoldValue(v:lnum,@/,' . col 
+		\ . ',' . max . ')'
+    setl fen fdm=expr fdl=0 fdc=2
+endfu
+
+fu! <sid>DisableFolding() "{{{3
+    setl nofen fdm=manual fdc=0 fdl=0
+endfu
+
+fu! <sid>GetSID() "{{{3
+    if v:version > 703 || v:version == 703 && has("patch032")
+	return '<SNR>' . maparg('W', "", "", 1).sid
+    else
+	return substitute(maparg('W'), '\(<SNR>\d\+\)_', '\1', '')
+    endif
+endfu
+
+fu! <sid>CommandDefinitions() "{{{3
     if !exists(":WhatColumn") "{{{4
 	command! -buffer -bang WhatColumn :echo <SID>WColumn(<bang>0)
     endif
@@ -963,24 +1095,6 @@ fu! <SID>CommandDefinitions() "{{{3
 	    \ :call <sid>PrepareDoForEachColumn(<line1>,<line2>, <bang>0)
     endif
 endfu
-
-fu! <SID>CSVMappings() "{{{3
-    noremap <silent> <buffer> W :<C-U>call <SID>MoveCol(1, line('.'))<CR>
-    noremap <silent> <buffer> E :<C-U>call <SID>MoveCol(-1, line('.'))<CR>
-    noremap <silent> <buffer> K :<C-U>call <SID>MoveCol(0, line('.')-v:count1)<CR>
-    noremap <silent> <buffer> J :<C-U>call <SID>MoveCol(0, line('.')+v:count1)<CR>
-    " Remap J and K to a sane backup
-    noremap <silent> <buffer> <LocalLeader>J J
-    noremap <silent> <buffer> <LocalLeader>K K
-    " Map C-Right and C-Left as alternative to W and E
-    map <silent> <buffer> <C-Right> W
-    map <silent> <buffer> <C-Left>  E
-    map <silent> <buffer> H E
-    map <silent> <buffer> L W
-    map <silent> <buffer> <Up> K
-    map <silent> <buffer> <Down> J
-endfu
-
 
 " end function definition "}}}2
 " Initialize Plugin "{{{2
