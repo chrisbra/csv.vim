@@ -965,8 +965,8 @@ fu! <sid>PrepareFolding(add) "{{{3
 	return
     endif
 
-    if !exists("s:csv_filter")
-	let s:csv_filter = {}
+    if !exists("b:csv_filter")
+	let b:csv_filter = {}
     endif
     if !exists("s:filter_count") || s:filter_count < 1
 	let s:filter_count = 0
@@ -974,10 +974,10 @@ fu! <sid>PrepareFolding(add) "{{{3
 
     if !a:add
 	" remove last added item from filter
-	if len(s:csv_filter) > 0
+	if len(b:csv_filter) > 0
 	    call <sid>RemoveLastItem(s:filter_count)
 	    let s:filter_count -= 1
-	    if len(s:csv_filter) == 0
+	    if len(b:csv_filter) == 0
 		call <sid>DisableFolding()
 		return
 	    endif
@@ -1018,14 +1018,14 @@ fu! <sid>PrepareFolding(add) "{{{3
 		\ '\)'
 
 	let s:filter_count += 1
-	let s:csv_filter[col] = { 'pat': b, 'id': s:filter_count, 
+	let b:csv_filter[col] = { 'pat': b, 'id': s:filter_count, 
 		    \ 'col': col, 'orig': a }
 
     endif
     " Put the pattern into the search register, so they will also
     " be highlighted
     let @/ = ''
-    for val in sort(values(s:csv_filter), '<sid>SortFilter')
+    for val in sort(values(b:csv_filter), '<sid>SortFilter')
 	let @/ .= val.pat . (val.id == s:filter_count ? '' : '\&')
     endfor
     setl foldexpr=s:FoldValue(v:lnum,@/)
@@ -1043,10 +1043,10 @@ fu! <sid>OutputFilters() "{{{3
     echo   printf("%s", title)
     echo   printf("%s", repeat("=",strdisplaywidth(title)))
     echohl "Normal"
-    if !exists("s:csv_filter") || len(s:csv_filter) == 0
+    if !exists("b:csv_filter") || len(b:csv_filter) == 0
 	echo printf("%s", "No active filter")
     else
-	let items = values(s:csv_filter)
+	let items = values(b:csv_filter)
 	call sort(items, "<sid>SortFilter")
 	for item in items
 	    if !s:csv_fold_headerline
@@ -1077,9 +1077,9 @@ fu! <sid>GetColumn(line, col) "{{{3
 endfu
 
 fu! <sid>RemoveLastItem(count) "{{{3
-    for [key,value] in items(s:csv_filter)
+    for [key,value] in items(b:csv_filter)
 	if value.id == a:count
-	    call remove(s:csv_filter, key)
+	    call remove(b:csv_filter, key)
 	endif
     endfor
 endfu
