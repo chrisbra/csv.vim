@@ -1,4 +1,5 @@
-" Filetype plugin for editing CSV files. "{{{1 " Author:  Christian Brabandt <cb@256bit.org>
+" Filetype plugin for editing CSV files. "{{{1
+" Author:  Christian Brabandt <cb@256bit.org>
 " Version: 0.18
 " Script:  http://www.vim.org/scripts/script.php?script_id=2830
 " License: VIM License
@@ -87,6 +88,7 @@ fu! <sid>Init() "{{{3
 	let b:col = g:csv_col
     endif
     " Check Header line
+    " Defines which line is considered to be a header line
     call <sid>CheckHeaderLine()
 
     " define buffer-local commands
@@ -130,7 +132,10 @@ fu! <sid>Init() "{{{3
 
     " undo when setting a new filetype
     let b:undo_ftplugin = "setlocal sol< tw< wrap<"
-	\ . "| unlet! b:delimiter b:col b:csv_fixed_width_cols"
+	\ . "| unlet! b:delimiter b:col b:csv_fixed_width_cols b:csv_filter"
+	\ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
+	\ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
+        \ . "| setl fen< fdm< fdl< fdc< fml<"
 
     " CSV local settings
     setl nostartofline tw=0 nowrap
