@@ -138,15 +138,16 @@ fu! <sid>Init() "{{{3
 	\ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
 
     for com in ["WhatColumn", "NrColumns", "HiColumn", "SearchInColumn", "DeleteColumn",
-	    \  ["ArrangeColumn", "InitCSV", "Header", "VHeader", "HeaderToggle", 
-	    \  ["VHeaderToggle", "Sort", "Column", "MoveColumn", "SumCol", "ConvertData",
-	    \  ["Filters"]
-	let b:undo_ftplugin .= "| sil! delc" com
+	    \  "ArrangeColumn", "InitCSV", "Header", "VHeader", "HeaderToggle", 
+	    \  "VHeaderToggle", "Sort", "Column", "MoveColumn", "SumCol", "ConvertData",
+	    \  "Filters", "Analyze"]
+	let b:undo_ftplugin .= "| sil! delc " . com
     endfor
     
 
     " CSV local settings
     setl nostartofline tw=0 nowrap
+
     if has("conceal")
 	setl cole=2 cocu=nc
 	let b:undo_ftplugin .= '|setl cole< cocu<'
@@ -1120,6 +1121,69 @@ fu! <sid>CheckHeaderLine() "{{{3
 	let s:csv_fold_headerline = b:csv_headerline
     endif
 endfu
+
+fu! <sid>AnalyzeColumn(...) "{{{3
+    let maxcolnr = <SID>MaxColumns()
+    if len(a:000) == 1
+	let colnr = a:1
+    else
+	let colnr = <sid>WColumn()
+    endif
+
+    if colnr > maxcolnr
+	call <SID>Warn("There exists no column " . colnr)
+	return 1
+    endif
+
+    " Initialize s:fold_headerline
+    call <sid>CheckHeaderLine()
+    let data = <sid>CopyCol('', colnr)[s:csv_fold_headerline : -1]
+    let qty = len(data)
+    let res = {}
+    for item in data
+	if !get(res, item)
+	    let res[item] = 0
+	endif
+	let res[item]+=1
+    endfor
+
+    let max_items = reverse(sort(values(res)))
+    if len(max_items) > 5
+	call remove(max_items, 5, -1)
+	call filter(res, 'v:val =~ ''^''.join(max_items, ''\|'').''$''')
+    endif
+
+    if has("float")
+	let  title="Nr\tCount\t % \tValue"
+    else
+	let  title="Nr\tCount\tValue"
+    endif
+    echohl "Title"
+    echo printf("%s", title)
+    echohl "Normal"
+    echo printf("%s", repeat('=', strdisplaywidth(title)))
+
+    let i=1
+    for val in max_items
+	for key in keys(res)
+	    if res[key] == val
+		let k = substitute(key, b:delimiter . '\?$', '', '')
+		if has("float")
+		    echo printf("%02d\t%02d\t%2.0f%%\t%.50s", i, res[key],
+			\ ((res[key] + 0.0)/qty)*100, k)
+		else
+		    echo printf("%02d\t%02d\t%.50s", i, res[key], k)
+		endif
+		call remove(res,key)
+		let i+=1
+	    else
+		continue
+	    endif
+	endfor
+    endfor
+    unlet max_items
+endfunc
+
 fu! <sid>CommandDefinitions() "{{{3
     if !exists(":WhatColumn") "{{{4
 	command! -buffer -bang WhatColumn :echo <SID>WColumn(<bang>0)
@@ -1182,6 +1246,9 @@ fu! <sid>CommandDefinitions() "{{{3
 
     if !exists(":Filters") "{{{4
 	command! -buffer -nargs=0 Filters :call <sid>OutputFilters()
+    endif
+    if !exists(":Analyze") "{{{4
+	command! -buffer -nargs=? Analyze :call <sid>AnalyzeColumn(<args>)
     endif
 endfu
 
