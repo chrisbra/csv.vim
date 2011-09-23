@@ -26,6 +26,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.13 Normal mode commands...................|csv-mapping|
     3.14 Convert CSV file.......................|csv-convert|
     3.15 Dynamic filters........................|csv-filter|
+    3.16 Analyze a column.......................|csv-analyze|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -383,7 +384,7 @@ call the >
 At this point, Vim will ask you for input. First, you need to specify, what
 needs to be done before processing the data:
 
-Pre convert text: <html><body><table>`
+Pre convert text: <html><body><table> `
 
 This would specify to put the HTML Header before the actual data can be
 processed. If the variable g:csv_pre_convert is already defined, Vim will
@@ -481,7 +482,7 @@ a small summary, of what filters are active and looks like this:
 
 Nr      Col           Name              Value `
 ============================================= `
-01      07          Price;              23.10   `
+01      07          Price;              23.10 `
 
 This means, there is only one filter active. The current active filter is on
 column 7 (column name is Price) and the active value for the filter is 23.10.
@@ -492,6 +493,28 @@ Note, that depending on your csv file and the number of filters you used,
 applying the filter might actually slow down vim, because a complex regular
 expression is generated that is applied by the fold expression. Look into the
 @/ (|quote_/|) register to see its value.
+
+                                                                *Analyze_CSV*
+3.16 Analyze a Column       					 *csv-analyze*
+---------------------
+
+If you'd like to know, how the values are distributed among a certain column,
+you can use the :Analyze command. So >
+
+    :Analyze 3
+
+outputs the the distribution of the top 5 values in column 3. This looks like
+this: 
+
+Nr      Count    %      Value `
+============================= `
+01      20      50%     10    `
+02      10      25%     2     `
+03      10      25%     5     `
+
+This tells you, that the the value '10' in column 3 occurs 50% of the time
+(exactly 20 times) and the other 2 values '2' and '5' occur only 10 times, so
+25% of the time.
 
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
@@ -904,6 +927,7 @@ plugin call it for a column like this:
 - documentation updates
 - Allow to dynamically add Filters, see |csv-filter|
 - Also display what filters are active, see |:Filter|
+- Analyze a column for the distribution of a value |csv-analyze|
 
 0.18 Aug 30, 2011 {{{1
 
