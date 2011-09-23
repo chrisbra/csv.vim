@@ -132,10 +132,18 @@ fu! <sid>Init() "{{{3
 
     " undo when setting a new filetype
     let b:undo_ftplugin = "setlocal sol< tw< wrap<"
+        \ . "| setl fen< fdm< fdl< fdc< fml<"
 	\ . "| unlet! b:delimiter b:col b:csv_fixed_width_cols b:csv_filter"
 	\ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
 	\ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
-        \ . "| setl fen< fdm< fdl< fdc< fml<"
+
+    for com in ["WhatColumn", "NrColumns", "HiColumn", "SearchInColumn", "DeleteColumn",
+	    \  ["ArrangeColumn", "InitCSV", "Header", "VHeader", "HeaderToggle", 
+	    \  ["VHeaderToggle", "Sort", "Column", "MoveColumn", "SumCol", "ConvertData",
+	    \  ["Filters"]
+	let b:undo_ftplugin .= "| sil! delc" com
+    endfor
+    
 
     " CSV local settings
     setl nostartofline tw=0 nowrap
