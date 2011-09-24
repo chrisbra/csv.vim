@@ -137,10 +137,11 @@ fu! <sid>Init() "{{{3
 	\ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
 	\ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
 
-    for com in ["WhatColumn", "NrColumns", "HiColumn", "SearchInColumn", "DeleteColumn",
-	    \  "ArrangeColumn", "InitCSV", "Header", "VHeader", "HeaderToggle", 
-	    \  "VHeaderToggle", "Sort", "Column", "MoveColumn", "SumCol", "ConvertData",
-	    \  "Filters", "Analyze"]
+    for com in ["WhatColumn", "NrColumns", "HiColumn", "SearchInColumn",
+	    \ "DeleteColumn",  "ArrangeColumn", "InitCSV", "Header",
+	    \ "VHeader", "HeaderToggle", "VHeaderToggle", "Sort",
+	    \ "Column", "MoveColumn", "SumCol", "ConvertData",
+	    \  "Filters", "Analyze", "UnArrangeColumn" ]
 	let b:undo_ftplugin .= "| sil! delc " . com
     endfor
     
@@ -457,6 +458,35 @@ fu! <sid>ArrangeCol(first, last, bang) range "{{{3
    unlet! s:columnize_count s:max_cols s:prev_line
    setl ro
    call winrestview(cur)
+endfu
+
+fu! <sid>PrepUnArrangeCol(first, last) "{{{3
+    " Because of the way, Vim works with
+    " a:firstline and a:lastline parameter, 
+    " explicitly give the range as argument to the function
+    if exists("b:csv_fixed_width_cols")
+	" Nothing to do
+	call <sid>Warn("UnArrangeColumn does not work with fixed width column!")
+	return
+    endif
+    let cur=winsaveview()
+
+   if &ro
+       " Just in case, to prevent the Warning 
+       " Warning: W10: Changing read-only file
+       setl noro
+   endif
+   exe a:first . ',' . a:last .'s/' . (b:col) .
+  \ '/\=<SID>UnArrangeCol(submatch(0))/' . (&gd ? '' : 'g')
+   " Clean up variables, that were only needed for <sid>Columnize() function
+   call winrestview(cur)
+endfu
+
+fu! <sid>UnArrangeCol(match) "{{{3
+    " Strip leading white space, also trims empty records:
+    return substitute(a:match, '^\s\+', '', '')
+    " only strip leading white space, if a non-white space follows:
+    "return substitute(a:match, '^\s\+\ze\S', '', '')
 endfu
 
 fu! <sid>CalculateColumnWidth() "{{{3
@@ -1203,7 +1233,12 @@ fu! <sid>CommandDefinitions() "{{{3
     endif
     if !exists(":ArrangeColumn") "{{{4
 	command! -buffer -range -bang ArrangeColumn
-		\ :call <SID>ArrangeCol(<line1>,<line2>, <bang>0)
+		\ :call <sid>ArrangeCol(<line1>,<line2>, <bang>0)
+    endif
+
+    if !exists(":UnArrangeColumn") "{{{4
+	command! -buffer -range UnArrangeColumn
+	        \ :call <sid>PrepUnArrangeCol(<line1>, <line2>)
     endif
     if !exists(":InitCSV") "{{{4
 	command! -buffer InitCSV :call <SID>Init()
