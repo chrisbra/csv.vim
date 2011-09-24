@@ -16,17 +16,18 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.3 SearchInColumn..........................|SearchInColumn_CSV|
     3.4 HiColumn................................|HiColumn_CSV|
     3.5 ArrangeColumn...........................|ArrangeColumn_CSV|
-    3.6 DeleteColumn............................|DeleteColumn_CSV|
-    3.7 InitCSV.................................|InitCSV|
-    3.8 Header..................................|Header_CSV|
-    3.9 Sort....................................|Sort_CSV|
-    3.10 CopyColumn.............................|Copy_CSV|
-    3.11 MoveColumn.............................|MoveCol_CSV|
-    3.12 Sum of a column........................|SumCol_CSV|
-    3.13 Normal mode commands...................|csv-mapping|
-    3.14 Convert CSV file.......................|csv-convert|
-    3.15 Dynamic filters........................|csv-filter|
-    3.16 Analyze a column.......................|csv-analyze|
+    3.6 UnArrangeColumn.........................|UnArrangeColumn_CSV|
+    3.7 DeleteColumn............................|DeleteColumn_CSV|
+    3.8 InitCSV.................................|InitCSV|
+    3.9 Header..................................|Header_CSV|
+    3.10 Sort...................................|Sort_CSV|
+    3.11 CopyColumn.............................|Copy_CSV|
+    3.12 MoveColumn.............................|MoveCol_CSV|
+    3.13 Sum of a column........................|SumCol_CSV|
+    3.14 Normal mode commands...................|csv-mapping|
+    3.15 Convert CSV file.......................|csv-convert|
+    3.16 Dynamic filters........................|csv-filter|
+    3.17 Analyze a column.......................|csv-analyze|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -192,7 +193,19 @@ from accidently changing your csv file, the buffer will be set 'readonly'
 afterwards. Note: this command does not work for fixed width columns
 |csv-fixedwidth|
 
-3.6 DeleteColumn                                           *DeleteColumn_CSV*
+3.6 UnArrangeColumn                                    *UnArrangeColumn_CSV*
+-----------------
+
+If you would like to undo a previous :ArrangeColumn command, you can use this
+command: >
+
+    :UnArrangeColumn
+
+Beware, that is no exact undo of the :ArrangeColumn command, since it strips
+away all leading blanks for each column. So if previously a column contained
+only some blanks, this command will strip all blanks.
+
+3.7 DeleteColumn                                           *DeleteColumn_CSV*
 ----------------
 
 The command :DeleteColumn can be used to delete a specific column. >
@@ -204,13 +217,13 @@ will delete column 2.
 If you don't specify a column number, it will delete the column on which the
 cursor is.
 
-3.7 InitCSV							*InitCSV*
+3.8 InitCSV							*InitCSV*
 -----------
 
 Reinitialize the Plugin. Use this, if you have changed the configuration
 of the plugin (see |csv-configuration| ).
 
-3.8 Header lines						 *Header_CSV*
+3.9 Header lines						 *Header_CSV*
 ----------------
 
 This command splits the csv-buffer and adds a window, that holds a small
@@ -257,13 +270,13 @@ Use the :HeaderToggle and :VHeaderToggle command to toggle displaying the
 horizontal or vertical header line.
 
 
-3.9 Sort							*Sort_CSV*
+3.10 Sort							*Sort_CSV*
 --------
 
 This command can be used to sort the csv file on a certain column. If no range
 is given, is sorts the whole file. Specify the column number to sort on as
-argument. Use the '!' attribute to reverse the sort order.
-For example, the following command sorts line 1 til 10 on the 3 column >
+argument. Use the '!' attribute to reverse the sort order. For example, the
+following command sorts line 1 til 10 on the 3 column >
 
     :1,10Sort 3
 
@@ -277,7 +290,7 @@ Instead of a column, you can give the flag 'n' to have it sort numerically.
 When no column number is given, it will sort by the column, on which the
 cursor is currently.
 
-3.10 Copy Column        					 *Copy_CSV*
+3.11 Copy Column        					 *Copy_CSV*
 ----------------
 
 If you need to copy a specific column, you can use the command :Column >
@@ -289,10 +302,11 @@ current cursor position is used. If no register is given, the default register
 |quotequote| is used. 
 
 
-3.11 Move A Column        					 *MoveCol_CSV*
+3.12 Move A Column        					 *MoveCol_CSV*
 ------------------
 
-You can move one column behind another column by using the :MoveColumn command >
+You can move one column behind another column by using the :MoveColumn
+command >
 
     :[range]MoveColumn [source] [dest]
 
@@ -308,7 +322,7 @@ this would move column 1 behind the last column, while keeping the header line
 as is.
 
 
-3.12 Sum of a Column        					 *SumCol_CSV*
+3.13 Sum of a Column        					 *SumCol_CSV*
 --------------------
 
 You can let Vim output the sum of a column using the :SumCol command >
@@ -321,7 +335,7 @@ given, this calculate the sum for the column the cursor is on. See also
 |csv-aggregate-functions|
 
 
-3.13 Normal mode commands					 *csv-mapping*
+3.14 Normal mode commands					 *csv-mapping*
 -------------------------
 
 The csv filetype plugin redefines the following keys as:
@@ -349,7 +363,7 @@ the word under the cursor and \J would join this line with the previous line.
 
 
                                                             *ConvertData_CSV*
-3.14 Converting a CSV File					 *csv-convert*
+3.15 Converting a CSV File					 *csv-convert*
 --------------------------
 
 You can convert your CSV file to a different format with the command >
@@ -452,7 +466,7 @@ doesn't include the column delimiters.
 
 Now you can copy it into your database, or further manipulate it.
 
-3.15 Dynamic filters      					 *csv-filter*
+3.16 Dynamic filters      					 *csv-filter*
 --------------------      
 
 If you are one a value and only want to see lines, that have the same value in
@@ -495,7 +509,7 @@ expression is generated that is applied by the fold expression. Look into the
 @/ (|quote_/|) register to see its value.
 
                                                                 *Analyze_CSV*
-3.16 Analyze a Column       					 *csv-analyze*
+3.17 Analyze a Column       					 *csv-analyze*
 ---------------------
 
 If you'd like to know, how the values are distributed among a certain column,
