@@ -942,6 +942,8 @@ plugin call it for a column like this:
 - Allow to dynamically add Filters, see |csv-filter|
 - Also display what filters are active, see |:Filter|
 - Analyze a column for the distribution of a value |csv-analyze|
+- Implement UnArrangeColumn command |UnArrangeColumn_CSV|
+  (suggested by Daniel Karl in https://github.com/chrisbra/csv.vim/issues/7)
 
 0.18 Aug 30, 2011 {{{1
 
