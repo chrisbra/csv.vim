@@ -931,7 +931,7 @@ plugin call it for a column like this:
 ==============================================================================
 6. CSV Changelog					       *csv-changelog*
 
-0.19 (unreleased) {{{1
+0.19 Sep 26, 2011 {{{1
 
 - Make |:ArrangeColumn| more robust
 - Link CSVDelimiter to the Conceal highlighting group for Vim's that have
