@@ -1,0 +1,2 @@
+- add vertical folding (concealing columns)
+- make plugin autoloadable
