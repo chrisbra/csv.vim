@@ -1196,8 +1196,12 @@ fu! <sid>AnalyzeColumn(...) "{{{3
     let i=1
     for val in max_items
 	for key in keys(res)
-	    if res[key] == val
-		let k = substitute(key, b:delimiter . '\?$', '', '')
+	    if res[key] == val && i <= len(max_items)
+		if !empty(b:delimiter)
+		    let k = substitute(key, b:delimiter . '\?$', '', '')
+		else
+		    let k = key
+		endif
 		if has("float")
 		    echo printf("%02d\t%02d\t%2.0f%%\t%.50s", i, res[key],
 			\ ((res[key] + 0.0)/qty)*100, k)
