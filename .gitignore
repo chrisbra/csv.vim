@@ -6,5 +6,6 @@ vim_passfile
 *.csv
 # ignore vimballs
 *.vba
+*.vmb
 # ignore *.orig files
 *.orig
