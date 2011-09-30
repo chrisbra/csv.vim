@@ -157,9 +157,6 @@ endfu
 
 fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
     if a:colnr > 1 && a:colnr < a:maxcolnr
-	"let @/=<SID>GetColPat(colnr-1,0) . '*\zs' . pat . '\ze\([^' . b:delimiter . ']*' . b:delimiter .'\)\?' . <SID>GetColPat(maxcolnr-colnr-1,0)
-	"let @/= '^' . <SID>GetColPat(colnr-1,0) . '[^' . b:delimiter . ']*\zs' . pat . '\ze[^' . b:delimiter . ']*'.b:delimiter . <SID>GetColPat(maxcolnr-colnr,0) . '$'
-	"let @/= '^' . <SID>GetColPat(colnr-1,0) . b:col1 . '\?\zs' . pat . '\ze' . b:col1 .'\?' . <SID>GetColPat(maxcolnr-colnr,0) " . '$'
 	if !exists("b:csv_fixed_width_cols")
 	    return '^' . <SID>GetColPat(a:colnr-1,0) . '\%([^' . 
 		    \ b:delimiter . ']*\)\?\zs' . a:pat . '\ze' .
@@ -181,8 +178,6 @@ fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
 		    \ 'c\zs' . a:pat . '\ze'
 	endif
     else " colnr = 1
-	"let @/= '^\zs' . pat . '\ze' . substitute((<SID>GetColPat(maxcolnr - colnr)), '\\zs', '', 'g')
-	"let @/= '^\zs' . b:col1 . '\?' . pat . '\ze' . b:col1 . '\?' .  <SID>GetColPat(maxcolnr,0) . '$'
 	if !exists("b:csv_fixed_width_cols")
 	    return '^' . '\%([^' . b:delimiter . ']*\)\?\zs' . a:pat .
 		\ '\ze\%([^' . b:delimiter . ']*\)\?' . b:delimiter .
