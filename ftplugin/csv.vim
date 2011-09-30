@@ -1218,79 +1218,60 @@ fu! <sid>AnalyzeColumn(...) "{{{3
     unlet max_items
 endfunc
 
-fu! <sid>CommandDefinitions() "{{{3
-    if !exists(":WhatColumn") "{{{4
-	command! -buffer -bang WhatColumn :echo <SID>WColumn(<bang>0)
-    endif
-    if !exists(":NrColumns") "{{{4
-	command! -buffer NrColumns :echo <SID>MaxColumns()
-    endif
-    if !exists(":HiColumn") "{{{4
-	command! -buffer -bang -nargs=? HiColumn :call <SID>HiCol(<q-args>.<q-bang>)
-    endif
-    if !exists(":SearchInColumn") "{{{4
-	command! -buffer -nargs=* SearchInColumn :call <SID>SearchColumn(<q-args>)
-    endif
-    if !exists(":DeleteColumn") "{{{4
-	command! -buffer -nargs=? -complete=custom,
-	    \<SID>SortComplete DeleteColumn :call <SID>DelColumn(<q-args>)
-    endif
-    if !exists(":ArrangeColumn") "{{{4
-	command! -buffer -range -bang ArrangeColumn
-		\ :call <sid>ArrangeCol(<line1>,<line2>, <bang>0)
-    endif
 
-    if !exists(":UnArrangeColumn") "{{{4
-	command! -buffer -range UnArrangeColumn
-	        \ :call <sid>PrepUnArrangeCol(<line1>, <line2>)
-    endif
-    if !exists(":InitCSV") "{{{4
-	command! -buffer InitCSV :call <SID>Init()
-    endif
-    if !exists(":Header") "{{{4
-	command! -buffer -bang -nargs=? Header :call <SID>SplitHeaderLine(<q-args>,<bang>0,1)
-    endif
-    if !exists(":VHeader") "{{{4
-	command! -buffer -bang -nargs=? VHeader :call <SID>SplitHeaderLine(<q-args>,<bang>0,0)
-    endif
-    if !exists(":HeaderToggle") "{{{4
-	command! -buffer HeaderToggle :call <SID>SplitHeaderToggle(1)
-    endif
-    if !exists(":VHeaderToggle") "{{{4
-	command! -buffer VHeaderToggle :call <SID>SplitHeaderToggle(0)
-    endif
-    if !exists(":Sort") "{{{4
-	command! -buffer -nargs=* -bang -range=% -complete=custom,
-	    \<SID>SortComplete Sort :call
-	    \<SID>Sort(<bang>0,<line1>,<line2>,<q-args>)
-    endif
-    if !exists(":Column") "{{{4
-	command! -buffer -count -register Column :call <SID>CopyCol(
-		    \ empty(<q-reg>) ? '"' : <q-reg>,<q-count>)
-    endif
-    if !exists(":MoveColumn") "{{{4
-	command! -buffer -range=% -nargs=* -complete=custom,<SID>SortComplete
-		    \ MoveColumn :call <SID>MoveColumn(<line1>,<line2>,<f-args>)
-    endif
-    if !exists(":SumCol") "{{{4
-	command! -buffer -nargs=? -range=% -complete=custom,<SID>SortComplete
-		    \ SumCol :echo csv#EvalColumn(<q-args>, "<sid>SumColumn",
-		    \<line1>,<line2>)
-    endif
-    if !exists(":ConvertData") "{{{4
-	command! -buffer -bang -nargs=? -range=%
-	    \ -complete=custom,<SID>SortComplete ConvertData
-	    \ :call <sid>PrepareDoForEachColumn(<line1>,<line2>, <bang>0)
-    endif
-
-    if !exists(":Filters") "{{{4
-	command! -buffer -nargs=0 Filters :call <sid>OutputFilters()
-    endif
-    if !exists(":Analyze") "{{{4
-	command! -buffer -nargs=? Analyze :call <sid>AnalyzeColumn(<args>)
+fu! <sid>LocalCommand(name, definition, args) "{{{3
+    if !exists(':'.a:name)
+	exe "com! -buffer " a:args a:name a:definition
     endif
 endfu
 
+fu! <sid>CommandDefinitions() "{{{3
+    call <sid>LocalCommand("WhatColumn", ':echo <sid>WColumn(<bang>0)',
+	\ '-bang')
+    call <sid>LocalCommand("NrColumns", ':echo <sid>MaxColumns()', '')
+    call <sid>LocalCommand("HiColumn", ':call <sid>HiCol(<q-args>,<q-bang>)',
+	\ '-bang -nargs=?')
+    call <sid>LocalCommand("SearchInColumn",
+	\ ':call <sid>SearchColumn(<q-args>)', '-nargs=*')
+    call <sid>LocalCommand("DeleteColumn", ':call <sid>DelColumn(<q-args>)',
+	\ '-nargs=? -complete=custom,<sid>SortComplete')
+    call <sid>LocalCommand("ArrangeColumn",
+	\ ':call <sid>ArrangeCol(<line1>, <line2>, <bang>0)',
+	\ '-range')
+    call <sid>LocalCommand("UnArrangeColumn",
+	\':call <sid>PrepUnArrangeCol(<line1>, <line2>)',
+	\ '-range')
+    call <sid>LocalCommand("InitCSV", ':call <sid>Init()', '')
+    call <sid>LocalCommand('Header',
+	\ ':call <sid>SplitHeaderLine(<q-args>,<bang>0,1)',
+	\ '-nargs=? -bang')
+    call <sid>LocalCommand('VHeader',
+	\ ':call <sid>SplitHeaderLine(<q-args>,<bang>0,0)',
+	\ '-nargs=? -bang')
+    call <sid>LocalCommand("HeaderToggle",
+	\ ':call <sid>SplitHeaderToggle(1)', '')
+    call <sid>LocalCommand("VHeaderToggle",
+	\ ':call <sid>SplitHeaderToggle(0)', '')
+    call <sid>LocalCommand("Sort",
+	\ ':call <sid>Sort(<bang>0, <line1>,<line2>,<q-args>)',
+	\ '-nargs=* -bang -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCommand("Column",
+	\ ':call <sid>CopyCol(empty(<q-reg>)?''"'':<q-reg>,<q-count>)',
+	\ '-count -register')
+    call <sid>LocalCommand("MoveColumn",
+	\ ':call <sid>MoveColumn(<line1>,<line2>,<f-args>)',
+	\ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
+    call <sid>LocalCommand("SumCol",
+	\ ':echo csv#EvalColumn(<q-args>, "<sid>SumColumn", <line1>,<line2>)',
+	\ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCommand("ConvertData",
+	\ ':call <sid>PrepareDoForEachColumn(<line1>,<line2>,<bang>0)',
+	\ '-bang -nargs=? -range=%')
+    call <sid>LocalCommand("Filters", ':call <sid>OutputFilters()',
+	\ '-nargs=0')
+    call <sid>LocalCommand("Analyze", ':call <sid>AnalyzeColumn(<args>)',
+	\ '-nargs=?')
+endfu
 " end function definition "}}}2
 " Initialize Plugin "{{{2
 call <SID>Init()

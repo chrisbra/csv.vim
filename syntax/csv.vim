@@ -60,8 +60,10 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     endtry
 endfu
 
+" Syntax rules {{{2
 fu! <sid>DoHighlight() "{{{3
-    if has("conceal") && !exists("g:csv_no_conceal") && !exists("b:csv_fixed_width_cols")
+    if has("conceal") && !exists("g:csv_no_conceal") &&
+		\ !exists("b:csv_fixed_width_cols")
 	" old val
 	    "\ '\%(.\)\@=/ms=e,me=e contained conceal cchar=' .
 	    " Has a problem with the last line!
@@ -112,8 +114,6 @@ fu! <sid>DoHighlight() "{{{3
     endif
 endfun
 
-
-" Syntax rules {{{2
 fu! <sid>DoSyntaxDefinitions() "{{{3
     syn spell toplevel
 
@@ -122,21 +122,30 @@ fu! <sid>DoSyntaxDefinitions() "{{{3
 
     if &t_Co < 88
 	if !exists("b:csv_fixed_width_cols")
-	    hi default CSVColumnHeaderOdd ctermfg=DarkRed ctermbg=15 guibg=grey80 guifg=black term=underline cterm=standout,bold gui=bold,underline 
+	    hi default CSVColumnHeaderOdd ctermfg=DarkRed ctermbg=15
+		\ guibg=grey80 guifg=black term=underline cterm=standout,bold
+		\ gui=bold,underline 
 	endif
-	hi default CSVColumnOdd	  ctermfg=DarkRed ctermbg=15 guibg=grey80 guifg=black term=underline cterm=bold gui=underline
+	hi default CSVColumnOdd	ctermfg=DarkRed ctermbg=15 guibg=grey80
+		\ guifg=black term=underline cterm=bold gui=underline
     else
 	if !exists("b:csv_fixed_width_cols")
-	    hi default CSVColumnHeaderOdd ctermfg=darkblue ctermbg=white guibg=grey80 guifg=black cterm=standout,underline gui=bold,underline
+	    hi default CSVColumnHeaderOdd ctermfg=darkblue ctermbg=white
+		\ guibg=grey80 guifg=black cterm=standout,underline
+		\ gui=bold,underline
 	endif
-	hi default CSVColumnOdd       ctermfg=darkblue ctermbg=white guibg=grey80 guifg=black cterm=reverse,underline gui=underline
+	hi default CSVColumnOdd ctermfg=darkblue ctermbg=white guibg=grey80
+		\ guifg=black cterm=reverse,underline gui=underline
     endif
 	
     " ctermbg=8 should be safe, even in 8 color terms
     if !exists("b:csv_fixed_width_cols")
-	hi default CSVColumnHeaderEven    ctermfg=white ctermbg=darkgrey guibg=grey50 guifg=black term=bold cterm=standout,underline gui=bold,underline 
+	hi default CSVColumnHeaderEven ctermfg=white ctermbg=darkgrey
+		\ guibg=grey50 guifg=black term=bold cterm=standout,underline
+		\ gui=bold,underline 
     endif
-    hi default CSVColumnEven	  ctermfg=white ctermbg=darkgrey guibg=grey50 guifg=black term=bold cterm=underline gui=bold,underline 
+    hi default CSVColumnEven ctermfg=white ctermbg=darkgrey guibg=grey50
+		\ guifg=black term=bold cterm=underline gui=bold,underline 
 endfun
 
 " Main: {{{2 
