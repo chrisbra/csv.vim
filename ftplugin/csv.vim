@@ -268,12 +268,12 @@ fu! <sid>DelColumn(colnr) "{{{3
     call setpos('.', _p)
 endfu
 
-fu! <sid>HiCol(colnr) "{{{3
-    if a:colnr > <SID>MaxColumns() && a:colnr[-1:] != '!'
+fu! <sid>HiCol(colnr, bang) "{{{3
+    if a:colnr > <SID>MaxColumns() && !a:bang
 	call <SID>Warn("There exists no column " . a:colnr)
 	return
     endif
-    if a:colnr[-1:] != '!'
+    if !a:bang
 	if empty(a:colnr)
 	   let colnr=<SID>WColumn()
 	else
@@ -300,12 +300,12 @@ fu! <sid>HiCol(colnr) "{{{3
 	let matchlist=getmatches()
 	call filter(matchlist, 'v:val["group"] !~ s:hiGroup')
 	call setmatches(matchlist)
-	if a:colnr[-1:] == '!'
+	if a:bang
 	    return
 	endif
 	let s:matchid=matchadd(s:hiGroup, pat, 0)
     else
-	if a:colnr[-1:] != '!'
+	if !a:bang
 	    exe ":2match " . s:hiGroup . ' /' . pat . '/'
 	endif
     endif
