@@ -1198,6 +1198,14 @@ fu! <sid>AnalyzeColumn(...) "{{{3
 endfunc
 
 
+fu! <sid>Vertfold(col) "{{{3
+    let pat=<sid>GetPat(a:col, <sid>MaxColumns()-1, '.*')
+    let pat=substitute(pat, '\\zs\(\.\*\)\@=', '', '')
+    if !empty(pat)
+        exe "syn match CSVFold /" . pat . "/ conceal cchar=+"
+    endif
+endfu
+    
 fu! <sid>LocalCommand(name, definition, args) "{{{3
     if !exists(':'.a:name)
         exe "com! -buffer " a:args a:name a:definition
@@ -1250,6 +1258,8 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-nargs=0')
     call <sid>LocalCommand("Analyze", ':call <sid>AnalyzeColumn(<args>)',
         \ '-nargs=?')
+    call <sid>LocalCommand("VertFold", ':call <sid>Vertfold(<args>)',
+        \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
 endfu
 " end function definition "}}}2
 " Initialize Plugin "{{{2
