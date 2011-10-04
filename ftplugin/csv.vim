@@ -214,12 +214,6 @@ fu! <sid>SearchColumn(arg) "{{{3
         call <SID>Warn("There exists no column " . colnr)
         return 1
     endif
-    "let @/=<SID>GetColPat(colnr) . '*\zs' . pat . '\ze\([^' . b:delimiter . ']*' . b:delimiter .'\)\?' . <SID>GetColPat(maxcolnr-colnr-1)
-    " GetColPat(nr) returns a pattern containing '\zs' if nr > 1,
-    " therefore, we need to clear that flag again ;(
-    " TODO:
-    " Is there a better way, than running a substitute command on '\zs', may be using a flag
-    " with GetColPat(zsflag, colnr)?
     let @/ = <sid>GetPat(colnr, maxcolnr, pat)
     try
         norm! n
@@ -504,7 +498,7 @@ fu! <sid>Columnize(field) "{{{3
         let s:max_cols = len(b:col_width)
     endif
 
-    if exists("s:prev_line") && if s:prev_line != line('.')
+    if exists("s:prev_line") && s:prev_line != line('.')
         let s:columnize_count = 0
     endif
 
@@ -518,7 +512,8 @@ fu! <sid>Columnize(field) "{{{3
 
     let s:columnize_count += 1
     if !exists("g:csv_no_multibyte") &&
-        \ match(a:field, '[^ -~]') != -1   " match characters outside the ascii range
+        \ match(a:field, '[^ -~]') != -1
+        " match characters outside the ascii range
         let a = split(a:field, '\zs')
         let add = eval(join(map(a, 'len(v:val)'), '+'))
         let add -= len(a)
