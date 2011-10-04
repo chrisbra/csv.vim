@@ -54,7 +54,7 @@ fu! <sid>Init() "{{{3
     let s:del='\%(' . b:delimiter . '\|$\)'
     " Pattern for matching a single column
     if !exists("g:csv_strict_columns") && !exists("g:csv_col")
-		\ && !exists("b:csv_fixed_width")
+        \ && !exists("b:csv_fixed_width")
         " - Allow double quotes as escaped quotes only insides double quotes
         " - Allow linebreaks only, if g:csv_nl isn't set (this is
         "   only allowed in double quoted strings see RFC4180), though this
@@ -65,8 +65,7 @@ fu! <sid>Init() "{{{3
         " - Should work with most ugly solutions that are available
         let b:col='\%(\%(\%(' . (b:delimiter !~ '\s' ? '\s*' : '') .
                 \ '"\%(' . (exists("g:csv_nl") ? '\_' : '' ) .
-                \ '[^"]\|""\)*"\)' . s:del .
-                \	'\)\|\%(' .
+                \ '[^"]\|""\)*"\)' . s:del . '\)\|\%(' .
                 \  '[^' .  b:delimiter . ']*' . s:del . '\)\)'
     elseif !exists("g:csv_col") && exists("g:csv_strict_columns")
         " strict columns
@@ -98,7 +97,7 @@ fu! <sid>Init() "{{{3
 
     " Highlight column, on which the cursor is?
     if exists("g:csv_highlight_column") && g:csv_highlight_column =~? 'y' &&
-		\ !exists("#CSV_HI#CursorMoved")
+        \ !exists("#CSV_HI#CursorMoved")
         aug CSV_HI
             au!
             au CursorMoved <buffer> HiColumn
@@ -133,15 +132,15 @@ fu! <sid>Init() "{{{3
     " undo when setting a new filetype
     let b:undo_ftplugin = "setlocal sol< tw< wrap<"
         \ . "| setl fen< fdm< fdl< fdc< fml<"
-	\ . "| unlet! b:delimiter b:col b:csv_fixed_width_cols b:csv_filter"
-	\ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
-	\ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
+        \ . "| unlet! b:delimiter b:col b:csv_fixed_width_cols b:csv_filter"
+        \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
+        \ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
 
     for com in ["WhatColumn", "NrColumns", "HiColumn", "SearchInColumn",
-	    \ "DeleteColumn",  "ArrangeColumn", "InitCSV", "Header",
-	    \ "VHeader", "HeaderToggle", "VHeaderToggle", "Sort",
-	    \ "Column", "MoveColumn", "SumCol", "ConvertData",
-	    \  "Filters", "Analyze", "UnArrangeColumn" ]
+            \ "DeleteColumn",  "ArrangeColumn", "InitCSV", "Header",
+            \ "VHeader", "HeaderToggle", "VHeaderToggle", "Sort",
+            \ "Column", "MoveColumn", "SumCol", "ConvertData",
+            \  "Filters", "Analyze", "UnArrangeColumn" ]
         let b:undo_ftplugin .= "| sil! delc " . com
     endfor
 
@@ -756,7 +755,7 @@ fu! <sid>Sort(bang, line1, line2, colnr) range "{{{3
         let pat= '^' . <SID>GetColPat(col,0)
     endif
     exe a:line1 ',' a:line2 . "sort" . (a:bang ? '!' : '') .
-		\' r ' . (numeric ? 'n' : '') . ' /' . pat . '/'
+        \' r ' . (numeric ? 'n' : '') . ' /' . pat . '/'
     call winrestview(wsv)
 endfun
 
@@ -1212,50 +1211,50 @@ endfu
 
 fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCommand("WhatColumn", ':echo <sid>WColumn(<bang>0)',
-	\ '-bang')
+        \ '-bang')
     call <sid>LocalCommand("NrColumns", ':echo <sid>MaxColumns()', '')
     call <sid>LocalCommand("HiColumn", ':call <sid>HiCol(<q-args>,<q-bang>)',
-	\ '-bang -nargs=?')
+        \ '-bang -nargs=?')
     call <sid>LocalCommand("SearchInColumn",
-	\ ':call <sid>SearchColumn(<q-args>)', '-nargs=*')
+        \ ':call <sid>SearchColumn(<q-args>)', '-nargs=*')
     call <sid>LocalCommand("DeleteColumn", ':call <sid>DelColumn(<q-args>)',
-	\ '-nargs=? -complete=custom,<sid>SortComplete')
+        \ '-nargs=? -complete=custom,<sid>SortComplete')
     call <sid>LocalCommand("ArrangeColumn",
-	\ ':call <sid>ArrangeCol(<line1>, <line2>, <bang>0)',
-	\ '-range')
+        \ ':call <sid>ArrangeCol(<line1>, <line2>, <bang>0)',
+        \ '-range')
     call <sid>LocalCommand("UnArrangeColumn",
-	\':call <sid>PrepUnArrangeCol(<line1>, <line2>)',
-	\ '-range')
+        \':call <sid>PrepUnArrangeCol(<line1>, <line2>)',
+        \ '-range')
     call <sid>LocalCommand("InitCSV", ':call <sid>Init()', '')
     call <sid>LocalCommand('Header',
-	\ ':call <sid>SplitHeaderLine(<q-args>,<bang>0,1)',
-	\ '-nargs=? -bang')
+        \ ':call <sid>SplitHeaderLine(<q-args>,<bang>0,1)',
+        \ '-nargs=? -bang')
     call <sid>LocalCommand('VHeader',
-	\ ':call <sid>SplitHeaderLine(<q-args>,<bang>0,0)',
-	\ '-nargs=? -bang')
+        \ ':call <sid>SplitHeaderLine(<q-args>,<bang>0,0)',
+        \ '-nargs=? -bang')
     call <sid>LocalCommand("HeaderToggle",
-	\ ':call <sid>SplitHeaderToggle(1)', '')
+        \ ':call <sid>SplitHeaderToggle(1)', '')
     call <sid>LocalCommand("VHeaderToggle",
-	\ ':call <sid>SplitHeaderToggle(0)', '')
+        \ ':call <sid>SplitHeaderToggle(0)', '')
     call <sid>LocalCommand("Sort",
-	\ ':call <sid>Sort(<bang>0, <line1>,<line2>,<q-args>)',
-	\ '-nargs=* -bang -range=% -complete=custom,<sid>SortComplete')
+        \ ':call <sid>Sort(<bang>0, <line1>,<line2>,<q-args>)',
+        \ '-nargs=* -bang -range=% -complete=custom,<sid>SortComplete')
     call <sid>LocalCommand("Column",
-	\ ':call <sid>CopyCol(empty(<q-reg>)?''"'':<q-reg>,<q-count>)',
-	\ '-count -register')
+        \ ':call <sid>CopyCol(empty(<q-reg>)?''"'':<q-reg>,<q-count>)',
+        \ '-count -register')
     call <sid>LocalCommand("MoveColumn",
-	\ ':call <sid>MoveColumn(<line1>,<line2>,<f-args>)',
-	\ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
+        \ ':call <sid>MoveColumn(<line1>,<line2>,<f-args>)',
+        \ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
     call <sid>LocalCommand("SumCol",
-	\ ':echo csv#EvalColumn(<q-args>, "<sid>SumColumn", <line1>,<line2>)',
-	\ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+        \ ':echo csv#EvalColumn(<q-args>, "<sid>SumColumn", <line1>,<line2>)',
+        \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
     call <sid>LocalCommand("ConvertData",
-	\ ':call <sid>PrepareDoForEachColumn(<line1>,<line2>,<bang>0)',
-	\ '-bang -nargs=? -range=%')
+        \ ':call <sid>PrepareDoForEachColumn(<line1>,<line2>,<bang>0)',
+        \ '-bang -nargs=? -range=%')
     call <sid>LocalCommand("Filters", ':call <sid>OutputFilters()',
-	\ '-nargs=0')
+        \ '-nargs=0')
     call <sid>LocalCommand("Analyze", ':call <sid>AnalyzeColumn(<args>)',
-	\ '-nargs=?')
+        \ '-nargs=?')
 endfu
 " end function definition "}}}2
 " Initialize Plugin "{{{2
@@ -1264,4 +1263,4 @@ let &cpo = s:cpo_save
 unlet s:cpo_save
 
 " Vim Modeline " {{{2
-" vim: set foldmethod=marker:
+" vim: set foldmethod=marker et:
