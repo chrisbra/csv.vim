@@ -140,7 +140,7 @@ fu! <sid>Init() "{{{3
             \ "DeleteColumn",  "ArrangeColumn", "InitCSV", "Header",
             \ "VHeader", "HeaderToggle", "VHeaderToggle", "Sort",
             \ "Column", "MoveColumn", "SumCol", "ConvertData",
-            \  "Filters", "Analyze", "UnArrangeColumn" ]
+            \ "Filters", "Analyze", "UnArrangeColumn", "CSVFixed" ]
         let b:undo_ftplugin .= "| sil! delc " . com
     endfor
 
@@ -729,7 +729,7 @@ fu! <sid>SortComplete(A,L,P) "{{{3
 endfun
 
 fu! <sid>SortList(a1, a2) "{{{3
-    return a:a1 == a:a2 ? 0 : a:a1 > a:a2 ? 1 : -1
+    return a:a1+0 == a:a2+0 ? 0 : a:a1+0 > a:a2+0 ? 1 : -1
 endfu
 
 fu! <sid>Sort(bang, line1, line2, colnr) range "{{{3
@@ -1205,61 +1205,125 @@ fu! <sid>Vertfold(col) "{{{3
         exe "syn match CSVFold /" . pat . "/ conceal cchar=+"
     endif
 endfu
-    
-fu! <sid>LocalCommand(name, definition, args) "{{{3
+
+fu! <sid>InitCSVFixedWidth() "{{{3
+    if !exists("+cc")
+        " TODO: make this work with a custom matchadd() command for older
+        " Vims, that don't have 'colorcolumn'
+        call <sid>Warn("'colorcolumn' option not available")
+        return
+    endif
+    " Turn off syntax highlighting
+    syn clear
+    let _cc  = &l:cc
+    let &l:cc = 1
+    redraw!
+    let list = []
+    let tcc  = &l:cc
+    echo "<Cursor>, <Space>, <ESC>, <BS>, <CR>..."
+    let char=getchar()
+    while 1
+        if char == "\<Left>" || char == "\<Right>"
+            let tcc = eval('tcc'.(char=="\<Left>" ? '-' : '+').'1')
+        elseif char == 32 " Space
+            call add(list, tcc)
+        elseif char == "\<BS>"
+            call remove(list, -1)
+        elseif char == 27 "<ESC>
+            let &l:cc=_cc
+            return
+        else
+            break
+        endif
+        let &l:cc=tcc . (!empty(list)? ',' . join(list, ','):'')
+        redraw!
+        echo "<Cursor>, <Space>, <ESC>, <BS>, <CR>..."
+        let char=getchar()
+    endw
+    if tcc > 0
+        call add(list,tcc)
+    endif
+    let b:csv_fixed_width_cols=[]
+    let tcc=0
+    if !empty(list)
+        call Break()
+        " Remove duplicate entries
+        for val in sort(list, "<sid>SortList")
+            if val==tcc
+                continue
+            endif
+            call add(b:csv_fixed_width_cols, val)
+            let tcc=val
+        endfor
+        let b:csv_fixed_width=join(sort(b:csv_fixed_width_cols,
+            \ "<sid>SortList"), ',')
+        call <sid>Init()
+    endif
+    let &l:cc=_cc
+    redraw!
+endfu
+
+fu! Break()
+    return
+endfu
+
+fu! <sid>LocalCmd(name, definition, args) "{{{3
     if !exists(':'.a:name)
         exe "com! -buffer " a:args a:name a:definition
     endif
 endfu
 
 fu! <sid>CommandDefinitions() "{{{3
-    call <sid>LocalCommand("WhatColumn", ':echo <sid>WColumn(<bang>0)',
+    " When adding new commands, be sure, to also update
+    " b:undo_ftplugin
+    call <sid>LocalCmd("WhatColumn", ':echo <sid>WColumn(<bang>0)',
         \ '-bang')
-    call <sid>LocalCommand("NrColumns", ':echo <sid>MaxColumns()', '')
-    call <sid>LocalCommand("HiColumn", ':call <sid>HiCol(<q-args>,<q-bang>)',
+    call <sid>LocalCmd("NrColumns", ':echo <sid>MaxColumns()', '')
+    call <sid>LocalCmd("HiColumn", ':call <sid>HiCol(<q-args>,<q-bang>)',
         \ '-bang -nargs=?')
-    call <sid>LocalCommand("SearchInColumn",
+    call <sid>LocalCmd("SearchInColumn",
         \ ':call <sid>SearchColumn(<q-args>)', '-nargs=*')
-    call <sid>LocalCommand("DeleteColumn", ':call <sid>DelColumn(<q-args>)',
+    call <sid>LocalCmd("DeleteColumn", ':call <sid>DelColumn(<q-args>)',
         \ '-nargs=? -complete=custom,<sid>SortComplete')
-    call <sid>LocalCommand("ArrangeColumn",
+    call <sid>LocalCmd("ArrangeColumn",
         \ ':call <sid>ArrangeCol(<line1>, <line2>, <bang>0)',
         \ '-range')
-    call <sid>LocalCommand("UnArrangeColumn",
+    call <sid>LocalCmd("UnArrangeColumn",
         \':call <sid>PrepUnArrangeCol(<line1>, <line2>)',
         \ '-range')
-    call <sid>LocalCommand("InitCSV", ':call <sid>Init()', '')
-    call <sid>LocalCommand('Header',
+    call <sid>LocalCmd("InitCSV", ':call <sid>Init()', '')
+    call <sid>LocalCmd('Header',
         \ ':call <sid>SplitHeaderLine(<q-args>,<bang>0,1)',
         \ '-nargs=? -bang')
-    call <sid>LocalCommand('VHeader',
+    call <sid>LocalCmd('VHeader',
         \ ':call <sid>SplitHeaderLine(<q-args>,<bang>0,0)',
         \ '-nargs=? -bang')
-    call <sid>LocalCommand("HeaderToggle",
+    call <sid>LocalCmd("HeaderToggle",
         \ ':call <sid>SplitHeaderToggle(1)', '')
-    call <sid>LocalCommand("VHeaderToggle",
+    call <sid>LocalCmd("VHeaderToggle",
         \ ':call <sid>SplitHeaderToggle(0)', '')
-    call <sid>LocalCommand("Sort",
+    call <sid>LocalCmd("Sort",
         \ ':call <sid>Sort(<bang>0, <line1>,<line2>,<q-args>)',
         \ '-nargs=* -bang -range=% -complete=custom,<sid>SortComplete')
-    call <sid>LocalCommand("Column",
+    call <sid>LocalCmd("Column",
         \ ':call <sid>CopyCol(empty(<q-reg>)?''"'':<q-reg>,<q-count>)',
         \ '-count -register')
-    call <sid>LocalCommand("MoveColumn",
+    call <sid>LocalCmd("MoveColumn",
         \ ':call <sid>MoveColumn(<line1>,<line2>,<f-args>)',
         \ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
-    call <sid>LocalCommand("SumCol",
+    call <sid>LocalCmd("SumCol",
         \ ':echo csv#EvalColumn(<q-args>, "<sid>SumColumn", <line1>,<line2>)',
         \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
-    call <sid>LocalCommand("ConvertData",
+    call <sid>LocalCmd("ConvertData",
         \ ':call <sid>PrepareDoForEachColumn(<line1>,<line2>,<bang>0)',
         \ '-bang -nargs=? -range=%')
-    call <sid>LocalCommand("Filters", ':call <sid>OutputFilters()',
+    call <sid>LocalCmd("Filters", ':call <sid>OutputFilters()',
         \ '-nargs=0')
-    call <sid>LocalCommand("Analyze", ':call <sid>AnalyzeColumn(<args>)',
+    call <sid>LocalCmd("Analyze", ':call <sid>AnalyzeColumn(<args>)',
         \ '-nargs=?')
-    call <sid>LocalCommand("VertFold", ':call <sid>Vertfold(<args>)',
+    call <sid>LocalCmd("VertFold", ':call <sid>Vertfold(<args>)',
         \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd("CSVFixed", ':call <sid>InitCSVFixedWidth()', '')
 endfu
 " end function definition "}}}2
 " Initialize Plugin "{{{2
