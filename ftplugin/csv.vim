@@ -551,8 +551,10 @@ fu! <sid>GetColPat(colnr, zs_flag) "{{{3
     elseif !exists("b:csv_fixed_width_cols")
         let pat=b:col
     else
-        let pat='\%' . b:csv_fixed_width_cols[0] . 'c.\{-}\%' .
-        \ b:csv_fixed_width_cols[1] . 'c'
+        let pat='\%' . b:csv_fixed_width_cols[0] . 'c.\{-}' .
+            \ len(b:csv_fixed_width_cols) > 1 ?
+            \ '\%' . b:csv_fixed_width_cols[1] . 'c' :
+            \ ''
     endif
     return pat . (a:zs_flag ? '\zs' : '')
 endfu
