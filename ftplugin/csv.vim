@@ -140,7 +140,8 @@ fu! <sid>Init() "{{{3
             \ "DeleteColumn",  "ArrangeColumn", "InitCSV", "Header",
             \ "VHeader", "HeaderToggle", "VHeaderToggle", "Sort",
             \ "Column", "MoveColumn", "SumCol", "ConvertData",
-            \ "Filters", "Analyze", "UnArrangeColumn", "CSVFixed" ]
+            \ "Filters", "Analyze", "UnArrangeColumn", "CSVFixed",
+            \ "VertFold" ]
         let b:undo_ftplugin .= "| sil! delc " . com
     endfor
 
@@ -1201,7 +1202,21 @@ endfunc
 
 
 fu! <sid>Vertfold(col) "{{{3
-    let pat=<sid>GetPat(a:col, <sid>MaxColumns()-1, '.*')
+    if !has("conceal")
+        call <sid>Warn("Concealing not supported in your Vim")
+        return
+    endif
+    if empty(b:delimiter) && !exists("b:csv_fixed_width_cols")
+        call <sid>Warn("There are no columns defined, can't hide away anything!")
+        return
+    endif
+    let pat=<sid>GetPat(a:col, <sid>MaxColumns(), '.*')
+    if exists("b:csv_fixed_width_cols") &&
+        \ pat !~ '^\^\.\*'
+        " Make the pattern implicitly start at line start,
+        " so it will be applied by syntax highlighting (:h :syn-priority)
+        let pat='^.*' . pat
+    endif
     let pat=substitute(pat, '\\zs\(\.\*\)\@=', '', '')
     if !empty(pat)
         exe "syn match CSVFold /" . pat . "/ conceal cchar=+"
@@ -1233,6 +1248,7 @@ fu! <sid>InitCSVFixedWidth() "{{{3
             call remove(list, -1)
         elseif char == 27 "<ESC>
             let &l:cc=_cc
+            redraw!
             return
         else
             break
