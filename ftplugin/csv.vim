@@ -312,20 +312,17 @@ fu! <sid>GetDelimiter() "{{{3
             redir END
         endfor
         let Delim = map(temp, 'matchstr(substitute(v:val, "\n", "", ""), "^\\d\\+")')
+        let Delim = filter(temp, 'v:val=~''\d''')
+        let max   = max(values(temp))
 
         let result=[]
+        call setpos('.', _cur)
         for [key, value] in items(Delim)
-            if get(result,0) < value
-            call add(result, key)
-            call add(result, value)
+            if value == max
+                return key
             endif
         endfor
-        call setpos('.', _cur)
-        if !empty(result)
-            return result[0]
-        else
-            return ''
-        endif
+        return ''
     else
         " There is no delimiter for fixedwidth files
         return ''
