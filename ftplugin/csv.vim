@@ -1004,8 +1004,8 @@ fu! <sid>PrepareFolding(add)  "{{{3
             call <sid>RemoveLastItem(s:filter_count)
             let s:filter_count -= 1
             if len(b:csv_filter) == 0
-            call <sid>DisableFolding()
-            return
+                call <sid>DisableFolding()
+                return
             endif
         else
             " Disable folding, if no pattern available
@@ -1056,10 +1056,12 @@ fu! <sid>PrepareFolding(add)  "{{{3
     endfor
     let sid = <sid>GetSID()
     " Don't put spaces between the arguments!
-    exe 'setl foldexpr=' . sid . '_FoldValue(v:lnum,@/,)'
+    exe 'setl foldexpr=' . sid . '_FoldValue(v:lnum,@/)'
     "setl foldexpr=s:FoldValue(v:lnum,@/)
     " Be sure to also fold away single screen lines
     setl fen fdm=expr fdl=0 fdc=2 fml=0
+    setl foldtext=substitute(v:folddashes,'-','\ ','g')
+    setl fillchars-=fold:-
 endfu
 
 fu! <sid>OutputFilters() "{{{3
@@ -1115,7 +1117,7 @@ fu! <sid>RemoveLastItem(count) "{{{3
 endfu
 
 fu! <sid>DisableFolding() "{{{3
-    setl nofen fdm=manual fdc=0 fdl=0
+    setl nofen fdm=manual fdc=0 fdl=0 fillchars+=fold:-
 endfu
 
 fu! <sid>GetSID() "{{{3
@@ -1201,7 +1203,11 @@ fu! <sid>AnalyzeColumn(...) "{{{3
 endfunc
 
 
-fu! <sid>Vertfold(col) "{{{3
+fu! <sid>Vertfold(bang, col) "{{{3
+    if a:bang
+        do Syntax
+        return
+    endif
     if !has("conceal")
         call <sid>Warn("Concealing not supported in your Vim")
         return
@@ -1339,8 +1345,8 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-nargs=0')
     call <sid>LocalCmd("Analyze", ':call <sid>AnalyzeColumn(<args>)',
         \ '-nargs=?')
-    call <sid>LocalCmd("VertFold", ':call <sid>Vertfold(<args>)',
-        \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd("VertFold", ':call <sid>Vertfold(<bang>0,<args>)',
+        \ '-bang -nargs=? -range=% -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("CSVFixed", ':call <sid>InitCSVFixedWidth()', '')
 endfu
 " end function definition "}}}2
