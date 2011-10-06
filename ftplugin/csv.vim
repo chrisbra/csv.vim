@@ -1,11 +1,11 @@
 " Filetype plugin for editing CSV files. "{{{1
 " Author:  Christian Brabandt <cb@256bit.org>
-" Version: 0.19
+" Version: 0.20
 " Script:  http://www.vim.org/scripts/script.php?script_id=2830
 " License: VIM License
-" Last Change: Mon, 26 Sep 2011 23:05:33 +0200
+" Last Change: Thu, 06 Oct 2011 20:47:21 +0200
 " Documentation: see :help ft-csv.txt
-" GetLatestVimScripts: 2830 19 :AutoInstall: csv.vim
+" GetLatestVimScripts: 2830 20 :AutoInstall: csv.vim
 "
 " Some ideas are take from the wiki http://vim.wikia.com/wiki/VimTip667
 " though, implementation differs.

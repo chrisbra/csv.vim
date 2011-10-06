@@ -1,7 +1,7 @@
-*ft-csv.txt*	For Vim version 7.3	Last change: 2011 Feb 17
+*ft-csv.txt*	For Vim version 7.3	Last Change: Thu, 06 Oct 2011
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.19
+Version:	0.20
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -28,6 +28,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.15 Convert CSV file.......................|csv-convert|
     3.16 Dynamic filters........................|csv-filter|
     3.17 Analyze a column.......................|csv-analyze|
+    3.18 Vertical Folding.......................|csv-vertfold|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -38,6 +39,8 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     4.7 Newlines................................|csv-newline|
     4.8 Highlight column automatically..........|csv-hicol|
     4.9 Fixed width columns.....................|csv-fixedwidth|
+        4.9.1 Manual setup
+        4.9.2 Setup using a Wizard
     4.10 CSV Header lines.......................|csv-header|
 5. CSV Tips and Tricks..........................|csv-tips|
     5.1 Statusline..............................|csv-stl|
@@ -487,6 +490,10 @@ and the new value). To remove the last item from the filter, press <BS>
 (backspace). If all items from the filter are removed, folding will be
 disabled.
 
+If some command messes up the folding, you can use |zX| to have the folding
+being reinitialized. (If in the meantime you searched for something, the folds
+will be updated to only fold away non-matching lines.)
+
 By default, the first line is assumed to be the header and won't be folded
 away. See also |csv-header|.
 
@@ -529,6 +536,26 @@ Nr      Count    %      Value `
 This tells you, that the the value '10' in column 3 occurs 50% of the time
 (exactly 20 times) and the other 2 values '2' and '5' occur only 10 times, so
 25% of the time.
+
+                                                                *VertFold_CSV*
+3.18 Vertical Folding       					 *csv-vertfold*
+---------------------
+
+Sometimes, you want to hide away certain columns to better view only certain
+columns without having to horizontally scroll. You can use the :VertFold
+command to hide certain columns: >
+
+    :VertFold <nr>
+<
+This will hide all columns from the first until the number entered. It
+currently can't hide single columns, because of the way, syntax highlighting
+is used. This command uses the conceal-feature |:syn-conceal| to hide away
+those columns.
+
+Use >
+    :VertFold!
+
+to display all hidden columns again.
 
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
@@ -747,21 +774,55 @@ It is a good idea to reinitialize the plugin afterwards |InitCSV|
 Sometimes there are no real columns, but rather the file is fixed width with
 no distinct delimiters between each column. The CSV plugin allows you to
 handle such virtual columns like csv columns, if you define where each column
-starts. You can do this, by setting the buffer-local variable
+starts.
+
+Note: Except for |ArrangeColumn_CSV| and the |Header_CSV| commands, all
+commands work in either mode. Those two commands won't do anything in the case
+of fixedwidth columns, since they don't really make sense here.
+
+4.9.1 Manual setup
+------------------
+You can do this, by setting the buffer-local variable
 b:csv_fixed_width like this >
 
     let b:csv_fixed_width="1,5,9,13,17,21"
 
-This defines that each column starts at multiples of 4. Be sure, to issue this
-command in the buffer, that contains your file, otherwise, it won't have an
-effect, since this is a buffer-local option (|local-option|)
-
-Except for |ArrangeColumn_CSV| and the |Header_CSV| commands, all commands
-work in either mode. Those two commands won't do anything in the case of
-fixedwidth columns, since they don't really make sense here.
+This defines that each column starts at multiples of 4. Be sure, to issue
+this command in the buffer, that contains your file, otherwise, it won't
+have an effect, since this is a buffer-local option (|local-option|)
 
 After setting this variable, you should reinitialize the plugins using
 |InitCSV|
+
+                                                                    *CSVFixed*
+4.9.2 Setup using a Wizard
+--------------------------
+Alternatively, you can setup the fixed width columns using the :CSVFixed
+command. This provides a simple wizard to select each column. If you enter
+the command: >
+    :CSVFixed 
+<
+The first column will be highlighted and Vim outputs:
+<Cursor>, <Space>, <ESC>, <BS>, <CR>...
+This means, you can now use those 5 keys to configure the fixed-width columns:
+
+   <Cursor> Use Cursor Left (<Left>) and Cursor Right (<Right>) to move the
+            highlighting bar.
+   <Space>  If you press <Space>, this column will be fixed and remain
+            highlighted and there will be another bar, you can move using
+            the Cursor keys. This means this column will be considered to be
+            the border between 2 fixed with columns.
+   <ESC>    Abort
+   <BS>     Press the backspace key, to remove the last column you fixed with
+            the <Space> key.
+   <CR>     Use Enter to finish the wizard. This will use all fixed columns
+            to define the fixed width columns of your csv file. The plugin
+            will be initialized and syntax highlighting should appear.
+
+Note: This only works, if your Vim has the 'colorcolumn' option available
+(This won't work with Vim < 7.3 and also not with a Vim without +syntax
+feature).
+
 
 4.10 CSV Header lines                                        *csv-header*
 ---------------------
@@ -930,6 +991,13 @@ plugin call it for a column like this:
 
 ==============================================================================
 6. CSV Changelog					       *csv-changelog*
+
+0.20 Oct 06, 2011 {{{1
+
+- Implement a wizard for initializing fixed-width columns (|CSVFixed|)
+- Vertical folding (|VertFold_CSV|)
+- fix plugin indentation (by Daniel Karl, thanks!)
+- fixed missing bang parameter for HiColumn function (by Daniel Karl, thanks!)
 
 0.19 Sep 26, 2011 {{{1
 
