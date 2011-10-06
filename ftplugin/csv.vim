@@ -4,7 +4,7 @@
 " Script:  http://www.vim.org/scripts/script.php?script_id=2830
 " License: VIM License
 " Last Change: Mon, 26 Sep 2011 23:05:33 +0200
-" Documentation: see :help ft_csv.txt
+" Documentation: see :help ft-csv.txt
 " GetLatestVimScripts: 2830 19 :AutoInstall: csv.vim
 "
 " Some ideas are take from the wiki http://vim.wikia.com/wiki/VimTip667
@@ -1245,11 +1245,11 @@ fu! <sid>InitCSVFixedWidth() "{{{3
     while 1
         if char == "\<Left>" || char == "\<Right>"
             let tcc = eval('tcc'.(char=="\<Left>" ? '-' : '+').'1')
-        elseif char == 32 " Space
+        elseif char == "\<Space>" || char == 32 " Space
             call add(list, tcc)
-        elseif char == "\<BS>"
+        elseif char == "\<BS>" || char == 127
             call remove(list, -1)
-        elseif char == 27 "<ESC>
+        elseif char == "\<ESC>" || char == 27
             let &l:cc=_cc
             redraw!
             return
