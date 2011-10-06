@@ -1,4 +1,5 @@
 - add vertical folding (concealing columns)
   (works partly, can't conceal single columns?)
 - add a wizard, for defining fixed-width columns
+  (should work now)
 - make plugin autoloadable
