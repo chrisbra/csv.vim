@@ -998,6 +998,7 @@ plugin call it for a column like this:
 - Vertical folding (|VertFold_CSV|)
 - fix plugin indentation (by Daniel Karl, thanks!)
 - fixed missing bang parameter for HiColumn function (by Daniel Karl, thanks!)
+- fixed broken autodection of delimiter (reported by Peng Yu, thanks!)
 
 0.19 Sep 26, 2011 {{{1
 
