@@ -3,3 +3,5 @@
 - add a wizard, for defining fixed-width columns
   (should work now)
 - make plugin autoloadable
+- wrap/shorten long fields (scopus.csv). Is this
+  even possible with Vim?
