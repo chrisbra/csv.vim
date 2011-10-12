@@ -771,7 +771,7 @@ fu! <sid>CopyCol(reg, col) "{{{3
     endif
     let a = []
     " Don't get lines, that are currently filtered away
-    if empty(b:csv_filter)
+    if !exists("b:csv_filter") || empty(b:csv_filter)
         let a=getline(1, '$')
     else
         for line in range(1, line('$'))
