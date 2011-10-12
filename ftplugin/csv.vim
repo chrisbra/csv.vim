@@ -7,7 +7,7 @@
 " Documentation: see :help ft-csv.txt
 " GetLatestVimScripts: 2830 20 :AutoInstall: csv.vim
 "
-" Some ideas are take from the wiki http://vim.wikia.com/wiki/VimTip667
+" Some ideas are taken from the wiki http://vim.wikia.com/wiki/VimTip667
 " though, implementation differs.
 
 " Plugin folklore "{{{2
@@ -769,7 +769,19 @@ fu! <sid>CopyCol(reg, col) "{{{3
     if col == '$' || col > mcol
         let col = mcol
     endif
-    let a=getline(1, '$')
+    let a = []
+    " Don't get lines, that are currently filtered away
+    if empty(b:csv_filter)
+        let a=getline(1, '$')
+    else
+        for line in range(1, line('$'))
+            if foldlevel(line)
+                continue
+            else
+                call add(a, getline(line))
+            endif
+        endfor
+    endif
     if !exists("b:csv_fixed_width_cols")
         call map(a, 'split(v:val, ''^'' . b:col . ''\zs'')[col-1]')
     else
@@ -840,18 +852,27 @@ fu! <sid>MoveColumn(start, stop, ...) range "{{{3
 endfu
 
 fu! <sid>SumColumn(list) "{{{3
-    return eval(join(a:list, '+'))
+    if empty(a:list)
+        return 0
+    else
+        return eval(join(a:list, '+'))
+    endif
 endfu
 
 fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     let save = winsaveview()
+    call <sid>CheckHeaderLine()
     let col = (empty(a:nr) ? <sid>WColumn() : a:nr)
-    let start = a:first - 1
+    " don't take the header line into consideration
+    let start = a:first - 1 + s:csv_fold_headerline
     let stop  = a:last  - 1
 
     let column = <sid>CopyCol('', col)[start : stop]
     " Delete delimiter
-    call map(column, 'substitute(v:val, b:delimiter, "", "g")')
+    call map(column, 'substitute(v:val, b:delimiter . "$", "", "g")')
+    " Delete empty values
+    call map(column, 'substitute(v:val, ''^\s\+$'', "", "g")')
+    call filter(column, '!empty(v:val)')
     try
         let result=call(function(a:func), [column])
         return result
@@ -1061,32 +1082,47 @@ fu! <sid>PrepareFolding(add)  "{{{3
     setl fillchars-=fold:-
 endfu
 
-fu! <sid>OutputFilters() "{{{3
-    call <sid>CheckHeaderLine()
-    if s:csv_fold_headerline
-        let  title="Nr\tCol\t      Name\tValue"
+fu! <sid>OutputFilters(bang) "{{{3
+    if !a:bang
+        call <sid>CheckHeaderLine()
+        if s:csv_fold_headerline
+            let  title="Nr\tCol\t      Name\tValue"
+        else
+            let  title="Nr\tCol\tValue"
+        endif
+        echohl "Title"
+        echo   printf("%s", title)
+        echo   printf("%s", repeat("=",strdisplaywidth(title)))
+        echohl "Normal"
+        if !exists("b:csv_filter") || len(b:csv_filter) == 0
+            echo printf("%s", "No active filter")
+        else
+            let items = values(b:csv_filter)
+            call sort(items, "<sid>SortFilter")
+            for item in items
+                if s:csv_fold_headerline
+                    echo printf("%02d\t%02d\t%10.10s\t%s",
+                        \ item.id, item.col, <sid>GetColumn(1, item.col),
+                        \ item.orig)
+                else
+                    echo printf("%02d\t%02d\t%s",
+                        \ item.id, item.col, item.orig)
+                endif
+            endfor
+        endif
     else
-        let  title="Nr\tCol\tValue"
-    endif
-    echohl "Title"
-    echo   printf("%s", title)
-    echo   printf("%s", repeat("=",strdisplaywidth(title)))
-    echohl "Normal"
-    if !exists("b:csv_filter") || len(b:csv_filter) == 0
-        echo printf("%s", "No active filter")
-    else
-        let items = values(b:csv_filter)
-        call sort(items, "<sid>SortFilter")
-        for item in items
-            if s:csv_fold_headerline
-                echo printf("%02d\t%02d\t%10.10s\t%s",
-                    \ item.id, item.col, <sid>GetColumn(1, item.col),
-                    \ item.orig)
-            else
-                echo printf("%02d\t%02d\t%s",
-                    \ item.id, item.col, item.orig)
-            endif
-        endfor
+        " Reapply filter again
+        if !exists("b:csv_filter") || len(b:csv_filter) == 0
+            call <sid>Warn("No filters defined currently!")
+            return
+        else
+            for val in values(b:csv_filter)
+                let a .= val.pat . '\&'
+            endfor
+            " Remove trailing \& from the pattern
+            let @/ = a[0:-3]
+            norm! zX
+        endif
     endif
 endfu
 
@@ -1338,8 +1374,8 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("ConvertData",
         \ ':call <sid>PrepareDoForEachColumn(<line1>,<line2>,<bang>0)',
         \ '-bang -nargs=? -range=%')
-    call <sid>LocalCmd("Filters", ':call <sid>OutputFilters()',
-        \ '-nargs=0')
+    call <sid>LocalCmd("Filters", ':call <sid>OutputFilters(<bang>0)',
+        \ '-nargs=0 -bang')
     call <sid>LocalCmd("Analyze", ':call <sid>AnalyzeColumn(<args>)',
         \ '-nargs=?')
     call <sid>LocalCmd("VertFold", ':call <sid>Vertfold(<bang>0,<args>)',
