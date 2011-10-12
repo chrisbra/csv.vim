@@ -334,8 +334,9 @@ You can let Vim output the sum of a column using the :SumCol command >
 
 This outputs the result of the column <nr> within the range given. If no range
 is given, this will calculate the sum of the whole column. If <nr> is not
-given, this calculate the sum for the column the cursor is on. See also
-|csv-aggregate-functions|
+given, this calculates the sum for the column the cursor is on. Note, that the
+delimiter will be stripped away from each value and also empty values won't be
+considered. See also |csv-aggregate-functions|
 
 
 3.14 Normal mode commands					 *csv-mapping*
@@ -514,6 +515,13 @@ Note, that depending on your csv file and the number of filters you used,
 applying the filter might actually slow down vim, because a complex regular
 expression is generated that is applied by the fold expression. Look into the
 @/ (|quote_/|) register to see its value.
+
+Use |zX| to apply the current value of your search register as filter. Use >
+
+    :Filters!
+
+to reapply all values from the current active filter and fold non-matching
+items away.
 
                                                                 *Analyze_CSV*
 3.17 Analyze a Column       					 *csv-analyze*
@@ -933,14 +941,18 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 5.3 Defining custom aggregate functions		    *csv-aggregate-functions*
 ---------------------------------------
 
-The CSV plugin already defines the |SumCol_CSV|command, to let you calculate
-the sum of all values of a certain column within a given range. But it may be,
-that you don't need the sum, but would rather want to have the average of all
-values within a certain column. You can define your own function and let the
-plugin call it for a column like this:
+The CSV plugin already defines the |SumCol_CSV| command, to let you calculate
+the sum of all values of a certain column within a given range. This will
+consider all values within the range, that are not folded away (|csv-filter|),
+except for empty fields and the header lines. The delimiter will be deleted
+from each field.
+
+But it may be, that you don't need the sum, but would rather want to have the
+average of all values within a certain column. You can define your own
+function and let the plugin call it for a column like this:
 
     1) You define your own custom function in the after directory of your
-       vimruntime path |after-directory| (see also #2 below) >
+       vim runtime path |after-directory| (see also #2 below) >
 
 	fun! My_CSV_Average(col)
 	    let sum=0
@@ -966,9 +978,9 @@ plugin call it for a column like this:
 	    \ :echo csv#EvalColumn(<q-args>,
 	    \ "My_CSV_Average", <line1>,<line2>)
 <
-        This command should best be put into a file called csv.vim and put
-	into your ~/.vim/after/ftplugin/ directory. Create directories that
-	don't exist yet. For Windows, this would be the
+        This command should best be put into a file called csv.vim and save
+        it into your ~/.vim/after/ftplugin/ directory. Create directories
+        that don't exist yet. For Windows, this would be the
 	$VIMRUNTIME/vimfiles/after/ftplugin directory.
 
     3) Make sure, your |.vimrc| includes a filetype plugin setting like this >
@@ -991,6 +1003,15 @@ plugin call it for a column like this:
 
 ==============================================================================
 6. CSV Changelog					       *csv-changelog*
+
+0.22 (unreleased) {{{1
+- Small enhancements to |SumCol_CSV|
+- :Filters! reapplys the dynamic filter
+- Apply |csv-aggregate-functions| only to those values, that are
+  not folded away.
+
+0.21 Oct 06, 2011 {{{1
+- same as 0.20 (erroneously uploaded to vim.org)   
 
 0.20 Oct 06, 2011 {{{1
 

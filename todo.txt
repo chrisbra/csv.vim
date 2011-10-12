@@ -3,7 +3,7 @@
 - add a wizard, for defining fixed-width columns
   (should work now)
 - Reapply Filter, in case Search register changed
-  (use :Filters!)
+  (use :Filters!, should work now)
 - make plugin autoloadable
 - wrap/shorten long fields (scopus.csv). Is this
   even possible with Vim?
