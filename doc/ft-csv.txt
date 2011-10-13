@@ -300,7 +300,8 @@ If you need to copy a specific column, you can use the command :Column >
 
     :[N]Column [a]
 
-Copy column N into register a. If you don't specify N, the column of the
+Copy column N into register a. This will only copy all the values, that are
+not folded-away (|csv-filter|). If you don't specify N, the column of the
 current cursor position is used. If no register is given, the default register
 |quotequote| is used. 
 
