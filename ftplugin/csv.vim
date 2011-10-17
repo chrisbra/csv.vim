@@ -877,14 +877,28 @@ fu! <sid>SumColumn(list) "{{{3
     if empty(a:list)
         return 0
     else
-        return eval(join(a:list, '+'))
+        let sum = 0.0
+        for item in a:list
+            let nr = matchstr(item, '\d\(.*\d\)$')
+            let format1 = '^\d\+\zs\V' . s:nr_format[','] . '\=\m\ze\d'
+            let format2 = '\d\+\zs\V' . s:nr_format['.'] . '\=\m\ze\d'
+            try
+                let nr = substitute(nr, format1, '', '')
+                let nr = substitute(nr, format2, '.', '')
+            catch
+                let nr = 0
+            endtry
+            let sum += str2float(nr)
+        endfor
+        return sum
     endif
 endfu
 
 fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     let save = winsaveview()
     call <sid>CheckHeaderLine()
-    let col = (empty(a:nr) ? <sid>WColumn() : a:nr)
+    let nr = matchstr(a:nr, '^\d\+')
+    let col = (empty(nr) ? <sid>WColumn() : nr)
     " don't take the header line into consideration
     let start = a:first - 1 + s:csv_fold_headerline
     let stop  = a:last  - 1
@@ -895,6 +909,21 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     " Delete empty values
     call map(column, 'substitute(v:val, ''^\s\+$'', "", "g")')
     call filter(column, '!empty(v:val)')
+    
+    " parse the optional number format
+    let s:nr_format = {',':',', '.': '.'}
+    let format = substitute(a:nr, '^\d\+', '', '')
+    if !empty(format)
+        let start = 1
+        " parse the optional number format
+        while match(format, '/[^/]*/', 0, start) >= 0
+            let str = matchstr(format, '/[^/]*/', 0, start)
+            let str = substitute(str, '/', '', 'g')
+            let val = split(str, ':')
+            let s:nr_format[val[0]] = val[1]
+            let start += 1
+        endw
+    endif
     try
         let result=call(function(a:func), [column])
         return result
