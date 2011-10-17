@@ -658,8 +658,8 @@ You should reinitialize the plugin afterwards |InitCSV|
 ------------------
 
 The default regular expression to define a column is quite complex
-|csv-column|. This slows down the processing and makes Vim use more memory and
-it could still not fit to your specific use case.
+(|csv-column|). This slows down the processing and makes Vim use more memory
+and it could still not fit to your specific use case.
 
 If you know, that in your data file, the delimiter cannot be contained inside
 the fields quoted or escaped, you can speed up processing (this is quite
@@ -680,6 +680,11 @@ You can disable the effect if you |unlet| the variable: >
     unlet g:csv_strict_columns
 
 You should reinitialize the plugin afterwards |InitCSV|
+
+For example when opening a CSV file you get the Error |E363|: pattern uses
+more memory than 'maxmempattern'. In this case, either increase the
+'maxmempattern' or set the g:csv_strict_columns variable.
+
 
 4.5 Multibyte Chars						*csv-mbyte*
 -------------------
