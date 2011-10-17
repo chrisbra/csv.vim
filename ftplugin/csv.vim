@@ -27,6 +27,7 @@ fu! <sid>Warn(mess) "{{{3
 endfu
 
 fu! <sid>Init() "{{{3
+    let b:undo_ftplugin=""
     " Hilight Group for Columns
     if exists("g:csv_hiGroup")
         let s:hiGroup = g:csv_hiGroup
@@ -86,14 +87,6 @@ fu! <sid>Init() "{{{3
         " User given column definition
         let b:col = g:csv_col
     endif
-    " Check Header line
-    " Defines which line is considered to be a header line
-    call <sid>CheckHeaderLine()
-
-    " define buffer-local commands
-    call <SID>CommandDefinitions()
-    " CSV specific mappings
-    call <SID>CSVMappings()
 
     " Highlight column, on which the cursor is?
     if exists("g:csv_highlight_column") && g:csv_highlight_column =~? 'y' &&
@@ -112,6 +105,34 @@ fu! <sid>Init() "{{{3
         " Remove any existing highlighting
         HiColumn!
     endif
+    " undo autocommand:
+    let b:undo_ftplugin .= 'exe "sil! au! CSV_HI CursorMoved <buffer> "'
+    let b:undo_ftplugin .= '| exe "sil! aug! CSV_HI" |exe "sil! HiColumn!" |'
+
+    " undo when setting a new filetype
+    let b:undo_ftplugin .= " setlocal sol< tw< wrap<"
+        \ . "| setl fen< fdm< fdl< fdc< fml<"
+        \ . "| unlet! b:delimiter b:col b:csv_fixed_width_cols b:csv_filter"
+        \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
+        \ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
+
+    " CSV local settings
+    setl nostartofline tw=0 nowrap
+
+    if has("conceal")
+        setl cole=2 cocu=nc
+        let b:undo_ftplugin .= '| setl cole< cocu< '
+    endif
+
+    " Check Header line
+    " Defines which line is considered to be a header line
+    call <sid>CheckHeaderLine()
+
+    " define buffer-local commands
+    call <SID>CommandDefinitions()
+    " CSV specific mappings
+    call <SID>CSVMappings()
+
 
     " force reloading CSV Syntax Highlighting
     if exists("b:current_syntax")
@@ -128,31 +149,6 @@ fu! <sid>Init() "{{{3
     endif
     call <sid>DisableFolding()
     silent do Syntax
-
-    " undo when setting a new filetype
-    let b:undo_ftplugin = "setlocal sol< tw< wrap<"
-        \ . "| setl fen< fdm< fdl< fdc< fml<"
-        \ . "| unlet! b:delimiter b:col b:csv_fixed_width_cols b:csv_filter"
-        \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
-        \ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
-
-    for com in ["WhatColumn", "NrColumns", "HiColumn", "SearchInColumn",
-            \ "DeleteColumn",  "ArrangeColumn", "InitCSV", "Header",
-            \ "VHeader", "HeaderToggle", "VHeaderToggle", "Sort",
-            \ "Column", "MoveColumn", "SumCol", "ConvertData",
-            \ "Filters", "Analyze", "UnArrangeColumn", "CSVFixed",
-            \ "VertFold" ]
-        let b:undo_ftplugin .= "| sil! delc " . com
-    endfor
-
-
-    " CSV local settings
-    setl nostartofline tw=0 nowrap
-
-    if has("conceal")
-        setl cole=2 cocu=nc
-        let b:undo_ftplugin .= '|setl cole< cocu<'
-    endif
 endfu
 
 fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
@@ -889,8 +885,7 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
 endfu
 
 
-fu! <sid>DoForEachColumn(start, stop, bang) range "{{{3
-    " Do something for each column,
+fu! <sid>DoForEachColumn(start, stop, bang) range "{{{3 " Do something for each column,
     " e.g. generate SQL-Statements, convert to HTML,
     " something like this
     " TODO: Define the function
@@ -960,28 +955,63 @@ fu! <sid>PrepareDoForEachColumn(start, stop, bang) range"{{{3
     call <sid>DoForEachColumn(a:start, a:stop, a:bang)
 endfun
 fu! <sid>CSVMappings() "{{{3
-    noremap <silent> <buffer> W :<C-U>call <SID>MoveCol(1, line('.'))<CR>
-    noremap <silent> <buffer> E :<C-U>call <SID>MoveCol(-1, line('.'))<CR>
-    noremap <silent> <buffer> K :<C-U>call <SID>MoveCol(0, line('.')-v:count1)<CR>
-    noremap <silent> <buffer> J :<C-U>call <SID>MoveCol(0, line('.')+v:count1)<CR>
-    nnoremap <silent> <buffer> <CR> :<C-U>call <SID>PrepareFolding(1)<CR>
-    nnoremap <silent> <buffer> <BS> :<C-U>call <SID>PrepareFolding(0)<CR>
+    call <sid>Map('noremap', 'W', ':<C-U>call <SID>MoveCol(1, line("."))<CR>')
+    call <sid>Map('noremap', 'E', ':<C-U>call <SID>MoveCol(-1, line("."))<CR>')
+    call <sid>Map('noremap', 'K', ':<C-U>call <SID>MoveCol(0, line(".")-v:count1)<CR>')
+    call <sid>Map('noremap', 'J', ':<C-U>call <SID>MoveCol(0, line(".")+v:count1)<CR>')
+    call <sid>Map('nnoremap', '<CR>', ':<C-U>call <SID>PrepareFolding(1)<CR>')
+    call <sid>Map('nnoremap', '<BS>', ':<C-U>call <SID>PrepareFolding(0)<CR>')
     " Remap <CR> original values to a sane backup
-    noremap <silent> <buffer> <LocalLeader>J J
-    noremap <silent> <buffer> <LocalLeader>K K
-    noremap <silent> <buffer> <LocalLeader>W W
-    noremap <silent> <buffer> <LocalLeader>E E
-    noremap <silent> <buffer> <LocalLeader>H H
-    noremap <silent> <buffer> <LocalLeader>L L
-    nnoremap <silent> <buffer> <LocalLeader><CR> <CR>
-    nnoremap <silent> <buffer> <LocalLeader><BS> <BS>
+    call <sid>Map('noremap', '<LocalLeader>J', 'J')
+    call <sid>Map('noremap', '<LocalLeader>K', 'K')
+    call <sid>Map('noremap', '<LocalLeader>W', 'W')
+    call <sid>Map('noremap', '<LocalLeader>E', 'E')
+    call <sid>Map('noremap', '<LocalLeader>H', 'H')
+    call <sid>Map('noremap', '<LocalLeader>L', 'L')
+    call <sid>Map('nnoremap', '<LocalLeader><CR>', '<CR>')
+    call <sid>Map('nnoremap', '<LocalLeader><BS>', '<BS>')
+    call <sid>Map('map', '<C-Right>', 'W')
+    call <sid>Map('map', '<C-Left>', 'E')
+    call <sid>Map('map', 'H', 'E')
+    call <sid>Map('map', 'L', 'W')
+    call <sid>Map('map', '<Up>', 'K')
+    call <sid>Map('map', '<Down>', 'J')
+    "noremap <silent> <buffer> W :<C-U>call <SID>MoveCol(1, line('.'))<CR>
+    "noremap <silent> <buffer> E :<C-U>call <SID>MoveCol(-1, line('.'))<CR>
+    "noremap <silent> <buffer> K :<C-U>call <SID>MoveCol(0, line('.')-v:count1)<CR>
+    "noremap <silent> <buffer> J :<C-U>call <SID>MoveCol(0, line('.')+v:count1)<CR>
+    "nnoremap <silent> <buffer> <CR> :<C-U>call <SID>PrepareFolding(1)<CR>
+    "nnoremap <silent> <buffer> <BS> :<C-U>call <SID>PrepareFolding(0)<CR>
+    " Remap <CR> original values to a sane backup
+    "noremap <silent> <buffer> <LocalLeader>J J
+    "noremap <silent> <buffer> <LocalLeader>K K
+    "noremap <silent> <buffer> <LocalLeader>W W
+    "noremap <silent> <buffer> <LocalLeader>E E
+    "noremap <silent> <buffer> <LocalLeader>H H
+    "noremap <silent> <buffer> <LocalLeader>L L
+    "nnoremap <silent> <buffer> <LocalLeader><CR> <CR>
+    "nnoremap <silent> <buffer> <LocalLeader><BS> <BS>
     " Map C-Right and C-Left as alternative to W and E
-    map <silent> <buffer> <C-Right> W
-    map <silent> <buffer> <C-Left>  E
-    map <silent> <buffer> H E
-    map <silent> <buffer> L W
-    map <silent> <buffer> <Up> K
-    map <silent> <buffer> <Down> J
+    "map <silent> <buffer> <C-Right> W
+    "map <silent> <buffer> <C-Left>  E
+    "map <silent> <buffer> H E
+    "map <silent> <buffer> L W
+    "map <silent> <buffer> <Up> K
+    "map <silent> <buffer> <Down> J
+endfu
+
+fu! <sid>Map(map, name, definition) "{{{3
+    " All mappings are buffer local
+    exe a:map "<buffer> <silent>" a:name a:definition
+    " should already exists
+    if a:map == 'nnoremap'
+        let unmap = 'nunmap'
+    elseif a:map == 'noremap' || a:map == 'map'
+        let unmap = 'unmap'
+    endif
+    if exists("b:undo_ftplugin")
+        let b:undo_ftplugin .= "| " . unmap . " <buffer> " . a:name
+    endif
 endfu
 
 fu! <sid>EscapeValue(val) "{{{3
@@ -1327,6 +1357,9 @@ endfu
 fu! <sid>LocalCmd(name, definition, args) "{{{3
     if !exists(':'.a:name)
         exe "com! -buffer " a:args a:name a:definition
+        if exists("b:undo_ftplugin")
+            let b:undo_ftplugin .= "| sil! delc " . a:name
+        endif
     endif
 endfu
 
@@ -1336,7 +1369,7 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("WhatColumn", ':echo <sid>WColumn(<bang>0)',
         \ '-bang')
     call <sid>LocalCmd("NrColumns", ':echo <sid>MaxColumns()', '')
-    call <sid>LocalCmd("HiColumn", ':call <sid>HiCol(<q-args>,<q-bang>)',
+    call <sid>LocalCmd("HiColumn", ':call <sid>HiCol(<q-args>,<bang>0)',
         \ '-bang -nargs=?')
     call <sid>LocalCmd("SearchInColumn",
         \ ':call <sid>SearchColumn(<q-args>)', '-nargs=*')
