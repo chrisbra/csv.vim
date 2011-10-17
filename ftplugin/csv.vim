@@ -150,7 +150,27 @@ fu! <sid>Init() "{{{3
     call <sid>DisableFolding()
     silent do Syntax
     " Delete all functions
-    let b:undo_ftplugin .= "| delf <sid>Warn  | delf <sid>Init  | delf <sid>GetPat  | delf <sid>SearchColumn  | delf <sid>DelColumn  | delf <sid>HiCol  | delf <sid>GetDelimiter  | delf <sid>WColumn  | delf <sid>MaxColumns  | delf <sid>ColWidth  | delf <sid>ArCol   | delf <sid>PrepUnArCol  | delf <sid>UnArCol  | delf <sid>CalculateColumnWidth  | delf <sid>Columnize  | delf <sid>GetColPat  | delf <sid>SplitHeaderLine  | delf <sid>SplitHeaderToggle  | delf <sid>MoveCol  | delf <sid>SortComplete  | delf <sid>SortList  | delf <sid>Sort   CSV_WCol  | delf <sid>CopyCol  | delf <sid>MoveColumn   | delf <sid>SumColumn  csv#EvalColumn   | delf <sid>DoForEachColumn   | delf <sid>PrepareDoForEachColumn | delf <sid>CSVMappings  | delf <sid>Map  | delf <sid>EscapeValue  | delf <sid>FoldValue  | delf <sid>PrepareFolding   | delf <sid>OutputFilters  | delf <sid>SortFilter  | delf <sid>GetColumn  | delf <sid>RemoveLastItem  | delf <sid>DisableFolding  | delf <sid>GetSID  | delf <sid>CheckHeaderLine  | delf <sid>AnalyzeColumn  | delf <sid>Vertfold  | delf <sid>InitCSVFixedWidth  Break | delf <sid>LocalCmd  | delf <sid>CommandDefinitions"
+    " disabled currently, is this really needed?
+    " let b:undo_ftplugin .= "| delf <sid>Warn  | delf <sid>Init  |
+    " \ delf <sid>GetPat  | delf <sid>SearchColumn  | delf <sid>DelColumn |
+    " \ delf <sid>HiCol  | delf <sid>GetDelimiter  | delf <sid>WColumn  |
+    " \ delf <sid>MaxColumns  | delf <sid>ColWidth  | delf <sid>ArCol   |
+    " \ delf <sid>PrepUnArCol  | delf <sid>UnArCol  |
+    " \ delf <sid>CalculateColumnWidth  | delf <sid>Columnize  |
+    " \ delf <sid>GetColPat  | delf <sid>SplitHeaderLine  |
+    " \ delf <sid>SplitHeaderToggle  | delf <sid>MoveCol  |
+    " \ delf <sid>SortComplete  | delf <sid>SortList  | delf <sid>Sort |
+    " \ delf CSV_WCol  | delf <sid>CopyCol  | delf <sid>MoveColumn  |
+    " \ delf <sid>SumColumn  csv#EvalColumn   | delf <sid>DoForEachColumn |
+    " \ delf <sid>PrepareDoForEachColumn | delf <sid>CSVMappings |
+    " \ delf <sid>Map  | delf <sid>EscapeValue  | delf <sid>FoldValue |
+    " \ delf <sid>PrepareFolding | delf <sid>OutputFilters |
+    " \ delf <sid>SortFilter  | delf <sid>GetColumn |
+    " \ delf <sid>RemoveLastItem | delf <sid>DisableFolding |
+    " \ delf <sid>GetSID | delf <sid>CheckHeaderLine |
+    " \ delf <sid>AnalyzeColumn | delf <sid>Vertfold |
+    " \ delf <sid>InitCSVFixedWidth | delf <sid>LocalCmd |
+    " \ delf <sid>CommandDefinitions"
 endfu
 
 fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
