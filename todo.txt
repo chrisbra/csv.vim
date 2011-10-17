@@ -4,6 +4,15 @@
   (should work now)
 - Reapply Filter, in case Search register changed
   (use :Filters!, should work now)
+- Sum should account for different number formats
+  (e.g. 10 000.01 should be counted as 10,000.01 in Australia,
+  10.000 should be counted as 10,000 in Germany.
+
+  How can the user configure how to handle certain delimiters?
+  :SumCol 3 /.:,/ should use the ',' as decimal separator?
+  :SumCol 3 /,: / should use the ' ' as thousands separator?
+  :SumCol 3 /,: / /.:,/ treats ' ' as thousands separator and
+  , as decimal separator?
 - make plugin autoloadable
 - wrap/shorten long fields (scopus.csv). Is this
   even possible with Vim?
