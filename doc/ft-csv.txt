@@ -337,7 +337,10 @@ This outputs the result of the column <nr> within the range given. If no range
 is given, this will calculate the sum of the whole column. If <nr> is not
 given, this calculates the sum for the column the cursor is on. Note, that the
 delimiter will be stripped away from each value and also empty values won't be
-considered. See also |csv-aggregate-functions|
+considered. By default, Vim uses the a numerica format that uses the '.' as 
+decimal separator while there is no thousands separator.
+
+See also |csv-aggregate-functions|
 
 
 3.14 Normal mode commands					 *csv-mapping*
