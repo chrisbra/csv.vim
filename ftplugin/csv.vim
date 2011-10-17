@@ -976,28 +976,6 @@ fu! <sid>CSVMappings() "{{{3
     call <sid>Map('map', 'L', 'W')
     call <sid>Map('map', '<Up>', 'K')
     call <sid>Map('map', '<Down>', 'J')
-    "noremap <silent> <buffer> W :<C-U>call <SID>MoveCol(1, line('.'))<CR>
-    "noremap <silent> <buffer> E :<C-U>call <SID>MoveCol(-1, line('.'))<CR>
-    "noremap <silent> <buffer> K :<C-U>call <SID>MoveCol(0, line('.')-v:count1)<CR>
-    "noremap <silent> <buffer> J :<C-U>call <SID>MoveCol(0, line('.')+v:count1)<CR>
-    "nnoremap <silent> <buffer> <CR> :<C-U>call <SID>PrepareFolding(1)<CR>
-    "nnoremap <silent> <buffer> <BS> :<C-U>call <SID>PrepareFolding(0)<CR>
-    " Remap <CR> original values to a sane backup
-    "noremap <silent> <buffer> <LocalLeader>J J
-    "noremap <silent> <buffer> <LocalLeader>K K
-    "noremap <silent> <buffer> <LocalLeader>W W
-    "noremap <silent> <buffer> <LocalLeader>E E
-    "noremap <silent> <buffer> <LocalLeader>H H
-    "noremap <silent> <buffer> <LocalLeader>L L
-    "nnoremap <silent> <buffer> <LocalLeader><CR> <CR>
-    "nnoremap <silent> <buffer> <LocalLeader><BS> <BS>
-    " Map C-Right and C-Left as alternative to W and E
-    "map <silent> <buffer> <C-Right> W
-    "map <silent> <buffer> <C-Left>  E
-    "map <silent> <buffer> H E
-    "map <silent> <buffer> L W
-    "map <silent> <buffer> <Up> K
-    "map <silent> <buffer> <Down> J
 endfu
 
 fu! <sid>Map(map, name, definition) "{{{3
