@@ -88,6 +88,9 @@ fu! <sid>Init() "{{{3
         let b:col = g:csv_col
     endif
 
+    " define buffer-local commands
+    call <SID>CommandDefinitions()
+
     " Highlight column, on which the cursor is?
     if exists("g:csv_highlight_column") && g:csv_highlight_column =~? 'y' &&
         \ !exists("#CSV_HI#CursorMoved")
@@ -128,8 +131,6 @@ fu! <sid>Init() "{{{3
     " Defines which line is considered to be a header line
     call <sid>CheckHeaderLine()
 
-    " define buffer-local commands
-    call <SID>CommandDefinitions()
     " CSV specific mappings
     call <SID>CSVMappings()
 
