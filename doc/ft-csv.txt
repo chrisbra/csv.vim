@@ -1,7 +1,7 @@
 *ft-csv.txt*	For Vim version 7.3	Last Change: Thu, 06 Oct 2011
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.20
+Version:	0.21
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -42,6 +42,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
         4.9.1 Manual setup
         4.9.2 Setup using a Wizard
     4.10 CSV Header lines.......................|csv-header|
+    4.11 Number format..........................|csv-nrformat|
 5. CSV Tips and Tricks..........................|csv-tips|
     5.1 Statusline..............................|csv-stl|
     5.2 Slow ArrangeCol.........................|csv-slow|
@@ -309,16 +310,17 @@ current cursor position is used. If no register is given, the default register
 3.12 Move A Column        					 *MoveCol_CSV*
 ------------------
 
-You can move one column behind another column by using the :MoveColumn
-command >
+You can move one column to the right of another column by using the
+:MoveColumn command >
 
     :[range]MoveColumn [source] [dest]
 
-This moves the column number source behind column nr destination.
-If both arguments are not given, move the column on which the cursor is behind
-the last column. If [range] is not given, MoveColumn moves all columns,
-otherwise, it moves the columns only for the lines within the range, e.g.
-given that your first line is a header line, which you don't want to change >
+This moves the column number source to the right of column nr destination. If
+both arguments are not given, move the column on which the cursor is to the
+right of the current last column. If [range] is not given, MoveColumn moves
+the entire column, otherwise, it moves the columns only for the lines within
+the range, e.g. given that your first line is a header line, which you don't
+want to change >
 
     :2,$MoveColumn 1 $
 
@@ -331,14 +333,34 @@ as is.
 
 You can let Vim output the sum of a column using the :SumCol command >
 
-    :[range]SumCol [nr]
+    :[range]SumCol [nr] [/format/]
 
 This outputs the result of the column <nr> within the range given. If no range
 is given, this will calculate the sum of the whole column. If <nr> is not
 given, this calculates the sum for the column the cursor is on. Note, that the
 delimiter will be stripped away from each value and also empty values won't be
-considered. By default, Vim uses the a numerica format that uses the '.' as 
-decimal separator while there is no thousands separator.
+considered.
+
+By default, Vim uses the a numerica format that uses the '.' as decimal
+separator while there is no thousands separator. If youre file contains 
+the numbers in a different format, you can use the /format/ option to specify
+a different thousands separator or a different decimal separator. The format
+needs to be specified like this:
+    /x:y/
+where 'x' defines the thousands separator and y defines the decimal
+separator and each one is optional. This means, that >
+
+    :SumCol 1 /:,/
+
+uses the default thousands separator and ',' as the decimal separator and >
+
+    :SumCol 2 / :./
+
+uses the Space as thousands separator and the '.' as decimal separator.
+
+Note, if you Vim is compiled without floating point number format (|+float|),
+Vim will only aggregate the integer part and therefore won't use the 'y'
+argument in the /format/ specifier.
 
 See also |csv-aggregate-functions|
 
@@ -854,6 +876,23 @@ to disable, that a header line won't be folded away. If your header line
 instead is on line 5, simply set this variable to 5. This also applies to the
 |Header_CSV| command.
 
+4.11 Number format                                           *csv-nrformat*
+------------------
+When using the |SumCol_CSV| command, you can specify a certain number format
+using the /x:y/ argument. You can however also configure the plugin to detect
+a different number format than the default number format (which does not
+support a thousands separator and uses the '.' as decimal separator).
+
+To specify a different thousands separator by default, use >
+
+    let b:csv_thousands_sep = ' '
+
+to have the space use as thousands separator and >
+
+    let b:csv_decimal_sep = ','
+
+to use the comma as decimal separator.
+
 ==============================================================================
 5. CSV Tips and Tricks						*csv-tips*
 
@@ -1018,6 +1057,12 @@ function and let the plugin call it for a column like this:
 - :Filters! reapplys the dynamic filter
 - Apply |csv-aggregate-functions| only to those values, that are
   not folded away.
+- |SumCol_CSV| can use a different number format (suggested by James Cole,
+  thanks! (also |csv-nrformat|
+- Documentation updates (suggested by James Cole and Peng Yu)
+- More code cleanup and error handling
+  https://github.com/chrisbra/csv.vim/issues/9 reported Daniel Carl, thanks!
+  https://github.com/chrisbra/csv.vim/issues/8 patch by Daniel Carl, thanks!
 
 0.21 Oct 06, 2011 {{{1
 - same as 0.20 (erroneously uploaded to vim.org)   
