@@ -1,6 +1,6 @@
 " Filetype plugin for editing CSV files. "{{{1
 " Author:  Christian Brabandt <cb@256bit.org>
-" Version: 0.20
+" Version: 0.21
 " Script:  http://www.vim.org/scripts/script.php?script_id=2830
 " License: VIM License
 " Last Change: Thu, 06 Oct 2011 20:47:21 +0200
@@ -118,6 +118,7 @@ fu! <sid>Init() "{{{3
         \ . "| unlet! b:delimiter b:col b:csv_fixed_width_cols b:csv_filter"
         \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
         \ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
+        \ . "| unlet! b:csv_thousands_sep b:csv_decimal_sep"
 
     " CSV local settings
     setl nostartofline tw=0 nowrap
@@ -133,7 +134,6 @@ fu! <sid>Init() "{{{3
 
     " CSV specific mappings
     call <SID>CSVMappings()
-
 
     " force reloading CSV Syntax Highlighting
     if exists("b:current_syntax")
@@ -171,7 +171,7 @@ fu! <sid>Init() "{{{3
     " \ delf <sid>GetSID | delf <sid>CheckHeaderLine |
     " \ delf <sid>AnalyzeColumn | delf <sid>Vertfold |
     " \ delf <sid>InitCSVFixedWidth | delf <sid>LocalCmd |
-    " \ delf <sid>CommandDefinitions"
+    " \ delf <sid>CommandDefinitions | delf <sid>NumberFormat"
 endfu
 
 fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
@@ -581,6 +581,7 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
         call <sid>Warn("Header does not work with fixed width column!")
         return
     endif
+    " Check that there exists a header line
     call <sid>CheckHeaderLine()
     if !a:bang
         " A Split Header Window already exists,
@@ -875,21 +876,27 @@ fu! <sid>MoveColumn(start, stop, ...) range "{{{3
 endfu
 
 fu! <sid>SumColumn(list) "{{{3
+    " Sum a list of values, but only consider the digits within each value
+    " parses the digits according to the given format (if none has been
+    " specified, assume POSIX format (without thousand separator) If Vim has
+    " does not support floats, simply sum up only the integer part
     if empty(a:list)
         return 0
     else
-        let sum = 0.0
+        let sum = has("float") ? 0.0 : 0
         for item in a:list
             let nr = matchstr(item, '\d\(.*\d\)$')
-            let format1 = '^\d\+\zs\V' . s:nr_format[','] . '\=\m\ze\d'
-            let format2 = '\d\+\zs\V' . s:nr_format['.'] . '\=\m\ze\d'
+            let format1 = '^\d\+\zs\V' . s:nr_format[0] . '\=\m\ze\d'
+            let format2 = '\d\+\zs\V' . s:nr_format[1] . '\=\m\ze\d'
             try
                 let nr = substitute(nr, format1, '', '')
-                let nr = substitute(nr, format2, '.', '')
+                if has("float")
+                    let nr = substitute(nr, format2, '.', '')
+                endif
             catch
                 let nr = 0
             endtry
-            let sum += str2float(nr)
+            let sum += (has("float") ? str2float(nr) : (nr + 0))
         endfor
         return sum
     endif
@@ -912,18 +919,22 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     call filter(column, '!empty(v:val)')
     
     " parse the optional number format
-    let s:nr_format = {',':',', '.': '.'}
-    let format = substitute(a:nr, '^\d\+', '', '')
+    let format = matchstr(a:nr, '/[^/]*/')
     if !empty(format)
-        let start = 1
-        " parse the optional number format
-        while match(format, '/[^/]*/', 0, start) >= 0
-            let str = matchstr(format, '/[^/]*/', 0, start)
-            let str = substitute(str, '/', '', 'g')
-            let val = split(str, ':')
-            let s:nr_format[val[0]] = val[1]
-            let start += 1
-        endw
+        call <sid>NumberFormat()
+        let s:nr_format = [',', '.']
+        try
+            let s = []
+            " parse the optional number format
+            let str = matchstr(format, '/\zs[^/]*\ze/', 0, start)
+            let s = matchlist(str, '\(.\)\?:\(.\)\?')[1:2]
+            if !empty(s[0])
+                let s:nr_format[0] = s[0]
+            endif
+            if !empty(s[1])
+                let s:nr_format[1] = s[1]
+            endif
+        endtry
     endif
     try
         let result=call(function(a:func), [column])
@@ -1225,6 +1236,16 @@ fu! <sid>GetSID() "{{{3
     endif
 endfu
 
+fu! <sid>NumberFormat() "{{{3
+    let s:nr_format = [',', '.']
+    if exists("b:csv_thousands_sep")
+        let s:nr_format[0] = b:csv_thousands_sep
+    endif
+    if exists("b:csv_decimal_sep")
+        let s:nr_format[1] = b:csv_decimal_sep
+    endif
+endfu
+
 fu! <sid>CheckHeaderLine() "{{{3
     if !exists("b:csv_headerline")
         let s:csv_fold_headerline = 1
@@ -1411,7 +1432,7 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-nargs=? -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("ArrangeColumn",
         \ ':call <sid>ArrangeCol(<line1>, <line2>, <bang>0)',
-        \ '-range')
+        \ '-range -bang')
     call <sid>LocalCmd("UnArrangeColumn",
         \':call <sid>PrepUnArrangeCol(<line1>, <line2>)',
         \ '-range')
