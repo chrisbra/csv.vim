@@ -892,7 +892,7 @@ fu! <sid>SumColumn(list) "{{{3
             if empty(item)
                 continue
             endif
-            let nr = matchstr(item, '\d\(.*\d\)$')
+            let nr = matchstr(item, '\d\(.*\d\)\?$')
             let format1 = '^\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
             let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
             try
@@ -906,7 +906,11 @@ fu! <sid>SumColumn(list) "{{{3
             let sum += (has("float") ? str2float(nr) : (nr + 0))
         endfor
         if has("float")
-            return printf("%.2f", sum)
+            if float2nr(sum) == sum
+                return float2nr(sum)
+            else
+                return printf("%.2f", sum)
+            endif
         endif
         return sum
     endif
@@ -1447,9 +1451,6 @@ fu! <sid>CSVMappings() "{{{3
     call <sid>Map('vnoremap', 'af', ':<C-U>call <sid>MoveOver(1)<CR>')
     call <sid>Map('omap', 'af', ':norm vaf<cr>')
     call <sid>Map('omap', 'if', ':norm vif<cr>')
-    " Text object: Record
-    call <sid>Map('vnoremap', 'ir', 'V')
-    call <sid>Map('omap', 'ir', ':norm vir<cr>')
     " Remap <CR> original values to a sane backup
     call <sid>Map('noremap', '<LocalLeader>J', 'J')
     call <sid>Map('noremap', '<LocalLeader>K', 'K')
