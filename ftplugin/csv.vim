@@ -889,6 +889,9 @@ fu! <sid>SumColumn(list) "{{{3
     else
         let sum = has("float") ? 0.0 : 0
         for item in a:list
+            if empty(item)
+                continue
+            endif
             let nr = matchstr(item, '\d\(.*\d\)$')
             let format1 = '^\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
             let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
@@ -921,9 +924,11 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     let column = <sid>CopyCol('', col)[start : stop]
     " Delete delimiter
     call map(column, 'substitute(v:val, b:delimiter . "$", "", "g")')
-    " Delete empty values
     call map(column, 'substitute(v:val, ''^\s\+$'', "", "g")')
-    call filter(column, '!empty(v:val)')
+    " Delete empty values
+    " Leave this up to the function that does something
+    " with each value
+    "call filter(column, '!empty(v:val)')
     
     " parse the optional number format
     let format = matchstr(a:nr, '/[^/]*/')
