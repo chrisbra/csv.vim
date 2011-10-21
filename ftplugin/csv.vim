@@ -27,7 +27,6 @@ fu! <sid>Warn(mess) "{{{3
 endfu
 
 fu! <sid>Init() "{{{3
-    let b:undo_ftplugin=""
     " Hilight Group for Columns
     if exists("g:csv_hiGroup")
         let s:hiGroup = g:csv_hiGroup
@@ -87,6 +86,18 @@ fu! <sid>Init() "{{{3
         " User given column definition
         let b:col = g:csv_col
     endif
+    
+    " undo when setting a new filetype
+    let b:undo_ftplugin = "setlocal sol< tw< wrap<"
+        \ . "| setl fen< fdm< fdl< fdc< fml<"
+
+    " CSV local settings
+    setl nostartofline tw=0 nowrap
+
+    if has("conceal")
+        setl cole=2 cocu=nc
+        let b:undo_ftplugin .= '| setl cole< cocu< '
+    endif
 
     " define buffer-local commands
     call <SID>CommandDefinitions()
@@ -109,24 +120,8 @@ fu! <sid>Init() "{{{3
         HiColumn!
     endif
     " undo autocommand:
-    let b:undo_ftplugin .= 'exe "sil! au! CSV_HI CursorMoved <buffer> "'
-    let b:undo_ftplugin .= '| exe "sil! aug! CSV_HI" |exe "sil! HiColumn!" |'
-
-    " undo when setting a new filetype
-    let b:undo_ftplugin .= " setlocal sol< tw< wrap<"
-        \ . "| setl fen< fdm< fdl< fdc< fml<"
-        \ . "| unlet! b:delimiter b:col b:csv_fixed_width_cols b:csv_filter"
-        \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
-        \ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
-        \ . "| unlet! b:csv_thousands_sep b:csv_decimal_sep"
-
-    " CSV local settings
-    setl nostartofline tw=0 nowrap
-
-    if has("conceal")
-        setl cole=2 cocu=nc
-        let b:undo_ftplugin .= '| setl cole< cocu< '
-    endif
+    let b:undo_ftplugin .= '| exe "sil! au! CSV_HI CursorMoved <buffer> "'
+    let b:undo_ftplugin .= '| exe "sil! aug! CSV_HI" |exe "sil! HiColumn!"'
 
     " Check Header line
     " Defines which line is considered to be a header line
@@ -150,6 +145,14 @@ fu! <sid>Init() "{{{3
     endif
     call <sid>DisableFolding()
     silent do Syntax
+
+    " Remove configuration variables
+    let b:undo_ftplugin .=  "| unlet! b:delimiter b:col"
+        \ . "| unlet! b:csv_fixed_width_cols b:csv_filter"
+        \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
+        \ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
+        \ . "| unlet! b:csv_thousands_sep b:csv_decimal_sep"
+
     " Delete all functions
     " disabled currently, is this really needed?
     " let b:undo_ftplugin .= "| delf <sid>Warn  | delf <sid>Init  |
@@ -171,7 +174,8 @@ fu! <sid>Init() "{{{3
     " \ delf <sid>GetSID | delf <sid>CheckHeaderLine |
     " \ delf <sid>AnalyzeColumn | delf <sid>Vertfold |
     " \ delf <sid>InitCSVFixedWidth | delf <sid>LocalCmd |
-    " \ delf <sid>CommandDefinitions | delf <sid>NumberFormat"
+    " \ delf <sid>CommandDefinitions | delf <sid>NumberFormat |
+    " \ delf <sid>NewRecord | delf <sid>MoveOver"
 endfu
 
 fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
@@ -886,11 +890,11 @@ fu! <sid>SumColumn(list) "{{{3
         let sum = has("float") ? 0.0 : 0
         for item in a:list
             let nr = matchstr(item, '\d\(.*\d\)$')
-            let format1 = '^\d\+\zs\V' . s:nr_format[0] . '\=\m\ze\d'
-            let format2 = '\d\+\zs\V' . s:nr_format[1] . '\=\m\ze\d'
+            let format1 = '^\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
+            let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
             try
                 let nr = substitute(nr, format1, '', '')
-                if has("float")
+                if has("float") && s:nr_format[1] != '.'
                     let nr = substitute(nr, format2, '.', '')
                 endif
             catch
@@ -898,6 +902,9 @@ fu! <sid>SumColumn(list) "{{{3
             endtry
             let sum += (has("float") ? str2float(nr) : (nr + 0))
         endfor
+        if has("float")
+            return printf("%.2f", sum)
+        endif
         return sum
     endif
 endfu
@@ -909,7 +916,7 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     let col = (empty(nr) ? <sid>WColumn() : nr)
     " don't take the header line into consideration
     let start = a:first - 1 + s:csv_fold_headerline
-    let stop  = a:last  - 1
+    let stop  = a:last  - 1 + s:csv_fold_headerline
 
     let column = <sid>CopyCol('', col)[start : stop]
     " Delete delimiter
@@ -920,9 +927,9 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     
     " parse the optional number format
     let format = matchstr(a:nr, '/[^/]*/')
+    let s:nr_format = [',', '.']
     if !empty(format)
         call <sid>NumberFormat()
-        let s:nr_format = [',', '.']
         try
             let s = []
             " parse the optional number format
@@ -1021,44 +1028,6 @@ fu! <sid>PrepareDoForEachColumn(start, stop, bang) range"{{{3
     let g:csv_convert=input("Converted text, use %s for column input:\n", convert)
     call <sid>DoForEachColumn(a:start, a:stop, a:bang)
 endfun
-fu! <sid>CSVMappings() "{{{3
-    call <sid>Map('noremap', 'W', ':<C-U>call <SID>MoveCol(1, line("."))<CR>')
-    call <sid>Map('noremap', 'E', ':<C-U>call <SID>MoveCol(-1, line("."))<CR>')
-    call <sid>Map('noremap', 'K', ':<C-U>call <SID>MoveCol(0, line(".")-v:count1)<CR>')
-    call <sid>Map('noremap', 'J', ':<C-U>call <SID>MoveCol(0, line(".")+v:count1)<CR>')
-    call <sid>Map('nnoremap', '<CR>', ':<C-U>call <SID>PrepareFolding(1)<CR>')
-    call <sid>Map('nnoremap', '<BS>', ':<C-U>call <SID>PrepareFolding(0)<CR>')
-    " Remap <CR> original values to a sane backup
-    call <sid>Map('noremap', '<LocalLeader>J', 'J')
-    call <sid>Map('noremap', '<LocalLeader>K', 'K')
-    call <sid>Map('noremap', '<LocalLeader>W', 'W')
-    call <sid>Map('noremap', '<LocalLeader>E', 'E')
-    call <sid>Map('noremap', '<LocalLeader>H', 'H')
-    call <sid>Map('noremap', '<LocalLeader>L', 'L')
-    call <sid>Map('nnoremap', '<LocalLeader><CR>', '<CR>')
-    call <sid>Map('nnoremap', '<LocalLeader><BS>', '<BS>')
-    call <sid>Map('map', '<C-Right>', 'W')
-    call <sid>Map('map', '<C-Left>', 'E')
-    call <sid>Map('map', 'H', 'E')
-    call <sid>Map('map', 'L', 'W')
-    call <sid>Map('map', '<Up>', 'K')
-    call <sid>Map('map', '<Down>', 'J')
-endfu
-
-fu! <sid>Map(map, name, definition) "{{{3
-    " All mappings are buffer local
-    exe a:map "<buffer> <silent>" a:name a:definition
-    " should already exists
-    if a:map == 'nnoremap'
-        let unmap = 'nunmap'
-    elseif a:map == 'noremap' || a:map == 'map'
-        let unmap = 'unmap'
-    endif
-    if exists("b:undo_ftplugin")
-        let b:undo_ftplugin .= "| " . unmap . " <buffer> " . a:name
-    endif
-endfu
-
 fu! <sid>EscapeValue(val) "{{{3
     return '\V' . escape(a:val, '\')
 endfu
@@ -1409,18 +1378,91 @@ fu! Break()
     return
 endfu
 
-fu! <sid>LocalCmd(name, definition, args) "{{{3
-    if !exists(':'.a:name)
-        exe "com! -buffer " a:args a:name a:definition
-        if exists("b:undo_ftplugin")
-            let b:undo_ftplugin .= "| sil! delc " . a:name
+fu! <sid>NewRecord(line1, line2, count) "{{{3
+    if a:count =~ "\D"
+        call <sid>WarningMsg("Invalid count specified")
+        return
+    endif
+
+    let cnt = (empty(a:count) ? 1 : a:count)
+    let record = ""
+    for item in range(1,<sid>MaxColumns())
+        if !exists("b:col_width")
+            " Best guess width
+            let record .= printf("%20s", b:delimiter)
+        else
+            let record .= printf("%*s", b:col_width[item-1]+1, b:delimiter)
         endif
+    endfor
+
+    if getline(1)[-1:] !=  b:delimiter
+        let record = record[0:-2] . " "
+    endif
+
+    let line = []
+    for item in range(cnt)
+        call add(line, record)
+    endfor
+    for nr in range(a:line1, a:line2)
+        call append(nr, line)
+    endfor
+endfu
+
+fu! <sid>MoveOver(outer) "{{{3
+    " Move over a field
+    " a:outer means include the delimiter
+    let last = 0
+    let mode = a:outer
+
+    if <sid>WColumn() == <sid>MaxColumns()
+        let last = 1
+        if !mode && getline('.')[-1:] != b:delimiter
+            " No trailing delimiter, so inner == outer
+            let mode = 1
+        endif
+    endif
+    " Use the mapped key
+    exe ":sil! norm E"
+    if last
+        exe "sil! norm! /" . b:col . "\<cr>v$h" . (mode ? "" : "\<Left>")
+    else
+        exe "sil! norm! /" . b:col . "\<cr>vn\<Left>" . (mode ? "" : "\<Left>")
     endif
 endfu
 
+fu! <sid>CSVMappings() "{{{3
+    call <sid>Map('noremap', 'W', ':<C-U>call <SID>MoveCol(1, line("."))<CR>')
+    call <sid>Map('noremap', 'E', ':<C-U>call <SID>MoveCol(-1, line("."))<CR>')
+    call <sid>Map('noremap', 'K', ':<C-U>call <SID>MoveCol(0, line(".")-v:count1)<CR>')
+    call <sid>Map('noremap', 'J', ':<C-U>call <SID>MoveCol(0, line(".")+v:count1)<CR>')
+    call <sid>Map('nnoremap', '<CR>', ':<C-U>call <SID>PrepareFolding(1)<CR>')
+    call <sid>Map('nnoremap', '<BS>', ':<C-U>call <SID>PrepareFolding(0)<CR>')
+    " Text object: Field
+    call <sid>Map('vnoremap', 'if', ':<C-U>call <sid>MoveOver(0)<CR>')
+    call <sid>Map('vnoremap', 'af', ':<C-U>call <sid>MoveOver(1)<CR>')
+    call <sid>Map('omap', 'af', ':norm vaf<cr>')
+    call <sid>Map('omap', 'if', ':norm vif<cr>')
+    " Text object: Record
+    call <sid>Map('vnoremap', 'ir', 'V')
+    call <sid>Map('omap', 'ir', ':norm vir<cr>')
+    " Remap <CR> original values to a sane backup
+    call <sid>Map('noremap', '<LocalLeader>J', 'J')
+    call <sid>Map('noremap', '<LocalLeader>K', 'K')
+    call <sid>Map('vnoremap', '<LocalLeader>W', 'W')
+    call <sid>Map('vnoremap', '<LocalLeader>E', 'E')
+    call <sid>Map('noremap', '<LocalLeader>H', 'H')
+    call <sid>Map('noremap', '<LocalLeader>L', 'L')
+    call <sid>Map('nnoremap', '<LocalLeader><CR>', '<CR>')
+    call <sid>Map('nnoremap', '<LocalLeader><BS>', '<BS>')
+    call <sid>Map('map', '<C-Right>', 'W')
+    call <sid>Map('map', '<C-Left>', 'E')
+    call <sid>Map('map', 'H', 'E')
+    call <sid>Map('map', 'L', 'W')
+    call <sid>Map('map', '<Up>', 'K')
+    call <sid>Map('map', '<Down>', 'J')
+endfu
+
 fu! <sid>CommandDefinitions() "{{{3
-    " When adding new commands, be sure, to also update
-    " b:undo_ftplugin
     call <sid>LocalCmd("WhatColumn", ':echo <sid>WColumn(<bang>0)',
         \ '-bang')
     call <sid>LocalCmd("NrColumns", ':echo <sid>MaxColumns()', '')
@@ -1469,7 +1511,32 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("VertFold", ':call <sid>Vertfold(<bang>0,<args>)',
         \ '-bang -nargs=? -range=% -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("CSVFixed", ':call <sid>InitCSVFixedWidth()', '')
+    call <sid>LocalCmd("NewRecord", ':call <sid>NewRecord(<line1>,
+        \ <line2>, <q-args>)', '-nargs=? -range')
 endfu
+fu! <sid>Map(map, name, definition) "{{{3
+    " All mappings are buffer local
+    exe a:map "<buffer> <silent>" a:name a:definition
+    " should already exists
+    if a:map == 'nnoremap'
+        let unmap = 'nunmap'
+    elseif a:map == 'noremap' || a:map == 'map'
+        let unmap = 'unmap'
+    elseif a:map == 'vnoremap'
+        let unmap = 'vunmap'
+    elseif a:map == 'omap'
+        let unmap = 'ounmap'
+    endif
+    let b:undo_ftplugin .= "| " . unmap . " <buffer> " . a:name
+endfu
+
+fu! <sid>LocalCmd(name, definition, args) "{{{3
+    if !exists(':'.a:name)
+        exe "com! -buffer " a:args a:name a:definition
+        let b:undo_ftplugin .= "| sil! delc " . a:name
+    endif
+endfu
+
 " end function definition "}}}2
 " Initialize Plugin "{{{2
 call <SID>Init()
