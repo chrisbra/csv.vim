@@ -48,6 +48,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     5.1 Statusline..............................|csv-stl|
     5.2 Slow ArrangeCol.........................|csv-slow|
     5.3 Defining custom aggregate functions.....|csv-aggregate-functions|
+    5.4 Autocommand on opening/closing files....|csv-arrange-autocmd|
 6. CSV Changelog................................|csv-changelog|
 
 ==============================================================================
@@ -201,17 +202,22 @@ from accidently changing your csv file, the buffer will be set 'readonly'
 afterwards. Note: this command does not work for fixed width columns
 |csv-fixedwidth|
 
+See also |csv-arrange-autocmd| on how to have vim automaticaly arrange a CSV
+file upon entering it.
+
 3.6 UnArrangeColumn                                    *UnArrangeColumn_CSV*
 -----------------
 
 If you would like to undo a previous :ArrangeColumn command, you can use this
 command: >
 
-    :UnArrangeColumn
+    :[range]UnArrangeColumn
 
 Beware, that is no exact undo of the :ArrangeColumn command, since it strips
 away all leading blanks for each column. So if previously a column contained
 only some blanks, this command will strip all blanks.
+
+If [range] is given, it defaults to the current line.
 
 3.7 DeleteColumn                                           *DeleteColumn_CSV*
 ----------------
@@ -406,8 +412,6 @@ if                      Inner Field (contains everything up to the delimiter)
 
 af                      Outer Field (contains everything up to and including
                         the delimiter)
-
-ir                      Inner Record (basically the complete line).
 
 Note, that the <BS>, <CR>, K and J overlap Vim's default mapping for |<CR>|,
 |<BS>|, |J| and |K| respectively. Therefore, this functionality has been
@@ -1017,8 +1021,7 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 The CSV plugin already defines the |SumCol_CSV| command, to let you calculate
 the sum of all values of a certain column within a given range. This will
 consider all values within the range, that are not folded away (|csv-filter|),
-except for empty fields and the header lines. The delimiter will be deleted
-from each field.
+and the header lines. The delimiter will be deleted from each field.
 
 But it may be, that you don't need the sum, but would rather want to have the
 average of all values within a certain column. You can define your own
@@ -1073,6 +1076,26 @@ function and let the plugin call it for a column like this:
     This will evaluate the average of column seven (assuming, line 1 is the
     header line, which should not be taken into account).
 
+5.4 Autocommand on opening/closing files                |csv-arrange-autocmd|
+----------------------------------------
+
+If you want your CSV files to always be displayed like a table, you can
+achieve this using the |ArrangeColumn_CSV| command and some autocommands.
+Define these autocommands in your |.vimrc| >
+
+    aug CSV_Editing
+        au!
+        au BufRead,BufWritePost *.csv :%ArrangeColumn
+        au BufWritePre *.csv :%UnArrangeColumn
+    aug end
+
+Upon Entering a csv file, Vim will visually arrange all columns and before
+writing, those columns will be collapsed again. The BufWritePost autocommand
+makes sure, that after the file has been written successfully, the csv file
+will again be visually arranged.
+
+Note, this is highly experimental and especially on big files, this might
+take a while.
 
 ==============================================================================
 6. CSV Changelog					       *csv-changelog*
@@ -1088,6 +1111,9 @@ function and let the plugin call it for a column like this:
 - More code cleanup and error handling
   https://github.com/chrisbra/csv.vim/issues/9 reported Daniel Carl, thanks!
   https://github.com/chrisbra/csv.vim/issues/8 patch by Daniel Carl, thanks!
+- New Command |NewRecord_CSV| (suggest by James Cole, thanks!)
+- new textobjects InnerField (if) and outerField (af) which contain the field
+  without or with the delimiter (suggested by James Cole, thanks!)
 
 0.21 Oct 06, 2011 {{{1
 - same as 0.20 (erroneously uploaded to vim.org)   
