@@ -174,13 +174,13 @@ fu! <sid>DoAutoCommands() "{{{3
 
     " Visually arrange columns when opening a csv file
     if exists("g:csv_autocmd_arrange") &&
-        \ !exists("#CSV_Edit#BufRead")
+        \ !exists("#CSV_Edit#BufReadPost")
         aug CSV_Edit
             au!
-            au BufRead,BufWritePost *.csv,*.dat :sil %ArrangeColumn
+            au BufReadPost,BufWritePost *.csv,*.dat :sil %ArrangeColumn
             au BufWritePre *.csv,*.dat :sil %UnArrangeColumn
         aug end
-    elseif exists("#CSV_Edit#BufRead")
+    elseif exists("#CSV_Edit#BufReadPost")
         aug CSV_Edit
             au!
         aug end
