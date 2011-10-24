@@ -1094,6 +1094,13 @@ writing, those columns will be collapsed again. The BufWritePost autocommand
 makes sure, that after the file has been written successfully, the csv file
 will again be visually arranged.
 
+You can also simply set the variable >
+
+    let g:csv_autocmd_arrange = 1
+<
+in your vimrc and an autocmd will be installed, that visually arranges your
+csv file whenever you open them for editing.
+
 Note, this is highly experimental and especially on big files, this might
 take a while.
 
@@ -1114,6 +1121,8 @@ take a while.
 - New Command |NewRecord_CSV| (suggest by James Cole, thanks!)
 - new textobjects InnerField (if) and outerField (af) which contain the field
   without or with the delimiter (suggested by James Cole, thanks!)
+- |csv-arrange-autocmd| to let Vim automatically visually arrange the columns
+  using |ArrangeColumn_CSV|
 
 0.21 Oct 06, 2011 {{{1
 - same as 0.20 (erroneously uploaded to vim.org)   
