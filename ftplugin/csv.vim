@@ -102,6 +102,55 @@ fu! <sid>Init() "{{{3
     " define buffer-local commands
     call <SID>CommandDefinitions()
 
+    " Check Header line
+    " Defines which line is considered to be a header line
+    call <sid>CheckHeaderLine()
+
+    " CSV specific mappings
+    call <SID>CSVMappings()
+
+    " force reloading CSV Syntax Highlighting
+    if exists("b:current_syntax")
+        unlet b:current_syntax
+        " Force reloading syntax file
+    endif
+    call <sid>DoAutoCommands()
+    call <sid>DisableFolding()
+    silent do Syntax
+
+    " Remove configuration variables
+    let b:undo_ftplugin .=  "| unlet! b:delimiter b:col"
+        \ . "| unlet! b:csv_fixed_width_cols b:csv_filter"
+        \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
+        \ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
+        \ . "| unlet! b:csv_thousands_sep b:csv_decimal_sep"
+
+ " Delete all functions
+ " disabled currently, is this really needed?
+ " let b:undo_ftplugin .= "| delf <sid>Warn | delf <sid>Init |
+ " \ delf <sid>GetPat | delf <sid>SearchColumn | delf <sid>DelColumn |
+ " \ delf <sid>HiCol | delf <sid>GetDelimiter | delf <sid>WColumn |
+ " \ delf <sid>MaxColumns | delf <sid>ColWidth | delf <sid>ArCol |
+ " \ delf <sid>PrepUnArCol | delf <sid>UnArCol |
+ " \ delf <sid>CalculateColumnWidth | delf <sid>Columnize |
+ " \ delf <sid>GetColPat | delf <sid>SplitHeaderLine |
+ " \ delf <sid>SplitHeaderToggle | delf <sid>MoveCol |
+ " \ delf <sid>SortComplete | delf <sid>SortList | delf <sid>Sort |
+ " \ delf CSV_WCol | delf <sid>CopyCol | delf <sid>MoveColumn |
+ " \ delf <sid>SumColumn csv#EvalColumn | delf <sid>DoForEachColumn |
+ " \ delf <sid>PrepareDoForEachColumn | delf <sid>CSVMappings |
+ " \ delf <sid>Map | delf <sid>EscapeValue | delf <sid>FoldValue |
+ " \ delf <sid>PrepareFolding | delf <sid>OutputFilters |
+ " \ delf <sid>SortFilter | delf <sid>GetColumn |
+ " \ delf <sid>RemoveLastItem | delf <sid>DisableFolding |
+ " \ delf <sid>GetSID | delf <sid>CheckHeaderLine |
+ " \ delf <sid>AnalyzeColumn | delf <sid>Vertfold |
+ " \ delf <sid>InitCSVFixedWidth | delf <sid>LocalCmd |
+ " \ delf <sid>CommandDefinitions | delf <sid>NumberFormat |
+ " \ delf <sid>NewRecord | delf <sid>MoveOver"
+endfu
+
+fu! <sid>DoAutoCommands() "{{{3
     " Highlight column, on which the cursor is?
     if exists("g:csv_highlight_column") && g:csv_highlight_column =~? 'y' &&
         \ !exists("#CSV_HI#CursorMoved")
@@ -123,18 +172,24 @@ fu! <sid>Init() "{{{3
     let b:undo_ftplugin .= '| exe "sil! au! CSV_HI CursorMoved <buffer> "'
     let b:undo_ftplugin .= '| exe "sil! aug! CSV_HI" |exe "sil! HiColumn!"'
 
-    " Check Header line
-    " Defines which line is considered to be a header line
-    call <sid>CheckHeaderLine()
-
-    " CSV specific mappings
-    call <SID>CSVMappings()
-
-    " force reloading CSV Syntax Highlighting
-    if exists("b:current_syntax")
-        unlet b:current_syntax
-        " Force reloading syntax file
+    " Visually arrange columns when opening a csv file
+    if exists("g:csv_autocmd_arrange") &&
+        \ !exists("#CSV_Edit#BufRead")
+        aug CSV_Edit
+            au!
+            au BufRead,BufWritePost *.csv,*.dat :sil %ArrangeColumn
+            au BufWritePre *.csv,*.dat :sil %UnArrangeColumn
+        aug end
+    elseif exists("#CSV_Edit#BufRead")
+        aug CSV_Edit
+            au!
+        aug end
+        aug! CSV_Edit
     endif
+    " undo autocommand:
+    let b:undo_ftplugin .= '| exe "sil! au! CSV_Edit BufRead,BufWritePost,BufWritePre *.csv,*.dat "'
+    let b:undo_ftplugin .= '| exe "sil! aug! CSV_Edit"'
+
     if !exists("#CSV#ColorScheme")
         " Make sure, syntax highlighting is applied
         " after changing the colorscheme
@@ -143,41 +198,9 @@ fu! <sid>Init() "{{{3
             au ColorScheme *.csv,*.dat do Syntax
         augroup end
     endif
-    call <sid>DisableFolding()
-    silent do Syntax
-
-    " Remove configuration variables
-    let b:undo_ftplugin .=  "| unlet! b:delimiter b:col"
-        \ . "| unlet! b:csv_fixed_width_cols b:csv_filter"
-        \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
-        \ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
-        \ . "| unlet! b:csv_thousands_sep b:csv_decimal_sep"
-
-    " Delete all functions
-    " disabled currently, is this really needed?
-    " let b:undo_ftplugin .= "| delf <sid>Warn  | delf <sid>Init  |
-    " \ delf <sid>GetPat  | delf <sid>SearchColumn  | delf <sid>DelColumn |
-    " \ delf <sid>HiCol  | delf <sid>GetDelimiter  | delf <sid>WColumn  |
-    " \ delf <sid>MaxColumns  | delf <sid>ColWidth  | delf <sid>ArCol   |
-    " \ delf <sid>PrepUnArCol  | delf <sid>UnArCol  |
-    " \ delf <sid>CalculateColumnWidth  | delf <sid>Columnize  |
-    " \ delf <sid>GetColPat  | delf <sid>SplitHeaderLine  |
-    " \ delf <sid>SplitHeaderToggle  | delf <sid>MoveCol  |
-    " \ delf <sid>SortComplete  | delf <sid>SortList  | delf <sid>Sort |
-    " \ delf CSV_WCol  | delf <sid>CopyCol  | delf <sid>MoveColumn  |
-    " \ delf <sid>SumColumn  csv#EvalColumn   | delf <sid>DoForEachColumn |
-    " \ delf <sid>PrepareDoForEachColumn | delf <sid>CSVMappings |
-    " \ delf <sid>Map  | delf <sid>EscapeValue  | delf <sid>FoldValue |
-    " \ delf <sid>PrepareFolding | delf <sid>OutputFilters |
-    " \ delf <sid>SortFilter  | delf <sid>GetColumn |
-    " \ delf <sid>RemoveLastItem | delf <sid>DisableFolding |
-    " \ delf <sid>GetSID | delf <sid>CheckHeaderLine |
-    " \ delf <sid>AnalyzeColumn | delf <sid>Vertfold |
-    " \ delf <sid>InitCSVFixedWidth | delf <sid>LocalCmd |
-    " \ delf <sid>CommandDefinitions | delf <sid>NumberFormat |
-    " \ delf <sid>NewRecord | delf <sid>MoveOver"
+    let b:undo_ftplugin .= '| exe "sil! au! CSV ColorScheme *.csv,*.dat "'
+    let b:undo_ftplugin .= '| exe "sil! aug! CSV"'
 endfu
-
 fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
     if a:colnr > 1 && a:colnr < a:maxcolnr
         if !exists("b:csv_fixed_width_cols")
@@ -936,9 +959,8 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     
     " parse the optional number format
     let format = matchstr(a:nr, '/[^/]*/')
-    let s:nr_format = [',', '.']
+    call <sid>NumberFormat()
     if !empty(format)
-        call <sid>NumberFormat()
         try
             let s = []
             " parse the optional number format
