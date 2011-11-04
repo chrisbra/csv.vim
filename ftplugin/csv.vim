@@ -122,7 +122,7 @@ fu! <sid>Init() "{{{3
     let b:undo_ftplugin .=  "| unlet! b:delimiter b:col"
         \ . "| unlet! b:csv_fixed_width_cols b:csv_filter"
         \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
-        \ . "| unlet! b:CSV_SplitWindow b:csv_headerline"
+        \ . "| unlet! b:csv_SplitWindow b:csv_headerline"
         \ . "| unlet! b:csv_thousands_sep b:csv_decimal_sep"
 
  " Delete all functions
@@ -613,7 +613,7 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
     if !a:bang
         " A Split Header Window already exists,
         " first close the already existing Window
-        if exists("b:CSV_SplitWindow")
+        if exists("b:csv_SplitWindow")
             call <sid>SplitHeaderLine(a:lines, 1, a:hor)
         endif
         " Split Window
@@ -653,13 +653,13 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
         endif
         call matchadd("CSVHeaderLine", b:col)
         exe "wincmd p"
-        let b:CSV_SplitWindow = win
+        let b:csv_SplitWindow = win
     else
         " Close split window
-        if !exists("b:CSV_SplitWindow")
+        if !exists("b:csv_SplitWindow")
             return
         endif
-        exe b:CSV_SplitWindow . "wincmd w"
+        exe b:csv_SplitWindow . "wincmd w"
         if exists("_stl")
             let &l_stl = _stl
         endif
@@ -668,12 +668,12 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
         endif
         setl noscrollbind
         wincmd c
-        unlet! b:CSV_SplitWindow
+        unlet! b:csv_SplitWindow
     endif
 endfu
 
 fu! <sid>SplitHeaderToggle(hor) "{{{3
-    if !exists("b:CSV_SplitWindow")
+    if !exists("b:csv_SplitWindow")
         :call <sid>SplitHeaderLine(1,0,a:hor)
     else
         :call <sid>SplitHeaderLine(1,1,a:hor)
@@ -1063,7 +1063,7 @@ fu! <sid>EscapeValue(val) "{{{3
     return '\V' . escape(a:val, '\')
 endfu
 
-fu! <sid>FoldValue(lnum, val) "{{{3
+fu! <sid>FoldValue(lnum, val, match) "{{{3
     call <sid>CheckHeaderLine()
 
     if (a:lnum == s:csv_fold_headerline)
@@ -1073,15 +1073,24 @@ fu! <sid>FoldValue(lnum, val) "{{{3
 
     " Match literally, don't use regular expressions for matching
     if (getline(a:lnum) =~ a:val)
-        return 0
+        " if a:match is given, fold non-matching items,
+        " else fold matching items
+        return !a:match
     else
-        return 1
+        return a:match
     endif
 endfu
 
-fu! <sid>PrepareFolding(add)  "{{{3
+fu! <sid>PrepareFolding(add, match)  "{{{3
     if !has("folding")
         return
+    endif
+
+    " Move folded-parts away?
+    if exists("g:csv_move_folds")
+        let s:csv_move_folds = g:csv_move_folds
+    else
+        let s:csv_move_folds = 0
     endif
 
     if !exists("b:csv_filter")
@@ -1090,6 +1099,7 @@ fu! <sid>PrepareFolding(add)  "{{{3
     if !exists("s:filter_count") || s:filter_count < 1
         let s:filter_count = 0
     endif
+    let cpos = winsaveview()
 
     if !a:add
         " remove last added item from filter
@@ -1138,7 +1148,7 @@ fu! <sid>PrepareFolding(add)  "{{{3
 
         let s:filter_count += 1
         let b:csv_filter[col] = { 'pat': b, 'id': s:filter_count,
-            \ 'col': col, 'orig': a }
+            \ 'col': col, 'orig': a, 'match': a:match}
 
     endif
     " Put the pattern into the search register, so they will also
@@ -1149,21 +1159,29 @@ fu! <sid>PrepareFolding(add)  "{{{3
     endfor
     let sid = <sid>GetSID()
     " Don't put spaces between the arguments!
-    exe 'setl foldexpr=' . sid . '_FoldValue(v:lnum,@/)'
+    exe 'setl foldexpr=' . sid . '_FoldValue(v:lnum,@/,' . a:match . ')'
     "setl foldexpr=s:FoldValue(v:lnum,@/)
     " Be sure to also fold away single screen lines
     setl fen fdm=expr fdl=0 fdc=2 fml=0
     setl foldtext=substitute(v:folddashes,'-','\ ','g')
     setl fillchars-=fold:-
+    " Move folded area to the bottom, so there is only on consecutive
+    " non-folded area
+    if exists("s:csv_move_folds") && s:csv_move_folds
+        \ && !&l:ro && &l:ma
+        folddoclosed m$
+        let cpos.lnum = s:csv_fold_headerline + 1
+    endif
+    call winrestview(cpos)
 endfu
 
 fu! <sid>OutputFilters(bang) "{{{3
     if !a:bang
         call <sid>CheckHeaderLine()
         if s:csv_fold_headerline
-            let  title="Nr\tCol\t      Name\tValue"
+            let  title="Nr\tMatch\tCol\t      Name\tValue"
         else
-            let  title="Nr\tCol\tValue"
+            let  title="Nr\tMatch\tCol\tValue"
         endif
         echohl "Title"
         echo   printf("%s", title)
@@ -1176,12 +1194,14 @@ fu! <sid>OutputFilters(bang) "{{{3
             call sort(items, "<sid>SortFilter")
             for item in items
                 if s:csv_fold_headerline
-                    echo printf("%02d\t%02d\t%10.10s\t%s",
-                        \ item.id, item.col, <sid>GetColumn(1, item.col),
+                    echo printf("%02d\t% 2s\t%02d\t%10.10s\t%s",
+                        \ item.id, (item.match ? '+' : '-'),
+                        \ item.col, <sid>GetColumn(1, item.col),
                         \ item.orig)
                 else
-                    echo printf("%02d\t%02d\t%s",
-                        \ item.id, item.col, item.orig)
+                    echo printf("%02d\t% 2s\t%02d\t%s",
+                        \ item.id, (item.match ? '+' : '-'),
+                        \ item.col, item.orig)
                 endif
             endfor
         endif
@@ -1464,10 +1484,16 @@ endfu
 fu! <sid>CSVMappings() "{{{3
     call <sid>Map('noremap', 'W', ':<C-U>call <SID>MoveCol(1, line("."))<CR>')
     call <sid>Map('noremap', 'E', ':<C-U>call <SID>MoveCol(-1, line("."))<CR>')
-    call <sid>Map('noremap', 'K', ':<C-U>call <SID>MoveCol(0, line(".")-v:count1)<CR>')
-    call <sid>Map('noremap', 'J', ':<C-U>call <SID>MoveCol(0, line(".")+v:count1)<CR>')
-    call <sid>Map('nnoremap', '<CR>', ':<C-U>call <SID>PrepareFolding(1)<CR>')
-    call <sid>Map('nnoremap', '<BS>', ':<C-U>call <SID>PrepareFolding(0)<CR>')
+    call <sid>Map('noremap', 'K', ':<C-U>call <SID>MoveCol(0,
+        \ line(".")-v:count1)<CR>')
+    call <sid>Map('noremap', 'J', ':<C-U>call <SID>MoveCol(0,
+        \ line(".")+v:count1)<CR>')
+    call <sid>Map('nnoremap', '<CR>', ':<C-U>call <SID>PrepareFolding(1,
+        \ 1)<CR>')
+    call <sid>Map('nnoremap', '<Space>', ':<C-U>call <SID>PrepareFolding(1,
+        \ 0)<CR>')
+    call <sid>Map('nnoremap', '<BS>', ':<C-U>call <SID>PrepareFolding(0,
+        \ 1)<CR>')
     " Text object: Field
     call <sid>Map('vnoremap', 'if', ':<C-U>call <sid>MoveOver(0)<CR>')
     call <sid>Map('vnoremap', 'af', ':<C-U>call <sid>MoveOver(1)<CR>')
@@ -1481,6 +1507,7 @@ fu! <sid>CSVMappings() "{{{3
     call <sid>Map('noremap', '<LocalLeader>H', 'H')
     call <sid>Map('noremap', '<LocalLeader>L', 'L')
     call <sid>Map('nnoremap', '<LocalLeader><CR>', '<CR>')
+    call <sid>Map('nnoremap', '<LocalLeader><Space>', '<Space>')
     call <sid>Map('nnoremap', '<LocalLeader><BS>', '<BS>')
     call <sid>Map('map', '<C-Right>', 'W')
     call <sid>Map('map', '<C-Left>', 'E')
