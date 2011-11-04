@@ -1063,22 +1063,32 @@ fu! <sid>EscapeValue(val) "{{{3
     return '\V' . escape(a:val, '\')
 endfu
 
-fu! <sid>FoldValue(lnum, val, match) "{{{3
+fu! <sid>FoldValue(lnum, filter) "{{{3
     call <sid>CheckHeaderLine()
 
     if (a:lnum == s:csv_fold_headerline)
         " Don't fold away the header line
         return 0
     endif
+    let result = 0
 
-    " Match literally, don't use regular expressions for matching
-    if (getline(a:lnum) =~ a:val)
-        " if a:match is given, fold non-matching items,
-        " else fold matching items
-        return !a:match
-    else
-        return a:match
-    endif
+    for item in values(a:filter)
+        if eval('getline(a:lnum)' .  (item.match ? '!~' : '=~') . 'item.pat')
+            let result += 1
+        else
+            let result += 0
+        endif
+    endfor
+    return (result > 0)
+    
+"        " Match literally, don't use regular expressions for matching
+"        if (getline(a:lnum) =~ a:val)
+"            " if a:match is given, fold non-matching items,
+"            " else fold matching items
+"            return !a:match
+"        else
+"            return a:match
+"        endif
 endfu
 
 fu! <sid>PrepareFolding(add, match)  "{{{3
@@ -1153,13 +1163,13 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
     endif
     " Put the pattern into the search register, so they will also
     " be highlighted
-    let @/ = ''
-    for val in sort(values(b:csv_filter), '<sid>SortFilter')
-        let @/ .= val.pat . (val.id == s:filter_count ? '' : '\&')
-    endfor
+"    let @/ = ''
+"    for val in sort(values(b:csv_filter), '<sid>SortFilter')
+"        let @/ .= val.pat . (val.id == s:filter_count ? '' : '\&')
+"    endfor
     let sid = <sid>GetSID()
     " Don't put spaces between the arguments!
-    exe 'setl foldexpr=' . sid . '_FoldValue(v:lnum,@/,' . a:match . ')'
+    exe 'setl foldexpr=<snr>' . sid . '_FoldValue(v:lnum,b:csv_filter)'
     "setl foldexpr=s:FoldValue(v:lnum,@/)
     " Be sure to also fold away single screen lines
     setl fen fdm=expr fdl=0 fdc=2 fml=0
@@ -1211,12 +1221,7 @@ fu! <sid>OutputFilters(bang) "{{{3
             call <sid>Warn("No filters defined currently!")
             return
         else
-            for val in values(b:csv_filter)
-                let a .= val.pat . '\&'
-            endfor
-            " Remove trailing \& from the pattern
-            let @/ = a[0:-3]
-            norm! zX
+            exe 'setl foldexpr=<snr>' . sid . '_FoldValue(v:lnum,b:csv_filter)'
         endif
     endif
 endfu
@@ -1250,9 +1255,10 @@ endfu
 
 fu! <sid>GetSID() "{{{3
     if v:version > 703 || v:version == 703 && has("patch032")
-        return '<SNR>' . maparg('W', "", "", 1).sid
+        return maparg('W', "", "", 1).sid
     else
-        return substitute(maparg('W'), '\(<SNR>\d\+\)_', '\1', '')
+        "return substitute(maparg('W'), '\(<SNR>\d\+\)_', '\1', '')
+        return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_GetSID$')
     endif
 endfu
 
