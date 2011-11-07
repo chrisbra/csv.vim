@@ -147,7 +147,7 @@ fu! <sid>Init() "{{{3
  " \ delf <sid>AnalyzeColumn | delf <sid>Vertfold |
  " \ delf <sid>InitCSVFixedWidth | delf <sid>LocalCmd |
  " \ delf <sid>CommandDefinitions | delf <sid>NumberFormat |
- " \ delf <sid>NewRecord | delf <sid>MoveOver"
+ " \ delf <sid>NewRecord | delf <sid>MoveOver | delf <sid>Menu "
 endfu
 
 fu! <sid>DoAutoCommands() "{{{3
@@ -200,6 +200,16 @@ fu! <sid>DoAutoCommands() "{{{3
     endif
     let b:undo_ftplugin .= '| exe "sil! au! CSV ColorScheme *.csv,*.dat "'
     let b:undo_ftplugin .= '| exe "sil! aug! CSV"'
+
+    if has("gui_running") && !exists("#CSV_Menu#FileType")
+        augroup CSV_Menu
+            au!
+            au FileType csv call <sid>Menu(1)
+            au BufEnter <buffer> call <sid>Menu(1) " enable
+            au BufLeave <buffer> call <sid>Menu(0) " disable
+        augroup END
+    endif
+    let b:undo_ftplugin .= '| sil! amenu disable CSV'
 endfu
 fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
     if a:colnr > 1 && a:colnr < a:maxcolnr
@@ -1173,7 +1183,8 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
     "setl foldexpr=s:FoldValue(v:lnum,@/)
     " Be sure to also fold away single screen lines
     setl fen fdm=expr fdl=0 fdc=2 fml=0
-    setl foldtext=substitute(v:folddashes,'-','\ ','g')
+    "setl foldtext=substitute(v:folddashes,'-','\ ','g')
+    let &foldtext=strlen(v:folddashes) . ' lines hidden'
     setl fillchars-=fold:-
     " Move folded area to the bottom, so there is only on consecutive
     " non-folded area
@@ -1360,7 +1371,12 @@ fu! <sid>Vertfold(bang, col) "{{{3
         call <sid>Warn("There are no columns defined, can't hide away anything!")
         return
     endif
-    let pat=<sid>GetPat(a:col, <sid>MaxColumns(), '.*')
+    if empty(a:col)
+        let colnr=<SID>WColumn()
+    else
+        let colnr=a:col
+    endif
+    let pat=<sid>GetPat(colnr, <sid>MaxColumns(), '.*')
     if exists("b:csv_fixed_width_cols") &&
         \ pat !~ '^\^\.\*'
         " Make the pattern implicitly start at line start,
@@ -1569,7 +1585,7 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-nargs=0 -bang')
     call <sid>LocalCmd("Analyze", ':call <sid>AnalyzeColumn(<args>)',
         \ '-nargs=?')
-    call <sid>LocalCmd("VertFold", ':call <sid>Vertfold(<bang>0,<args>)',
+    call <sid>LocalCmd("VertFold", ':call <sid>Vertfold(<bang>0,<q-args>)',
         \ '-bang -nargs=? -range=% -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("CSVFixed", ':call <sid>InitCSVFixedWidth()', '')
     call <sid>LocalCmd("NewRecord", ':call <sid>NewRecord(<line1>,
@@ -1598,7 +1614,34 @@ fu! <sid>LocalCmd(name, definition, args) "{{{3
     endif
 endfu
 
-" end function definition "}}}2
+fu! <sid>Menu(enable) "{{{3
+    if a:enable
+        " Make a menu for the graphical vim
+        amenu CSV.&Init\ Plugin             :InitCSV<cr>
+        amenu CSV.SetUp\ &fixedwidth\ Cols  :CSVFixed<cr>
+        amenu CSV.-sep1-                    <nul>
+        amenu &CSV.&Column.&Number          :WhatColumn<cr>
+        amenu CSV.Column.N&ame              :WhatColumn!<cr>
+        amenu CSV.Column.&Highlight\ column :HiColumn<cr>
+        amenu CSV.Column.&Remove\ highlight :HiColumn!<cr>
+        amenu CSV.Column.&Delete            :DeleteColumn<cr>
+        amenu CSV.Column.&Sort              :%Sort<cr>
+        amenu CSV.Column.&Copy              :Column<cr>
+        amenu CSV.Column.&Move              :%MoveColumn<cr>
+        amenu CSV.Column.S&um               :%SumCol<cr>
+        amenu CSV.Column.Analy&ze           :Analyze<cr>
+        amenu CSV.Column.&Arrange           :%ArrangeCol<cr>
+        amenu CSV.Column.&UnArrange         :%UnArrangeCol<cr>
+        amenu CSV.-sep2-                    <nul>
+        amenu CSV.&Toggle\ Header           :HeaderToggle<cr>
+        amenu CSV.&ConvertData              :ConvertData<cr>
+        amenu CSV.Filters                   :Filters<cr>
+        amenu CSV.Hide\ C&olumn           :VertFold<cr>
+        amenu CSV.&New\ Record              :NewRecord<cr>
+    else
+        amenu disable CSV
+    endif
+endfu
 " Initialize Plugin "{{{2
 call <SID>Init()
 let &cpo = s:cpo_save
