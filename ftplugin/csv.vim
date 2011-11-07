@@ -1085,20 +1085,9 @@ fu! <sid>FoldValue(lnum, filter) "{{{3
     for item in values(a:filter)
         if eval('getline(a:lnum)' .  (item.match ? '!~' : '=~') . 'item.pat')
             let result += 1
-        else
-            let result += 0
         endif
     endfor
     return (result > 0)
-    
-"        " Match literally, don't use regular expressions for matching
-"        if (getline(a:lnum) =~ a:val)
-"            " if a:match is given, fold non-matching items,
-"            " else fold matching items
-"            return !a:match
-"        else
-"            return a:match
-"        endif
 endfu
 
 fu! <sid>PrepareFolding(add, match)  "{{{3
