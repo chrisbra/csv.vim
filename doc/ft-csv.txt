@@ -1,7 +1,7 @@
-*ft-csv.txt*	For Vim version 7.3	Last Change: Thu, 06 Oct 2011
+*ft-csv.txt*	For Vim version 7.3	Last Change: Tue, 08 Nov 2011
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.21
+Version:	0.22
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -1133,7 +1133,7 @@ take a while.
 ==============================================================================
 6. CSV Changelog					       *csv-changelog*
 
-0.22 (unreleased) {{{1
+0.22 Nov 08, 2011 {{{1
 - Small enhancements to |SumCol_CSV|
 - :Filters! reapplys the dynamic filter
 - Apply |csv-aggregate-functions| only to those values, that are
