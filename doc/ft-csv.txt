@@ -44,6 +44,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
         4.9.2 Setup using a Wizard
     4.10 CSV Header lines.......................|csv-header|
     4.11 Number format..........................|csv-nrformat|
+    4.12 Move folded lines......................|csv-move-folds|
 5. CSV Tips and Tricks..........................|csv-tips|
     5.1 Statusline..............................|csv-stl|
     5.2 Slow ArrangeCol.........................|csv-slow|
@@ -403,6 +404,9 @@ The csv filetype plugin redefines the following keys as:
 <Enter>                 Dynamically fold all lines away, that don't match
                         the value in the current column. See |csv-filter|
 
+<Space>                 Dynamically fold all lines away, that match
+                        the value in the current column. See |csv-filter|
+
 <BS>                    Remove last item from the dynamic filter.
                         See |csv-filter|
 
@@ -533,36 +537,42 @@ this column, you can dynamically filter the file and fold away all lines not
 matching the value in the current column. To do so, simply press <CR> (Enter).
 Now Vim will fold away all lines, that don't have the same value in this
 particular row. Note, that leading blanks and the delimiter is removed and the
-value is used literally when comparing with other values.
+value is used literally when comparing with other values. If you press <Space>
+on the value, all fields having the same value will be folded away.
 
 The way this is done is, that the value from the column is extracted and a
-regular expression for that column is generated from it. In the end this
-regular expression is put into the search register (|quote_/|) and used for
-folding the file.
+regular expression for that field is generated from it. In the end this
+regular expression is used for folding the file.
 
-A subsequent <CR> on another value, will add this value to the current applied
-filter (this is like using the logical AND between the currently active filter
-and the new value). To remove the last item from the filter, press <BS>
-(backspace). If all items from the filter are removed, folding will be
-disabled.
+A subsequent <CR> or <Space> on another value, will add this value to the
+current applied filter (this is like using the logical AND between the
+currently active filter and the new value). To remove the last item from the
+filter, press <BS> (backspace). If all items from the filter are removed,
+folding will be disabled.
 
 If some command messes up the folding, you can use |zX| to have the folding
-being reinitialized. (If in the meantime you searched for something, the folds
-will be updated to only fold away non-matching lines.)
+being reinitialized. 
 
 By default, the first line is assumed to be the header and won't be folded
 away. See also |csv-header|.
+
+If you have set the g:csv_move_folds variable and the file is modifiable, all
+folded lines will be moved to the end of the file, so you can view all
+non-folded lines as one consecutive area  (see also |csv-move-folds|)
 
                                                          *:Filter* *Filter_CSV*
 To see the active filters, you can use the :Filter command. This will show you
 a small summary, of what filters are active and looks like this: 
 
-Nr      Col           Name              Value `
-============================================= `
-01      07          Price;              23.10 `
+Nr      Match   Col           Name              Value `
+===================================================== `
+01       -       07          Price;              23.10 `
+02       +       08            Qty;                 10 `
 
-This means, there is only one filter active. The current active filter is on
-column 7 (column name is Price) and the active value for the filter is 23.10.
+This means, there are two filters active. The current active filter is on
+column 7 (column name is Price) and all values that match 23.10 will be folded
+away AND all values that don't match a value of 10 in the QTY column will also
+be folded away.
 When removing one item from the filter by pressing <BS>, it will always remove
 the last item (highest number in NR column) from the active filter values.
 
@@ -608,12 +618,13 @@ Sometimes, you want to hide away certain columns to better view only certain
 columns without having to horizontally scroll. You can use the :VertFold
 command to hide certain columns: >
 
-    :VertFold <nr>
+    :VertFold [<nr>]
 <
 This will hide all columns from the first until the number entered. It
 currently can't hide single columns, because of the way, syntax highlighting
 is used. This command uses the conceal-feature |:syn-conceal| to hide away
-those columns.
+those columns. If no nr is given, hides all columns from the beginning till
+the current column.
 
 Use >
     :VertFold!
@@ -922,6 +933,21 @@ to have the space use as thousands separator and >
 
 to use the comma as decimal separator.
 
+4.12 Move folded lines format                                 *csv-move-folds*
+------------------
+
+If you use dynamic filters (see |csv-filter|), you can configure the plugin to
+move all folded lines to the end of the file. This only happens if you set the
+variable >
+
+    let g:csv_move_folds = 1
+<
+and the file is modifiable. This let's you see all non-folded records as a
+consecutive area without being disrupted by folded lines.
+
+(Note, that this might currently not work
+correctly all the times, as there seems to be a bug within Vim currently).
+
 ==============================================================================
 5. CSV Tips and Tricks						*csv-tips*
 
@@ -1123,6 +1149,8 @@ take a while.
   without or with the delimiter (suggested by James Cole, thanks!)
 - |csv-arrange-autocmd| to let Vim automatically visually arrange the columns
   using |ArrangeColumn_CSV|
+- |csv-move-folds| let Vim move folded lines to the end
+- implement a Menu for graphical Vim
 
 0.21 Oct 06, 2011 {{{1
 - same as 0.20 (erroneously uploaded to vim.org)   

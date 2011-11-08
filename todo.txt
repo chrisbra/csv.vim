@@ -1,14 +1,9 @@
 - add vertical folding (concealing columns)
   (works partly, can't conceal single columns?)
-- apply Filter negatively, e.g. pressing enter on a value, hides all
-  values, that don't have this value. (Maybe use <Space>, on the value?)
-- When filtering, move all folded values together, so your file needs to
-  be reorded (and changed), but will leave all non-folded items
-  together. Make this configurable and only possible, when the file is
-  !read-only and modifiable)
 - make plugin autoloadable (shouldn't be necessary, as the code is only
   loaded for file with &ft=csv)
 - wrap/shorten long fields (scopus.csv). Is this even possible with Vim?
+  (maybe conceal trailing and leading whitespace?)
 
 ## Fixed items
 - add a wizard, for defining fixed-width columns
@@ -19,11 +14,21 @@
   (e.g. 10 000.01 should be counted as 10,000.01 in Australia,
   10.000 should be counted as 10,000 in Germany.
 
-  How can the user configure how to handle certain delimiters?
-  :SumCol 3 /.:,/ should use the ',' as decimal separator?
-  :SumCol 3 /,: / should use the ' ' as thousands separator?
-  :SumCol 3 /,: / /.:,/ treats ' ' as thousands separator and
-  , as decimal separator?
+    How can the user configure how to handle certain delimiters?
+    :SumCol 3 /.:,/ should use the ',' as decimal separator?
+    :SumCol 3 /,: / should use the ' ' as thousands separator?
+    :SumCol 3 /,: / /.:,/ treats ' ' as thousands separator and
+    , as decimal separator?
+  (should work now)
+
+- When filtering, move all folded values together, so your file needs to
+  be reorded (and changed), but will leave all non-folded items
+  together. Make this configurable and only possible, when the file is
+  !read-only and modifiable)
+  (should work now)
+
+- apply Filter negatively, e.g. pressing enter on a value, hides all
+  values, that don't have this value. (Maybe use <Space>, on the value?)
   (should work now)
 
 vim:tw=72
