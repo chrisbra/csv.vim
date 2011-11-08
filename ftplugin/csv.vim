@@ -1235,10 +1235,11 @@ fu! <sid>GetColumn(line, col) "{{{3
     " Return Column content at a:line, a:col
     let a=getline(a:line)
     if !exists("b:csv_fixed_width_cols")
-        return split(a, '^' . b:col . '\zs')[a:col - 1]
+        let a = split(a, '^' . b:col . '\zs')[a:col - 1]
     else
-        return matchstr(a, <sid>GetColPat(a:col, 0))
+        let a = matchstr(a, <sid>GetColPat(a:col, 0))
     endif
+    return substitute(a, '^\s\+\|\s\+$', '', 'g')
 endfu
 
 fu! <sid>RemoveLastItem(count) "{{{3
