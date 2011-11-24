@@ -54,7 +54,9 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
 	" we catch every exception
 	let s:col = s:col_def
 	let s:del = s:del_def
-	call <sid>Warning("Invalid column pattern, using default pattern " . s:col_def)
+	if line('$') > 1
+	    call <sid>Warning("Invalid column pattern, using default pattern " . s:col_def)
+	endif
     finally
 	let @/ = _s
 	call setpos('.', _p)

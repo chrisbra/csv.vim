@@ -1133,6 +1133,10 @@ take a while.
 ==============================================================================
 6. CSV Changelog					       *csv-changelog*
 
+0.23 (unreleased) {{{1
+- Don't error out, when creating a new file and syntax highlighting
+  script can't find the delimiter
+  (ftplugin will still give a warning, so).
 0.22 Nov 08, 2011 {{{1
 - Small enhancements to |SumCol_CSV|
 - :Filters! reapplys the dynamic filter
