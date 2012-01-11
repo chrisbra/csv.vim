@@ -976,6 +976,11 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
             " parse the optional number format
             let str = matchstr(format, '/\zs[^/]*\ze/', 0, start)
             let s = matchlist(str, '\(.\)\?:\(.\)\?')[1:2]
+            if len(s) == 0
+                " Number format wrong
+                call <sid>Warn("Numberformat wrong, needs to be /x:y/!")
+                return ''
+            endif
             if !empty(s[0])
                 let s:nr_format[0] = s[0]
             endif
