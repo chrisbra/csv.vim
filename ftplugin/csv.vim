@@ -360,6 +360,7 @@ endfu
 fu! <sid>GetDelimiter() "{{{3
     if !exists("b:csv_fixed_width_cols")
         let _cur = getpos('.')
+        let _s   = @/
         let Delim={0: ';', 1:  ',', 2: '|', 3: '	'}
         let temp={}
         for i in  values(Delim)
@@ -373,6 +374,7 @@ fu! <sid>GetDelimiter() "{{{3
 
         let result=[]
         call setpos('.', _cur)
+        let @/ = _s
         for [key, value] in items(Delim)
             if value == max
                 return key
@@ -1491,11 +1493,13 @@ fu! <sid>MoveOver(outer) "{{{3
     endif
     " Use the mapped key
     exe ":sil! norm E"
+    let _s = @/
     if last
         exe "sil! norm! /" . b:col . "\<cr>v$h" . (mode ? "" : "\<Left>")
     else
         exe "sil! norm! /" . b:col . "\<cr>vn\<Left>" . (mode ? "" : "\<Left>")
     endif
+    let @/ = _s
 endfu
 
 fu! <sid>CSVMappings() "{{{3
