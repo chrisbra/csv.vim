@@ -1139,6 +1139,7 @@ take a while.
   (ftplugin will still give a warning, so).
 - Don't pollute the search register when loading a file
 - Give Warning when number format is wrong
+- Don't source ftdetect several times (patch by Zhao Cai, thanks!)
 0.22 Nov 08, 2011 {{{1
 - Small enhancements to |SumCol_CSV|
 - :Filters! reapplys the dynamic filter
