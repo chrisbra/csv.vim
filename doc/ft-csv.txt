@@ -1137,6 +1137,8 @@ take a while.
 - Don't error out, when creating a new file and syntax highlighting
   script can't find the delimiter
   (ftplugin will still give a warning, so).
+- Don't pollute the search register when loading a file
+- Give Warning when number format is wrong
 0.22 Nov 08, 2011 {{{1
 - Small enhancements to |SumCol_CSV|
 - :Filters! reapplys the dynamic filter
