@@ -208,8 +208,9 @@ fu! <sid>DoAutoCommands() "{{{3
             au BufEnter <buffer> call <sid>Menu(1) " enable
             au BufLeave <buffer> call <sid>Menu(0) " disable
         augroup END
+        "let b:undo_ftplugin .= '| sil! amenu disable CSV'
+        let b:undo_ftplugin .= '| sil! call <sid>Menut(0)
     endif
-    let b:undo_ftplugin .= '| sil! amenu disable CSV'
 endfu
 fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
     if a:colnr > 1 && a:colnr < a:maxcolnr
