@@ -1141,7 +1141,7 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
         try
             " strip leading whitespace
             if (a !~ '\s\+'. b:delimiter . '$')
-                let b = split(a, '^\s\+\ze\S')[0]
+                let b = split(a, '^\s\+\ze[^' . b:delimiter. ']\+')[0]
             else
                 let b = a
             endif
@@ -1156,6 +1156,10 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
         catch /^Vim\%((\a\+)\)\=:E684/
             let a = b
         endtry
+
+        if a == b:delimiter
+            let a=repeat(' ', <sid>ColWidth(col))
+        endif
 
         " Make a column pattern
         let b= '\%(' .
@@ -1229,6 +1233,7 @@ fu! <sid>OutputFilters(bang) "{{{3
             call <sid>Warn("No filters defined currently!")
             return
         else
+            let sid = <sid>GetSID()
             exe 'setl foldexpr=<snr>' . sid . '_FoldValue(v:lnum,b:csv_filter)'
         endif
     endif
@@ -1243,7 +1248,12 @@ fu! <sid>GetColumn(line, col) "{{{3
     " Return Column content at a:line, a:col
     let a=getline(a:line)
     if !exists("b:csv_fixed_width_cols")
-        let a = split(a, '^' . b:col . '\zs')[a:col - 1]
+        try
+            let a = split(a, '^' . b:col . '\zs')[a:col - 1]
+        catch
+            " index out of range
+            let a = ''
+        endtry
     else
         let a = matchstr(a, <sid>GetColPat(a:col, 0))
     endif
