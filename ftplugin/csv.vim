@@ -1140,7 +1140,7 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
 
         try
             " strip leading whitespace
-            if (a !~ '\s\+'. b:delimiter . '$')
+            if (a =~ '\s\+'. b:delimiter . '$')
                 let b = split(a, '^\s\+\ze[^' . b:delimiter. ']\+')[0]
             else
                 let b = a
