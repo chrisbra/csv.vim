@@ -25,11 +25,13 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.12 MoveColumn.............................|MoveCol_CSV|
     3.13 Sum of a column........................|SumCol_CSV|
     3.14 Create new records ....................|NewRecord_CSV|
-    3.15 Normal mode commands...................|csv-mapping|
-    3.16 Convert CSV file.......................|csv-convert|
-    3.17 Dynamic filters........................|csv-filter|
-    3.18 Analyze a column.......................|csv-analyze|
-    3.19 Vertical Folding.......................|csv-vertfold|
+    3.15 Change the delimiter...................|NewDelimiter_CSV|
+    3.16 Check for duplicate records............|Duplicate_CSV|
+    3.17 Normal mode commands...................|csv-mapping|
+    3.18 Convert CSV file.......................|csv-convert|
+    3.19 Dynamic filters........................|csv-filter|
+    3.20 Analyze a column.......................|csv-analyze|
+    3.21 Vertical Folding.......................|csv-vertfold|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -388,7 +390,32 @@ records. If [range] is not specified, creates a new line below the line the
 cursor is on and if count is not given, it defaults to 1.
 
 
-3.15 Normal mode commands					 *csv-mapping*
+3.15 Change the delimiter                                    *NewRecords_CSV*
+-------------------------
+
+If you want to change the field delimiter of you can use the :NewDelimiter
+command: >
+
+    :NewDelimiter char
+
+This changes the field delimiter of your file to the new delimiter "char".
+
+3.16 Check for duplicate records                            *Duplicate_CSV*
+--------------------------------
+
+If you want to check the file for duplicate records, use the command: >
+
+    :Duplicate columnlist
+<
+
+Columnlist needs to be a numeric comma-separated list of all columns that you
+want to check. You can also use a range like '2-5' which means the plugin
+should check columns 2,3,4 and 5. 
+
+If the plugin finds a duplicate records, it outputs its line number (but it
+only does that at most 10 times).
+
+3.17 Normal mode commands					 *csv-mapping*
 -------------------------
 
 The csv filetype plugin redefines the following keys as:
@@ -426,7 +453,7 @@ the word under the cursor and \J would join this line with the previous line.
 
 
                                                             *ConvertData_CSV*
-3.16 Converting a CSV File					 *csv-convert*
+3.18 Converting a CSV File					 *csv-convert*
 --------------------------
 
 You can convert your CSV file to a different format with the command >
@@ -529,7 +556,7 @@ doesn't include the column delimiters.
 
 Now you can copy it into your database, or further manipulate it.
 
-3.17 Dynamic filters      					 *csv-filter*
+3.19 Dynamic filters      					 *csv-filter*
 --------------------      
 
 If you are one a value and only want to see lines, that have the same value in
@@ -589,7 +616,7 @@ to reapply all values from the current active filter and fold non-matching
 items away.
 
                                                                 *Analyze_CSV*
-3.18 Analyze a Column       					 *csv-analyze*
+3.20 Analyze a Column       					 *csv-analyze*
 ---------------------
 
 If you'd like to know, how the values are distributed among a certain column,
@@ -611,7 +638,7 @@ This tells you, that the the value '10' in column 3 occurs 50% of the time
 25% of the time.
 
                                                                 *VertFold_CSV*
-3.19 Vertical Folding       					 *csv-vertfold*
+3.21 Vertical Folding       					 *csv-vertfold*
 ---------------------
 
 Sometimes, you want to hide away certain columns to better view only certain
@@ -1140,6 +1167,8 @@ take a while.
 - Don't pollute the search register when loading a file
 - Give Warning when number format is wrong
 - Don't source ftdetect several times (patch by Zhao Cai, thanks!)
+- |NewDelimiter_CSV| to change the delimiter of the file
+- |Duplicate_CSV| to check for duplicate records in the file
 0.22 Nov 08, 2011 {{{1
 - Small enhancements to |SumCol_CSV|
 - :Filters! reapplys the dynamic filter
