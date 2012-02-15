@@ -147,7 +147,10 @@ fu! <sid>Init() "{{{3
  " \ delf <sid>AnalyzeColumn | delf <sid>Vertfold |
  " \ delf <sid>InitCSVFixedWidth | delf <sid>LocalCmd |
  " \ delf <sid>CommandDefinitions | delf <sid>NumberFormat |
- " \ delf <sid>NewRecord | delf <sid>MoveOver | delf <sid>Menu "
+ " \ delf <sid>NewRecord | delf <sid>MoveOver | delf <sid>Menu |
+ " \ delf <sid>NewDelimiter | delf <sid>DuplicateRows | delf <sid>IN |
+ " \ delf <sid>SaveOptions | delf <sid>CheckDuplicates |
+ " \ delf <sid>CompleteColumnNr | 
 endfu
 
 fu! <sid>DoAutoCommands() "{{{3
@@ -1600,7 +1603,12 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("CSVFixed", ':call <sid>InitCSVFixedWidth()', '')
     call <sid>LocalCmd("NewRecord", ':call <sid>NewRecord(<line1>,
         \ <line2>, <q-args>)', '-nargs=? -range')
+    call <sid>LocalCmd("NewDelimiter", ':call <sid>NewDelimiter(<q-args>)',
+        \ '-nargs=1')
+    call <sid>LocalCmd("Duplicates", ':call <sid>CheckDuplicates(<q-args>)',
+        \ '-nargs=1 -complete=custom,<sid>CompleteColumnNr')
 endfu
+
 fu! <sid>Map(map, name, definition) "{{{3
     " All mappings are buffer local
     exe a:map "<buffer> <silent>" a:name a:definition
@@ -1651,6 +1659,97 @@ fu! <sid>Menu(enable) "{{{3
     else
         amenu disable CSV
     endif
+endfu
+
+fu! <sid>SaveOptions(list) "{{{3
+    let save = {}
+    for item in a:list
+        exe "let save.". item. " = &l:". item
+    endfor
+    return save
+endfu
+
+fu! <sid>NewDelimiter(newdelimiter) "{{{3
+    let save = <sid>SaveOptions(['ro', 'ma'])
+    if exists("b:csv_fixed_width_cols")
+        call <sid>Warn("NewDelimiter does not work with fixed width column!")
+        return
+    endif
+    if !&l:ma
+        setl ma
+    endif
+    if &l:ro
+        setl noro
+    endif
+    let line=1
+    while line <= line('$')
+        let fields=split(getline(line), b:col . '\zs')
+        " Remove field delimiter
+        call map(fields, 'substitute(v:val, b:delimiter .
+            \ ''\?$'' , "", "")')
+        call setline(line, join(fields, a:newdelimiter))
+        let line+=1
+    endwhile
+    " reset local buffer options
+    for [key, value] in items(save)
+        call setbufvar('', '&'. key, value)
+    endfor
+    "reinitialize the plugin
+    call <sid>Init()
+endfu
+
+fu! <sid>IN(list, value) "{{{3
+    for item in a:list
+        if item == a:value
+            return 1
+        endif
+    endfor
+    return 0
+endfu
+
+fu! <sid>DuplicateRows(columnlist) "{{{3
+    let duplicates = {}
+    let cnt   = 0
+    let line  = 1
+    while line <= line('$')
+        let key = ""
+        let i = 1
+        let cols = split(getline(line), b:col. '\zs')
+        for column in cols
+            if <sid>IN(a:columnlist, i)
+                let key .= column
+            endif
+            let i += 1
+        endfor
+        if has_key(duplicates, key) && cnt < 10
+            call <sid>Warn("Duplicate Row ". line)
+            let cnt += 1
+        elseif has_key(duplicates, key)
+            call <sid>Warn("More duplicate Rows after: ". line)
+            call <sid>Warn("Aborting...")
+            return
+        else
+            let duplicates[key] = 1
+        endif
+        let line += 1
+    endwhile
+    if cnt == 0
+        call <sid>Warn("No Duplicate Row found!")
+    endif
+endfu
+
+fu! <sid>CompleteColumnNr(A,L,P) "{{{3
+    return join(range(1,<sid>MaxColumns()), "\n")
+endfu
+
+fu! <sid>CheckDuplicates(list) "{{{3
+    let string = a:list
+    if string =~ '\d\s\?-\s\?\d'
+        let string = substitute(string, '\(\d\+\)\s\?-\s\?\(\d\+\)',
+            \ '\=join(range(submatch(1),submatch(2)), ",")', '')
+    endif
+    let list=split(string, ',')
+    call <sid>DuplicateRows(list)
 endfu
 " Initialize Plugin "{{{2
 call <SID>Init()
