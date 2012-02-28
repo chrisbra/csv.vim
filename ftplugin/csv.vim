@@ -198,7 +198,7 @@ fu! <sid>DoAutoCommands() "{{{3
         " after changing the colorscheme
         augroup CSV
             au!
-            au ColorScheme *.csv,*.dat do Syntax
+            au ColorScheme *.csv,*.dat,*.tsv,*.tab do Syntax
         augroup end
     endif
     let b:undo_ftplugin .= '| exe "sil! au! CSV ColorScheme *.csv,*.dat "'
