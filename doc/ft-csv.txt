@@ -47,12 +47,14 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     4.10 CSV Header lines.......................|csv-header|
     4.11 Number format..........................|csv-nrformat|
     4.12 Move folded lines......................|csv-move-folds|
-5. CSV Tips and Tricks..........................|csv-tips|
-    5.1 Statusline..............................|csv-stl|
-    5.2 Slow ArrangeCol.........................|csv-slow|
-    5.3 Defining custom aggregate functions.....|csv-aggregate-functions|
-    5.4 Autocommand on opening/closing files....|csv-arrange-autocmd|
-6. CSV Changelog................................|csv-changelog|
+5. Functions....................................|CSV-Functions|
+    5.1 CSVPat()................................|CSVPat()|
+6. CSV Tips and Tricks..........................|csv-tips|
+    6.1 Statusline..............................|csv-stl|
+    6.2 Slow ArrangeCol.........................|csv-slow|
+    6.3 Defining custom aggregate functions.....|csv-aggregate-functions|
+    6.4 Autocommand on opening/closing files....|csv-arrange-autocmd|
+7. CSV Changelog................................|csv-changelog|
 
 ==============================================================================
 1. Introduction                                                    *csv-intro*
@@ -976,12 +978,41 @@ consecutive area without being disrupted by folded lines.
 correctly all the times, as there seems to be a bug within Vim currently).
 
 ==============================================================================
-5. CSV Tips and Tricks						*csv-tips*
+5. Functions                                                    *CSV-Funtions*
+
+The csv plugins also defines some functions, that can be used for scripting
+when a csv file is open
+
+5.1 CSVPat()  							*CSVPat()*
+------------
+
+CSVPat({column}[, {pattern}])
+
+This function returns the pattern for the selected column. If only columns is
+given, returns the regular expression used to search for the pattern '.*' in
+that column (which means the content of that column). Alternatively, an
+optional pattern can be given, so the return string can be directly feeded to
+the |/| or |:s| command, e.g. type: >
+
+    :s/<C-R>=CSVPat(3, 'foobar')<cr>/baz
+
+where the <C-R> means pressing Control followed by R followed by =
+(see |c_CTRL-R_=|). A prompt will apear, with the '=' as the first character
+on which you can enter expressions.
+
+In this case enter CSVPat(3, 'foobar') which returns the pattern to search for
+the string 'foobar' in the third column. After you press enter, the returned
+pattern will be put after the :s command so you can directly enter / and the
+substitute string.
+
+
+==============================================================================
+6. CSV Tips and Tricks						*csv-tips*
 
 Here, there you'll find some small tips and tricks that might help when
 working with CSV files.
 
-5.1 Statusline							*csv-stl*
+6.1 Statusline							*csv-stl*
 --------------
 Suppose you want to include the column, on which the cursor is, into your
 statusline. You can do this, by defining in your .vimrc the 'statusline' like
@@ -1029,7 +1060,7 @@ by e.g.
 which will output "Name 2/10" if the cursor is in the second column
 which is named "Name".
 
-5.2 Slow ArrangeCol						*csv-slow*
+6.2 Slow ArrangeCol						*csv-slow*
 -------------------
 
 Processing a csv file using |ArrangeColumn_CSV| can be quite slow, because Vim
@@ -1068,7 +1099,7 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 
 
 
-5.3 Defining custom aggregate functions		    *csv-aggregate-functions*
+6.3 Defining custom aggregate functions		    *csv-aggregate-functions*
 ---------------------------------------
 
 The CSV plugin already defines the |SumCol_CSV| command, to let you calculate
@@ -1129,7 +1160,7 @@ function and let the plugin call it for a column like this:
     This will evaluate the average of column seven (assuming, line 1 is the
     header line, which should not be taken into account).
 
-5.4 Autocommand on opening/closing files                |csv-arrange-autocmd|
+6.4 Autocommand on opening/closing files                |csv-arrange-autocmd|
 ----------------------------------------
 
 If you want your CSV files to always be displayed like a table, you can
@@ -1158,7 +1189,7 @@ Note, this is highly experimental and especially on big files, this might
 take a while.
 
 ==============================================================================
-6. CSV Changelog					       *csv-changelog*
+7. CSV Changelog					       *csv-changelog*
 
 0.23 (unreleased) {{{1
 - Don't error out, when creating a new file and syntax highlighting
@@ -1169,6 +1200,9 @@ take a while.
 - Don't source ftdetect several times (patch by Zhao Cai, thanks!)
 - |NewDelimiter_CSV| to change the delimiter of the file
 - |Duplicate_CSV| to check for duplicate records in the file
+- Issue https://github.com/chrisbra/csv.vim/issues/13 fixed (missing quote,
+  reported by y, thanks!)
+- |CSVPat()| function
 0.22 Nov 08, 2011 {{{1
 - Small enhancements to |SumCol_CSV|
 - :Filters! reapplys the dynamic filter

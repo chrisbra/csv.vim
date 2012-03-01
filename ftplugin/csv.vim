@@ -150,7 +150,7 @@ fu! <sid>Init() "{{{3
  " \ delf <sid>NewRecord | delf <sid>MoveOver | delf <sid>Menu |
  " \ delf <sid>NewDelimiter | delf <sid>DuplicateRows | delf <sid>IN |
  " \ delf <sid>SaveOptions | delf <sid>CheckDuplicates |
- " \ delf <sid>CompleteColumnNr | 
+ " \ delf <sid>CompleteColumnNr | delf <sid>CSVPat
 endfu
 
 fu! <sid>DoAutoCommands() "{{{3
@@ -215,6 +215,7 @@ fu! <sid>DoAutoCommands() "{{{3
         let b:undo_ftplugin .= '| sil! call <sid>Menut(0)'
     endif
 endfu
+
 fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
     if a:colnr > 1 && a:colnr < a:maxcolnr
         if !exists("b:csv_fixed_width_cols")
@@ -1751,6 +1752,21 @@ fu! <sid>CheckDuplicates(list) "{{{3
     let list=split(string, ',')
     call <sid>DuplicateRows(list)
 endfu
+fu! CSVPat(colnr, ...) "{{{3
+    " Make sure, we are working in a csv file
+    if &ft != 'csv'
+        return ''
+    endif
+    " encapsulates GetPat(), that returns the search pattern for a 
+    " given column and tries to set the cursor at the specific position
+    let pat = <sid>GetPat(a:colnr, <SID>MaxColumns(), a:0 ? a:1 : '.*')
+    "let pos = match(pat, '.*\\ze') + 1
+    " Try to set the cursor at the beginning of the pattern
+    " does not work
+    "call setcmdpos(pos)
+    return pat
+endfu
+
 " Initialize Plugin "{{{2
 call <SID>Init()
 let &cpo = s:cpo_save
