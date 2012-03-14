@@ -366,13 +366,17 @@ fu! <sid>GetDelimiter() "{{{3
     if !exists("b:csv_fixed_width_cols")
         let _cur = getpos('.')
         let _s   = @/
-        let Delim={0: ';', 1:  ',', 2: '|', 3: '	'}
-        let temp={}
+        let Delim= {0: ';', 1:  ',', 2: '|', 3: '	'}
+        let temp = {}
+        " :silent :s does not work with lazyredraw
+        let _lz  = &lz
+        set nolz
         for i in  values(Delim)
             redir => temp[i]
             exe "silent! %s/" . i . "/&/nge"
             redir END
         endfor
+        let &lz = _lz
         let Delim = map(temp, 'matchstr(substitute(v:val, "\n", "", ""), "^\\d\\+")')
         let Delim = filter(temp, 'v:val=~''\d''')
         let max   = max(values(temp))
