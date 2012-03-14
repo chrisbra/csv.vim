@@ -54,6 +54,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     6.2 Slow ArrangeCol.........................|csv-slow|
     6.3 Defining custom aggregate functions.....|csv-aggregate-functions|
     6.4 Autocommand on opening/closing files....|csv-arrange-autocmd|
+    6.5 CSV Syntax error........................|csv-syntax-error|
 7. CSV Changelog................................|csv-changelog|
 
 ==============================================================================
@@ -1160,7 +1161,7 @@ function and let the plugin call it for a column like this:
     This will evaluate the average of column seven (assuming, line 1 is the
     header line, which should not be taken into account).
 
-6.4 Autocommand on opening/closing files                |csv-arrange-autocmd|
+6.4 Autocommand on opening/closing files                *csv-arrange-autocmd*
 ----------------------------------------
 
 If you want your CSV files to always be displayed like a table, you can
@@ -1188,6 +1189,18 @@ csv file whenever you open them for editing.
 Note, this is highly experimental and especially on big files, this might
 take a while.
 
+6.5 Syntax error when opening a CSV file               *csv-syntax-error*
+----------------------------------------
+
+This happens usually, when the syntax script is read before the filetype
+plugin, so the plugin did not have a chance to setup the column delimiter
+correctly.
+
+The easy way to fix it, is to reverse the order of the :syntax on (|:syn-on|)
+and :filetype plugin (|:filetype-plugin-on|) statements in your |.vimrc|
+
+Alternatively, you can simply call |InitCSV| and ignore the error.
+
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
@@ -1203,6 +1216,7 @@ take a while.
 - Issue https://github.com/chrisbra/csv.vim/issues/13 fixed (missing quote,
   reported by y, thanks!)
 - |CSVPat()| function
+- 'lz' does not work with |:silent| |:s| (patch by Sergey Khorev, thanks!)
 0.22 Nov 08, 2011 {{{1
 - Small enhancements to |SumCol_CSV|
 - :Filters! reapplys the dynamic filter
