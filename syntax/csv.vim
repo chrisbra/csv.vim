@@ -23,8 +23,8 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     let s:col_def = '\%([^' . s:del_def . ']*' . s:del_def . '\|$\)'
 
     " First: 
-    " Check for filetype plugin. This syntax script relies on the filetype plugin,
-    " else, it won't work properly.
+    " Check for filetype plugin. This syntax script relies on the filetype
+    " plugin, else, it won't work properly.
     redir => s:a |sil filetype | redir end
     let s:a=split(s:a, "\n")[0]
     if match(s:a, '\cplugin:off') > 0
@@ -41,26 +41,15 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
 
     " Try a simple highlighting, if the defaults from the ftplugin
     " don't exist
-    let s:col = exists("b:col") && !empty("b:col") ? b:col
+    let s:col = exists("b:col") && !empty(b:col) ? b:col
 		\ : s:col_def
-    let s:del = exists("b:delimiter") && !empty("b:delimiter") ? b:delimiter
+    let s:del = exists("b:delimiter") && !empty(b:delimiter) ? b:delimiter
 		\ : s:del_def
-    try
-	let _p = getpos('.')
-	let _s = @/ 
-	exe "sil norm! /" . b:col . "\<CR>"
-    catch
-	" check for invalid pattern, for simplicity,
-	" we catch every exception
-	let s:col = s:col_def
-	let s:del = s:del_def
-	if line('$') > 1
-	    call <sid>Warning("Invalid column pattern, using default pattern " . s:col_def)
-	endif
-    finally
-	let @/ = _s
-	call setpos('.', _p)
-    endtry
+
+    if line('$') > 1 && (!exists("b:col") || empty(b:col))
+    " check for invalid pattern, ftplugin hasn't been loaded yet
+	call <sid>Warning("Invalid column pattern, using default pattern " . s:col_def)
+    endif
 endfu
 
 " Syntax rules {{{2
