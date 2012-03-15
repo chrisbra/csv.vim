@@ -1,5 +1,6 @@
 let s:cpo_save = &cpo
 set cpo&vim
+
 if exists("g:csv_autocmd_arrange") &&
     \ !exists("#CSV_Edit#BufReadPost")
     aug CSV_Editing
@@ -13,5 +14,6 @@ elseif exists("#CSV_Edit#BufReadPost")
     aug end
     aug! CSV_Edit
 endif
+
 let &cpo = s:cpo_save
 unlet s:cpo_save

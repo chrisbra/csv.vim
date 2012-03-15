@@ -442,7 +442,20 @@ endfu
 fu! <sid>MaxColumns() "{{{3
     "return maximum number of columns in first 10 lines
     if !exists("b:csv_fixed_width_cols")
-        let l=getline(1,10)
+        let i=1
+        while 1
+            let l = getline(i, i+10)
+
+            " Filter comments out
+            let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
+            call filter(l, 'v:val !~ pat')
+            if !empty(l)
+                break
+            else
+                let i+=10
+            endif
+        endw
+
         let fields=[]
         let result=0
         for item in l
@@ -874,6 +887,10 @@ fu! <sid>CopyCol(reg, col) "{{{3
             endif
         endfor
     endif
+    " Filter comments out
+    let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
+    call filter(a, 'v:val !~ pat')
+
     if !exists("b:csv_fixed_width_cols")
         call map(a, 'split(v:val, ''^'' . b:col . ''\zs'')[col-1]')
     else
@@ -913,12 +930,17 @@ fu! <sid>MoveColumn(start, stop, ...) range "{{{3
     " Swap line by line, instead of reading the whole range into memory
 
     for i in range(a:start, a:stop)
+        let content = getline(i)
+        if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+            " skip comments
+            continue
+        endif
         if !exists("b:csv_fixed_width_cols")
-            let fields=split(getline(i), b:col . '\zs')
+            let fields=split(content, b:col . '\zs')
         else
             let fields=[]
             for j in range(1, max, 1)
-                call add(fields, matchstr(getline(i), <sid>GetColPat(j,0)))
+                call add(fields, matchstr(content, <sid>GetColPat(j,0)))
             endfor
         endif
 
@@ -1036,7 +1058,8 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
 endfu
 
 
-fu! <sid>DoForEachColumn(start, stop, bang) range "{{{3 " Do something for each column,
+fu! <sid>DoForEachColumn(start, stop, bang) range "{{{3
+    " Do something for each column,
     " e.g. generate SQL-Statements, convert to HTML,
     " something like this
     " TODO: Define the function
@@ -1059,6 +1082,11 @@ fu! <sid>DoForEachColumn(start, stop, bang) range "{{{3 " Do something for each 
     for item in range(a:start, a:stop, 1)
         let t = g:csv_convert
         let line = getline(item)
+        if line =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+            " Filter comments out
+            call add(result, line)
+            continue
+        endif
         let context = split(g:csv_convert, '%s')
         let columns = len(context)
         if columns > <sid>MaxColumns()
@@ -1119,7 +1147,11 @@ fu! <sid>FoldValue(lnum, filter) "{{{3
     let result = 0
 
     for item in values(a:filter)
-        if eval('getline(a:lnum)' .  (item.match ? '!~' : '=~') . 'item.pat')
+        " always fold comments away
+        let content = getline(a:lnum)
+        if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+            return 1
+        elseif eval('content' .  (item.match ? '!~' : '=~') . 'item.pat')
             let result += 1
         endif
     endfor
@@ -1279,6 +1311,11 @@ endfu
 fu! <sid>GetColumn(line, col) "{{{3
     " Return Column content at a:line, a:col
     let a=getline(a:line)
+    " Filter comments out
+    if a =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+        return ''
+    endif
+
     if !exists("b:csv_fixed_width_cols")
         try
             let a = split(a, '^' . b:col . '\zs')[a:col - 1]
@@ -1712,6 +1749,11 @@ fu! <sid>NewDelimiter(newdelimiter) "{{{3
     endif
     let line=1
     while line <= line('$')
+        " Don't change delimiter for comments
+        if getline(line) =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+            let line+=1
+            continue
+        endif
         let fields=split(getline(line), b:col . '\zs')
         " Remove field delimiter
         call map(fields, 'substitute(v:val, b:delimiter .
@@ -1743,7 +1785,12 @@ fu! <sid>DuplicateRows(columnlist) "{{{3
     while line <= line('$')
         let key = ""
         let i = 1
-        let cols = split(getline(line), b:col. '\zs')
+        let content = getline(line)
+        " Skip comments
+        if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+            continue
+        endif
+        let cols = split(content, b:col. '\zs')
         for column in cols
             if <sid>IN(a:columnlist, i)
                 let key .= column

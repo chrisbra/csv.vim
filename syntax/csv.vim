@@ -18,6 +18,10 @@ fu! <sid>Warning(msg) "{{{3
     echohl Normal
 endfu
 
+fu! <sid>Esc(val, char) "{{2
+    return '\V'.escape(a:val, '\\'.a:char).'\m'
+endfu
+
 fu! <sid>CheckSaneSearchPattern() "{{{3
     let s:del_def = ','
     let s:col_def = '\%([^' . s:del_def . ']*' . s:del_def . '\|$\)'
@@ -41,10 +45,13 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
 
     " Try a simple highlighting, if the defaults from the ftplugin
     " don't exist
-    let s:col = exists("b:col") && !empty(b:col) ? b:col
+    let s:col  = exists("b:col") && !empty(b:col) ? b:col
 		\ : s:col_def
-    let s:del = exists("b:delimiter") && !empty(b:delimiter) ? b:delimiter
+    let s:del  = exists("b:delimiter") && !empty(b:delimiter) ? b:delimiter
 		\ : s:del_def
+    let s:cmts = exists("b:csv_cmt") ? b:csv_cmt[0] : split(&cms, '&s')[0]
+    let s:cmte = exists("b:csv_cmt") && len(b:csv_cmt) == 2 ? b:csv_cmt[1]
+		\ : ''
 
     if line('$') > 1 && (!exists("b:col") || empty(b:col))
     " check for invalid pattern, ftplugin hasn't been loaded yet
@@ -104,6 +111,10 @@ fu! <sid>DoHighlight() "{{{3
 	    exe "syn match " group pat " nextgroup=" . ngroup
 	endfor
     endif
+    exe 'syn match CSVComment /'. <sid>Esc(s:cmts, '/'). '.*'.
+		\ (!empty(s:cmte) ? '\%('. <sid>Esc(s:cmte, '/'). '\)\?'
+		\: '').  '/'
+    hi def link CSVComment Comment
 endfun
 
 fu! <sid>DoSyntaxDefinitions() "{{{3
