@@ -1281,9 +1281,9 @@ fu! <sid>OutputFilters(bang) "{{{3
             for item in items
                 if s:csv_fold_headerline
                     echo printf("%02d\t% 2s\t%02d\t%10.10s\t%s",
-                        \ item.id, (item.match ? '+' : '-'),
-                        \ item.col, <sid>GetColumn(1, item.col),
-                        \ item.orig)
+                        \ item.id, (item.match ? '+' : '-'), item.col,
+                        \ substitute(<sid>GetColumn(1, item.col),
+                        \ b:col.'$', '', ''), item.orig)
                 else
                     echo printf("%02d\t% 2s\t%02d\t%s",
                         \ item.id, (item.match ? '+' : '-'),

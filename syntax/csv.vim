@@ -111,6 +111,7 @@ fu! <sid>DoHighlight() "{{{3
 	    exe "syn match " group pat " nextgroup=" . ngroup
 	endfor
     endif
+    " Comment regions
     exe 'syn match CSVComment /'. <sid>Esc(s:cmts, '/'). '.*'.
 		\ (!empty(s:cmte) ? '\%('. <sid>Esc(s:cmte, '/'). '\)\?'
 		\: '').  '/'
