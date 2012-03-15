@@ -47,6 +47,13 @@ fu! <sid>Init() "{{{3
         let b:delimiter=g:csv_delim
     endif
 
+    " Define custom commentstring
+    if !exists("g:csv_comment")
+        let b:csv_cmt = split(&cms, '%s')
+    else
+        let b:csv_cmt = split(g:csv_comment, '%s')
+    endif
+
     if empty(b:delimiter) && !exists("b:csv_fixed_width")
         call <SID>Warn("No delimiter found. See :h csv-delimiter to set it manually!")
     endif
@@ -126,7 +133,9 @@ fu! <sid>Init() "{{{3
         \ . "| unlet! b:csv_thousands_sep b:csv_decimal_sep"
 
  " Delete all functions
- " disabled currently, is this really needed?
+ " disabled currently, because otherwise when switching ft
+ "          I think, the functions wouldn't be available anymore
+ "
  " let b:undo_ftplugin .= "| delf <sid>Warn | delf <sid>Init |
  " \ delf <sid>GetPat | delf <sid>SearchColumn | delf <sid>DelColumn |
  " \ delf <sid>HiCol | delf <sid>GetDelimiter | delf <sid>WColumn |
@@ -455,6 +464,8 @@ fu! <sid>ColWidth(colnr) "{{{3
     if !exists("b:csv_fixed_width_cols")
         if !exists("b:csv_list")
             let b:csv_list=getline(1,'$')
+            let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
+            call filter(b:csv_list, 'v:val !~ pat')
             call map(b:csv_list, 'split(v:val, b:col.''\zs'')')
         endif
         try
