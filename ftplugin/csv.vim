@@ -470,6 +470,7 @@ fu! <sid>ColWidth(colnr) "{{{3
             call map(tlist, 'strlen(v:val)')
             return max(tlist)
         catch
+            throw "ColWidth-error"
             return width
         endtry
     elseif a:colnr > 0
@@ -543,9 +544,13 @@ fu! <sid>CalculateColumnWidth() "{{{3
     " Force recalculating the Column width
     unlet! b:csv_list
     let s:max_cols=<SID>MaxColumns()
-    for i in range(1,s:max_cols)
-        call add(b:col_width, <SID>ColWidth(i))
-    endfor
+    try
+        for i in range(1,s:max_cols)
+            call add(b:col_width, <SID>ColWidth(i))
+        endfor
+    catch /ColWidth/
+        call <sid>Warn("Error: getting Column Width, using default!")
+    endtry
     " delete buffer content in variable b:csv_list,
     " this was only necessary for calculating the max width
     unlet! b:csv_list
@@ -659,7 +664,11 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             let a=<sid>CopyCol('',1)
             " Force recalculating columns width
             unlet! b:csv_list
-            let width = <sid>ColWidth(1)
+            try
+                let width = <sid>ColWidth(1)
+            catch /ColWidth/
+                call <sid>Warn("Error: getting Column Width, using default!")
+            endtry
             let b=b:col
             abo vsp +enew
             let b:col=b
@@ -1166,7 +1175,11 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
         endtry
 
         if a == b:delimiter
-            let a=repeat(' ', <sid>ColWidth(col))
+            try
+                let a=repeat(' ', <sid>ColWidth(col))
+            catch
+                " no-op
+            endtry
         endif
 
         " Make a column pattern
