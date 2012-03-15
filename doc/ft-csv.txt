@@ -47,6 +47,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     4.10 CSV Header lines.......................|csv-header|
     4.11 Number format..........................|csv-nrformat|
     4.12 Move folded lines......................|csv-move-folds|
+    4.13 Using Comments.........................|csv-comments|
 5. Functions....................................|CSV-Functions|
     5.1 CSVPat()................................|CSVPat()|
 6. CSV Tips and Tricks..........................|csv-tips|
@@ -317,9 +318,11 @@ If you need to copy a specific column, you can use the command :Column >
 
     :[N]Column [a]
 
-Copy column N into register a. This will only copy all the values, that are
-not folded-away (|csv-filter|). If you don't specify N, the column of the
-current cursor position is used. If no register is given, the default register
+Copy column N into register a. This will copy all the values, that are
+not folded-away (|csv-filter|) and skip comments.
+
+If you don't specify N, the column of the current cursor position is used.
+If no register is given, the default register
 |quotequote| is used. 
 
 
@@ -513,7 +516,7 @@ This time, you can use '%s' expandos. They tell Vim, that they need to be
 replaced by the actual content of your file. It does by going from the first
 column in your file and replacing it with the corresponding %s in that order.
 If there are less '%s' expandos then columns in your file, Vim will skip the
-columns, that are not used. Again If the variable g:csv__convert is already
+columns, that are not used. Again If the variable g:csv_convert is already
 defined, Vim will already show you its' content as default value which you can
 confirm by pressing Enter. 
 
@@ -596,8 +599,8 @@ a small summary, of what filters are active and looks like this:
 
 Nr      Match   Col           Name              Value `
 ===================================================== `
-01       -       07          Price;              23.10 `
-02       +       08            Qty;                 10 `
+01       -       07          Price              23.10 `
+02       +       08            Qty                 10 `
 
 This means, there are two filters active. The current active filter is on
 column 7 (column name is Price) and all values that match 23.10 will be folded
@@ -963,8 +966,8 @@ to have the space use as thousands separator and >
 
 to use the comma as decimal separator.
 
-4.12 Move folded lines format                                 *csv-move-folds*
-------------------
+4.12 Move folded lines                                        *csv-move-folds*
+----------------------
 
 If you use dynamic filters (see |csv-filter|), you can configure the plugin to
 move all folded lines to the end of the file. This only happens if you set the
@@ -977,6 +980,31 @@ consecutive area without being disrupted by folded lines.
 
 (Note, that this might currently not work
 correctly all the times, as there seems to be a bug within Vim currently).
+
+4.13 Using comments                                           *csv-comments*
+-------------------
+
+Strictly speaking, in csv files there can't be any comments. You might however
+still wish to comment or annotate certain sections in your file, so the CSV
+plugin supports Comments. 
+
+Be default, the CSV plugin will use the 'commentstring' setting to identify
+comments. If this option includes the '%s' it will consider the part before
+the '%s' as leading comment marker and the part behind it as comment
+delimiter.
+
+You can however define your own comment marker, using the variable
+g:csv_comment. Like with the 'commentstring' setting, you can use '%s'
+expandos, that will denote where the actual comment text belongs. To define
+your own comment string, put this in your |.vimrc| >
+
+    :let g:csv_comment = '#'
+<
+Which will use the '#' sign as comment leader like in many scripting
+languages.
+
+After setting this variable, you should reinitialize the plugins using
+|InitCSV|
 
 ==============================================================================
 5. Functions                                                    *CSV-Funtions*
@@ -1106,7 +1134,8 @@ Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
 The CSV plugin already defines the |SumCol_CSV| command, to let you calculate
 the sum of all values of a certain column within a given range. This will
 consider all values within the range, that are not folded away (|csv-filter|),
-and the header lines. The delimiter will be deleted from each field.
+and also skip comments and the header lines. The delimiter will be deleted
+from each field.
 
 But it may be, that you don't need the sum, but would rather want to have the
 average of all values within a certain column. You can define your own
@@ -1217,6 +1246,7 @@ Alternatively, you can simply call |InitCSV| and ignore the error.
   reported by y, thanks!)
 - |CSVPat()| function
 - 'lz' does not work with |:silent| |:s| (patch by Sergey Khorev, thanks!)
+- support comments (|csv_comment|, suggested by Peng Yu, thanks!)
 0.22 Nov 08, 2011 {{{1
 - Small enhancements to |SumCol_CSV|
 - :Filters! reapplys the dynamic filter
