@@ -1,6 +1,9 @@
 " A simple syntax highlighting, simply alternate colors between two
 " adjacent columns
 " Init {{{2
+let s:cpo_save = &cpo
+set cpo&vim
+
 scriptencoding utf8
 if version < 600
     syn clear
@@ -35,6 +38,14 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
 	call <sid>Warning("No filetype support, only simple highlighting using"
 		    \ . s:del_def . " as delimiter! See :h csv-installation")
     endif
+
+    " Check Comment setting
+    if !exists("g:csv_comment")
+        let b:csv_cmt = split(&cms, '%s')
+    else
+        let b:csv_cmt = split(g:csv_comment, '%s')
+    endif
+
 
     " Second: Check for sane defaults for the column pattern
     " Not necessary to check for fixed width columns
@@ -165,3 +176,6 @@ call <sid>DoHighlight()
 
 " Set the syntax variable {{{2
 let b:current_syntax="csv"
+
+let &cpo = s:cpo_save
+unlet s:cpo_save

@@ -56,6 +56,8 @@ fu! <sid>Init() "{{{3
 
     if empty(b:delimiter) && !exists("b:csv_fixed_width")
         call <SID>Warn("No delimiter found. See :h csv-delimiter to set it manually!")
+        " Use a sane default as delimiter:
+        let b:delimiter = ','
     endif
 
     let s:del='\%(' . b:delimiter . '\|$\)'
