@@ -1,7 +1,7 @@
-*ft-csv.txt*	For Vim version 7.3	Last Change: Tue, 08 Nov 2011
+*ft-csv.txt*	For Vim version 7.3	Last Change: Sun, 25 Mar 2012
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.22
+Version:	0.23
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -1233,7 +1233,7 @@ Alternatively, you can simply call |InitCSV| and ignore the error.
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
-0.23 (unreleased) {{{1
+0.23 Mar 25, 2012 {{{1
 - Don't error out, when creating a new file and syntax highlighting
   script can't find the delimiter
   (ftplugin will still give a warning, so).
