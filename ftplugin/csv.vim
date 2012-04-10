@@ -124,6 +124,8 @@ fu! <sid>Init() "{{{3
         " Force reloading syntax file
     endif
     call <sid>DoAutoCommands()
+    " enable CSV Menu
+    call <sid>Menu(1)
     call <sid>DisableFolding()
     silent do Syntax
 
@@ -1722,10 +1724,11 @@ fu! <sid>Menu(enable) "{{{3
         amenu CSV.&Toggle\ Header           :HeaderToggle<cr>
         amenu CSV.&ConvertData              :ConvertData<cr>
         amenu CSV.Filters                   :Filters<cr>
-        amenu CSV.Hide\ C&olumn           :VertFold<cr>
+        amenu CSV.Hide\ C&olumn             :VertFold<cr>
         amenu CSV.&New\ Record              :NewRecord<cr>
     else
-        amenu disable CSV
+        " just in case the Menu wasn't defined properly
+        sil! amenu disable CSV
     endif
 endfu
 
