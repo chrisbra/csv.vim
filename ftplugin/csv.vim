@@ -650,9 +650,9 @@ fu! <sid>GetColPat(colnr, zs_flag) "{{{3
         let pat=b:col
     else
         let pat='\%' . b:csv_fixed_width_cols[0] . 'c.\{-}' .
-            \ len(b:csv_fixed_width_cols) > 1 ?
+            \ (len(b:csv_fixed_width_cols) > 1 ?
             \ '\%' . b:csv_fixed_width_cols[1] . 'c' :
-            \ ''
+            \ '')
     endif
     return pat . (a:zs_flag ? '\zs' : '')
 endfu
@@ -1202,31 +1202,33 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
         let max = <sid>MaxColumns()
         let a   = <sid>GetColumn(line('.'), col)
 
-        try
-            " strip leading whitespace
-            if (a =~ '\s\+'. b:delimiter . '$')
-                let b = split(a, '^\s\+\ze[^' . b:delimiter. ']\+')[0]
-            else
-                let b = a
-            endif
-        catch /^Vim\%((\a\+)\)\=:E684/
-            " empty pattern - should match only empty columns
-            let b = a
-        endtry
-
-        " strip trailing delimiter
-        try
-            let a = split(b, b:delimiter . '$')[0]
-        catch /^Vim\%((\a\+)\)\=:E684/
-            let a = b
-        endtry
-
-        if a == b:delimiter
+        if !exists("b:csv_fixed_width")
             try
-                let a=repeat(' ', <sid>ColWidth(col))
-            catch
-                " no-op
+                " strip leading whitespace
+                if (a =~ '\s\+'. b:delimiter . '$')
+                    let b = split(a, '^\s\+\ze[^' . b:delimiter. ']\+')[0]
+                else
+                    let b = a
+                endif
+            catch /^Vim\%((\a\+)\)\=:E684/
+                " empty pattern - should match only empty columns
+                let b = a
             endtry
+
+            " strip trailing delimiter
+            try
+                let a = split(b, b:delimiter . '$')[0]
+            catch /^Vim\%((\a\+)\)\=:E684/
+                let a = b
+            endtry
+
+            if a == b:delimiter
+                try
+                    let a=repeat(' ', <sid>ColWidth(col))
+                catch
+                    " no-op
+                endtry
+            endif
         endif
 
         " Make a column pattern
