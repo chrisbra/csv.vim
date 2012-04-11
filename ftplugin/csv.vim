@@ -163,7 +163,7 @@ fu! <sid>Init() "{{{3
  " \ delf <sid>NewRecord | delf <sid>MoveOver | delf <sid>Menu |
  " \ delf <sid>NewDelimiter | delf <sid>DuplicateRows | delf <sid>IN |
  " \ delf <sid>SaveOptions | delf <sid>CheckDuplicates |
- " \ delf <sid>CompleteColumnNr | delf <sid>CSVPat
+ " \ delf <sid>CompleteColumnNr | delf <sid>CSVPat | delf <sid>Transpose
 endfu
 
 fu! <sid>DoAutoCommands() "{{{3
@@ -443,23 +443,35 @@ fu! <sid>WColumn(...) "{{{3
     return ret
 endfu
 
-fu! <sid>MaxColumns() "{{{3
+fu! <sid>MaxColumns(...) "{{{3
+    if exists("a:0") && a:0 == 1
+        let this_col = 1
+    else
+        let this_col = 0
+    endif
     "return maximum number of columns in first 10 lines
     if !exists("b:csv_fixed_width_cols")
-        let i=1
+        if this_col
+            let i = a:1
+        else
+            let i = 1
+        endif
         while 1
             let l = getline(i, i+10)
 
             " Filter comments out
             let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
             call filter(l, 'v:val !~ pat')
-            if !empty(l)
+            if !empty(l) || this_col
                 break
             else
                 let i+=10
             endif
         endw
 
+        if empty(l)
+            throw 'csv:no_col'
+        endif
         let fields=[]
         let result=0
         for item in l
@@ -1627,7 +1639,7 @@ endfu
 fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("WhatColumn", ':echo <sid>WColumn(<bang>0)',
         \ '-bang')
-    call <sid>LocalCmd("NrColumns", ':echo <sid>MaxColumns()', '')
+    call <sid>LocalCmd("NrColumns", ':call <sid>NrColumns(<q-bang>)', '-bang')
     call <sid>LocalCmd("HiColumn", ':call <sid>HiCol(<q-args>,<bang>0)',
         \ '-bang -nargs=?')
     call <sid>LocalCmd("SearchInColumn",
@@ -1679,6 +1691,8 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-nargs=1')
     call <sid>LocalCmd("Duplicates", ':call <sid>CheckDuplicates(<q-args>)',
         \ '-nargs=1 -complete=custom,<sid>CompleteColumnNr')
+    call <sid>LocalCmd('Transpose', ':call <sid>Transpose(<line1>, <line2>)',
+        \ '-range=%')
 endfu
 
 fu! <sid>Map(map, name, definition) "{{{3
@@ -1834,6 +1848,100 @@ fu! <sid>CheckDuplicates(list) "{{{3
     let list=split(string, ',')
     call <sid>DuplicateRows(list)
 endfu
+
+fu! <sid>Transpose(line1, line2) "{{{3
+    " Note: - Comments will be deleted.
+    "       - Does not work with fixed-width columns
+    if exists("b:csv_fixed_width")
+        call <sid>Warn("Transposing does not work with fixed-width columns!")
+        return
+    endif
+    let _wsv    = winsaveview()
+    let TrailingDelim = 0
+
+    if line('$') > 1
+        let TrailingDelim = getline(1) =~ b:delimiter.'$'
+    endif
+    
+    let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
+
+    try
+        let columns = <sid>MaxColumns(a:line1)
+    catch
+        " No column, probably because of comment or empty line
+        " so use the number of columns from the beginning of the file
+        let columns = <sid>MaxColumns()
+    endtry
+    let matrix  = []
+    for line in range(a:line1, a:line2)
+        " Filter comments out
+        if getline(line) =~ pat
+            continue
+        endif
+        let r   = []
+        for row in range(1,columns)
+            let field = <sid>GetColumn(line, row)
+            call add(r, field)
+        endfor
+        call add(matrix, r)
+    endfor
+    unlet row
+
+    " create new transposed matrix
+    let transposed = []
+    for row in matrix
+        let i = 0
+        for val in row
+            if get(transposed, i, []) == []
+                call add(transposed, [])
+            endif
+            if val[-1:] != b:delimiter
+                let val .= b:delimiter
+            endif
+            call add(transposed[i], val)
+            let i+=1
+        endfor
+    endfor
+    " Save memory
+    unlet! matrix
+    call map(transposed, 'join(v:val, '''')')
+    if !TrailingDelim
+        call map(transposed, 'substitute(v:val, b:delimiter.''\?$'', "", "")')
+    endif
+    " filter out empty records
+    call filter(transposed, 'v:val != b:delimiter')
+
+    " Insert transposed data
+    let delete_last_line = 0
+    if a:line1 == 1 && a:line2 == line('$')
+        let delete_last_line = 1
+    endif
+    exe a:line1. ",". a:line2. "d _"
+    let first = (a:line1 > 0 ? (a:line1 - 1) : 0)
+    call append(first, transposed)
+    if delete_last_line
+        sil $d _
+    endif
+    " save memory
+    unlet! transposed
+    call winrestview(_wsv)
+endfu
+
+
+fu! <sid>NrColumns(bang) "{{{3
+    if !empty(a:bang)
+        try
+            let cols = <sid>MaxColumns(line('.'))
+        catch
+            " No column or comment line
+            call <sid>Warn("No valid CSV Column!")
+        endtry
+    else
+        let cols = <sid>MaxColumns()
+    endif
+    echo cols
+endfu    
+
 fu! CSVPat(colnr, ...) "{{{3
     " Make sure, we are working in a csv file
     if &ft != 'csv'
