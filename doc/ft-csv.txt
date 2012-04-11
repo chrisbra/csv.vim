@@ -239,6 +239,12 @@ will delete column 2.
 
 If you don't specify a column number, it will delete the column on which the
 cursor is.
+You can also specify a search string. The plugin will then delete all columns
+that match the pattern: >
+    
+    :DeleteColumn /foobar
+<
+will delete all columns where the pattern "foobar" matches.
 
 3.8 InitCSV							*InitCSV*
 -----------
@@ -1247,6 +1253,12 @@ Alternatively, you can simply call |InitCSV| and ignore the error.
 
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
+
+0.24 (unreleased) {{{1
+- Allow to transpose the file (|csv-transpose|, suggested by Karan Mistry,
+  thanks!)
+- |DeleteColumn_CSV| allows to specify a search pattern and all matching
+  columns will be deleted (suggested by Karan Mistry, thanks!)
 
 0.23 Mar 25, 2012 {{{1
 - Don't error out, when creating a new file and syntax highlighting

@@ -304,6 +304,21 @@ fu! <sid>SearchColumn(arg) "{{{3
 endfu
 
 
+fu! <sid>DeleteColumn(arg) "{{{3
+    let _wsv = winsaveview()
+    if a:arg =~ '^[/]'
+        let pat = a:arg[1:]
+        call cursor(1,1)
+        while search(pat, 'cW')
+            " Delete matching column
+            call <sid>DelColumn('')
+        endw
+    else
+        call <sid>DelColumn(a:arg)
+    endif
+    call winrestview(_wsv)
+endfu
+
 fu! <sid>DelColumn(colnr) "{{{3
     let maxcolnr = <SID>MaxColumns()
     let _p = getpos('.')
@@ -330,10 +345,16 @@ fu! <sid>DelColumn(colnr) "{{{3
         let pat= '^' . <SID>GetColPat(colnr,0)
     endif
     if &ro
-       setl noro
+        let ro = 1
+        setl noro
+    else
+        let ro = 0
     endif
     exe ':%s/' . escape(pat, '/') . '//'
     call setpos('.', _p)
+    if ro
+        setl ro
+    endif
 endfu
 
 fu! <sid>HiCol(colnr, bang) "{{{3
@@ -1644,7 +1665,7 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-bang -nargs=?')
     call <sid>LocalCmd("SearchInColumn",
         \ ':call <sid>SearchColumn(<q-args>)', '-nargs=*')
-    call <sid>LocalCmd("DeleteColumn", ':call <sid>DelColumn(<q-args>)',
+    call <sid>LocalCmd("DeleteColumn", ':call <sid>DeleteColumn(<q-args>)',
         \ '-nargs=? -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("ArrangeColumn",
         \ ':call <sid>ArrangeCol(<line1>, <line2>, <bang>0)',
