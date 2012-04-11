@@ -559,13 +559,19 @@ fu! <sid>ArrangeCol(first, last, bang) range "{{{3
     if &ro
        " Just in case, to prevent the Warning
        " Warning: W10: Changing read-only file
+       let ro = 1
        setl noro
+    else
+       let ro = 0
     endif
     exe a:first . ',' . a:last .'s/' . (b:col) .
     \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
     " Clean up variables, that were only needed for <sid>Columnize() function
     unlet! s:columnize_count s:max_cols s:prev_line
-    setl ro
+    if ro
+        setl ro
+        unlet ro
+    endif
     call winrestview(cur)
 endfu
 
@@ -624,7 +630,6 @@ fu! <sid>Columnize(field) "{{{3
         let s:columnize_count = 0
     endif
 
-
     if !exists("s:max_cols")
         let s:max_cols = len(b:col_width)
     endif
@@ -637,7 +642,7 @@ fu! <sid>Columnize(field) "{{{3
     " convert zero based indexed list to 1 based indexed list,
     " Default: 20 width, in case that column width isn't defined
     " Careful: Keep this fast! Using
-    "let width=get(b:col_width,<SID>WColumn()-1,20)
+    " let width=get(b:col_width,<SID>WColumn()-1,20)
     " is too slow, so we are using:
     let width=get(b:col_width, (s:columnize_count % s:max_cols), 20)
 
@@ -652,17 +657,17 @@ fu! <sid>Columnize(field) "{{{3
         let add = 0
     endif
 
-    if width + add + 1 == strlen(a:field)
-        " Column has correct length, don't use printf()
-        return a:field
-    endif
-
     " Add one for the frame
     " plus additional width for multibyte chars,
     " since printf(%*s..) uses byte width!
     let width = width + add  + 1
 
-    return printf("%*s", width ,  a:field)
+    if width == strlen(a:field)
+        " Column has correct length, don't use printf()
+        return a:field
+    else
+        return printf("%*s", width ,  a:field)
+    endif
 endfun
 
 fu! <sid>GetColPat(colnr, zs_flag) "{{{3
