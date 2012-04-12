@@ -1,18 +1,18 @@
 ## Open items ##
 ----------------
 
+- Header/VHeader command should be more robust. May be use the preview
+  window to display the header? Does scrollbinding then still work?
+- Add more scripting functions?
+- wrap/shorten long fields (scopus.csv). Is this even possible with Vim?
+  (maybe conceal trailing and leading whitespace?)
+- Better support for newlines within a column (Is this worth the
+  effort?)
+- Better syntax highlighting (last char in last line is concealed)
 - add vertical folding (concealing columns)
   (works partly, can't conceal single columns?)
 - make plugin autoloadable (shouldn't be necessary, as the code is only
   loaded for file with &ft=csv)
-- wrap/shorten long fields (scopus.csv). Is this even possible with Vim?
-  (maybe conceal trailing and leading whitespace?)
-- Header/VHeader command should be more robust. May be use the preview
-  window to display the header? Does scrollbinding then still work?
-- Better syntax highlighting (last char in last line is concealed)
-- Better support for newlines within a column (Is this worth the
-  effort?)
-- Add more scripting functions?
 
 ## Fixed items ##
 -----------------
