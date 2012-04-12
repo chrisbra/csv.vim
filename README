@@ -1,7 +1,7 @@
-*ft-csv.txt*	For Vim version 7.3	Last Change: Sun, 25 Mar 2012
+*ft-csv.txt*	For Vim version 7.3	Last Change: Thu, 12 Apr 2012
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.23
+Version:	0.24
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -32,6 +32,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.19 Dynamic filters........................|csv-filter|
     3.20 Analyze a column.......................|csv-analyze|
     3.21 Vertical Folding.......................|csv-vertfold|
+    3.22 Transposing columns....................|csv-transpose|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -149,9 +150,10 @@ to know the name of the column in which the cursor is: >
 
 :NrColumns outputs the maximum number of columns available. It does this by
 testing the first 10 lines for the number of columns. This usually should be
-enough.
+enough. If you use the '!' attribute, it outputs the number of columns in the
+current line.
 
-3.3 SearchInColumn                                          *SearchInColumn_CSV*
+3.3 SearchInColumn                                        *SearchInColumn_CSV*
 ------------------
 
 Use :SearchInColumn to search for a pattern within a specific column. The
@@ -237,6 +239,12 @@ will delete column 2.
 
 If you don't specify a column number, it will delete the column on which the
 cursor is.
+You can also specify a search string. The plugin will then delete all columns
+that match the pattern: >
+    
+    :DeleteColumn /foobar
+<
+will delete all columns where the pattern "foobar" matches.
 
 3.8 InitCSV							*InitCSV*
 -----------
@@ -664,6 +672,19 @@ Use >
 
 to display all hidden columns again.
 
+                                                               *Transpose_CSV*
+3.22 Transposing a column                                      *csv-transpose*
+-------------------------
+
+Transposing means to exchange rows and columns. You can transpose the csv
+file, using the: >
+
+    :[range]Transpose
+<
+command. If [range] is not given, it will transpose the complete file,
+otherwise it will only transpose the lines in the range given. Note, comments
+will be deleted and transposing does not work with fixed-width columns.
+
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
 
@@ -848,7 +869,7 @@ Note, these changes won't take effect, until you restart Vim.
 
 RFC4180 allows newlines in double quoted strings. By default, the csv-plugin
 won't recognize newlines inside fields. It is however possible to make the
-plugin aware of newlines within quoted strings. To enbale this, set >
+plugin aware of newlines within quoted strings. To enable this, set >
 
     let g:csv_nl = 1
 
@@ -1232,6 +1253,12 @@ Alternatively, you can simply call |InitCSV| and ignore the error.
 
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
+
+0.24 Apr 12, 2012 {{{1
+- Allow to transpose the file (|csv-transpose|, suggested by Karan Mistry,
+  thanks!)
+- |DeleteColumn_CSV| allows to specify a search pattern and all matching
+  columns will be deleted (suggested by Karan Mistry, thanks!)
 
 0.23 Mar 25, 2012 {{{1
 - Don't error out, when creating a new file and syntax highlighting
