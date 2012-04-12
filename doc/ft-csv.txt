@@ -1254,7 +1254,7 @@ Alternatively, you can simply call |InitCSV| and ignore the error.
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
-0.24 (unreleased) {{{1
+0.24 Apr 12, 2012 {{{1
 - Allow to transpose the file (|csv-transpose|, suggested by Karan Mistry,
   thanks!)
 - |DeleteColumn_CSV| allows to specify a search pattern and all matching

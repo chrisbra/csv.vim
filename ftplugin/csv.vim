@@ -307,14 +307,22 @@ endfu
 fu! <sid>DeleteColumn(arg) "{{{3
     let _wsv = winsaveview()
     if a:arg =~ '^[/]'
+        let i = 0
         let pat = a:arg[1:]
         call cursor(1,1)
         while search(pat, 'cW')
             " Delete matching column
-            call <sid>DelColumn('')
+            sil call <sid>DelColumn('')
+            let i+=1
         endw
     else
-        call <sid>DelColumn(a:arg)
+        let i = 1
+        sil call <sid>DelColumn(a:arg)
+    endif
+    if i > 1
+        call <sid>Warn(printf("%d columns deleted", i))
+    else
+        call <sid>Warn("1 column deleted")
     endif
     call winrestview(_wsv)
 endfu
