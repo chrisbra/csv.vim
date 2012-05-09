@@ -233,8 +233,8 @@ fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
     if a:colnr > 1 && a:colnr < a:maxcolnr
         if !exists("b:csv_fixed_width_cols")
             return '^' . <SID>GetColPat(a:colnr-1,0) . '\%([^' .
-                \ b:delimiter . ']*\)\?\zs' . a:pat . '\ze' .
-                \ '\%([^' . b:delimiter .']*\)\?' .
+                \ b:delimiter . ']\{-}\)\?\zs' . a:pat . '\ze' .
+                \ '\%([^' . b:delimiter .']\{-}\)\?' .
                 \ b:delimiter . <SID>GetColPat(a:maxcolnr - a:colnr, 0) .
                 \ '$'
         else
@@ -246,14 +246,14 @@ fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
         if !exists("b:csv_fixed_width_cols")
             return '^' . <SID>GetColPat(a:colnr - 1,0) .
                 \ '\%([^' . b:delimiter .
-                \ ']*\)\?\zs' . a:pat . '\ze'
+                \ ']\{-}\)\?\zs' . a:pat . '\ze'
         else
             return '\%' . b:csv_fixed_width_cols[-1] .
                 \ 'c\zs' . a:pat . '\ze'
         endif
     else " colnr = 1
         if !exists("b:csv_fixed_width_cols")
-            return '^' . '\%([^' . b:delimiter . ']*\)\?\zs' . a:pat .
+            return '^' . '\%([^' . b:delimiter . ']\{-}\)\?\zs' . a:pat .
             \ '\ze\%([^' . b:delimiter . ']*\)\?' . b:delimiter .
             \ <SID>GetColPat(a:maxcolnr -1 , 0) . '$'
         else
