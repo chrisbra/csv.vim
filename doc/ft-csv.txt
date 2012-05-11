@@ -1256,6 +1256,7 @@ Alternatively, you can simply call |InitCSV| and ignore the error.
 
 0.25 (unreleased) {{{1
 - |SearchInColumn_CSV| should match non-greedily, patch by Matěj Korvas,
+- better argument parsing for |SearchInColumn_CSV|, patch by Matěj Korvas,
   thanks!
 0.24 Apr 12, 2012 {{{1
 - Allow to transpose the file (|csv-transpose|, suggested by Karan Mistry,
