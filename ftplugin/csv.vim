@@ -273,11 +273,32 @@ fu! <sid>SearchColumn(arg) "{{{3
                 throw "E684"
             endif
         else
-            let colnr=arglist[0]
-            let pat=substitute(arglist[1], '^\(.\)\(.*\)\1$', '\2', '')
-            if pat == arglist[1]
-                throw "E684"
+            " Determine whether the first word in the argument is a number 
+            " (of the column to search).
+            let colnr = substitute( a:arg, '^\s*\(\d\+\)\s.*', '\1', '' )
+            " If it is _not_ a number,
+            if colnr == a:arg
+                " treat the whole argument as the pattern.
+                let pat = substitute(a:arg,
+                    \ '^\s*\(\S\)\(.*\)\1\s*$', '\2', '' )
+                if pat == a:arg
+                    throw "E684"
+                endif
+                let colnr = <SID>WColumn()
+            else
+                " if the first word tells us the number of the column,
+                " treat the rest of the argument as the pattern.
+                let pat = substitute(a:arg,
+                    \ '^\s*\d\+\s*\(\S\)\(.*\)\1\s*$', '\2', '' )
+                if pat == a:arg
+                    throw "E684"
+                endif
             endif
+"             let colnr=arglist[0]
+"             let pat=substitute(arglist[1], '^\(.\)\(.*\)\1$', '\2', '')
+"             if pat == arglist[1]
+"                 throw "E684"
+"             endif
         endif
     "catch /^Vim\%((\a\+)\)\=:E684/
     catch /E684/	" catch error index out of bounds
