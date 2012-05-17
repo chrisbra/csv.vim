@@ -1,7 +1,7 @@
-*ft-csv.txt*	For Vim version 7.3	Last Change: Thu, 12 Apr 2012
+*ft-csv.txt*	For Vim version 7.3	Last Change: Thu, 17 May 2012
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.24
+Version:	0.25
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -1254,6 +1254,10 @@ Alternatively, you can simply call |InitCSV| and ignore the error.
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
+0.25 May 17, 2012 {{{1
+- |SearchInColumn_CSV| should match non-greedily, patch by Matěj Korvas,
+- better argument parsing for |SearchInColumn_CSV|, patch by Matěj Korvas,
+  thanks!
 0.24 Apr 12, 2012 {{{1
 - Allow to transpose the file (|csv-transpose|, suggested by Karan Mistry,
   thanks!)
