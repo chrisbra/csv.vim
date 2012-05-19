@@ -96,17 +96,8 @@ fu! <sid>Init() "{{{3
         let b:col = g:csv_col
     endif
     
-    " undo when setting a new filetype
-    let b:undo_ftplugin = "setlocal sol< tw< wrap<"
-        \ . "| setl fen< fdm< fdl< fdc< fml<"
-
-    " CSV local settings
-    setl nostartofline tw=0 nowrap
-
-    if has("conceal")
-        setl cole=2 cocu=nc
-        let b:undo_ftplugin .= '| setl cole< cocu< '
-    endif
+    " set filetype specific options
+    call <sid>LocalSettings('all')
 
     " define buffer-local commands
     call <SID>CommandDefinitions()
@@ -138,7 +129,8 @@ fu! <sid>Init() "{{{3
 
  " Delete all functions
  " disabled currently, because otherwise when switching ft
- "          I think, the functions wouldn't be available anymore
+ "          I think, all functions need to be read in again and this
+ "          costs time.
  "
  " let b:undo_ftplugin .= "| delf <sid>Warn | delf <sid>Init |
  " \ delf <sid>GetPat | delf <sid>SearchColumn | delf <sid>DelColumn |
@@ -163,7 +155,34 @@ fu! <sid>Init() "{{{3
  " \ delf <sid>NewRecord | delf <sid>MoveOver | delf <sid>Menu |
  " \ delf <sid>NewDelimiter | delf <sid>DuplicateRows | delf <sid>IN |
  " \ delf <sid>SaveOptions | delf <sid>CheckDuplicates |
- " \ delf <sid>CompleteColumnNr | delf <sid>CSVPat | delf <sid>Transpose
+ " \ delf <sid>CompleteColumnNr | delf <sid>CSVPat | delf <sid>Transpose |
+ " \ delf <sid>LocalSettings()
+endfu
+
+fu! <sid>LocalSettings(type) "{{{3
+    if a:type == 'all'
+        " CSV local settings
+        setl nostartofline tw=0 nowrap
+
+        " undo when setting a new filetype
+        let b:undo_ftplugin = "setlocal sol& tw< wrap<"
+
+        if has("conceal")
+            setl cole=2 cocu=nc
+            let b:undo_ftplugin .= '| setl cole< cocu< '
+        endif
+    endif
+
+    if a:type == 'all' || a:type == 'fold'
+        " Be sure to also fold away single screen lines
+        setl fen fdm=expr fdl=0 fdc=2 fml=0
+
+        let &foldtext=strlen(v:folddashes) . ' lines hidden'
+        setl fillchars-=fold:-
+        " undo settings:
+        let b:undo_ftplugin .=
+        \ "| setl fen< fdm< fdl< fdc< fml< fdt< fcs& fde<"
+    endif
 endfu
 
 fu! <sid>DoAutoCommands() "{{{3
@@ -1316,14 +1335,12 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
 "        let @/ .= val.pat . (val.id == s:filter_count ? '' : '\&')
 "    endfor
     let sid = <sid>GetSID()
+
+    " Fold settings:
+    call <sid>LocalSettings('fold')
     " Don't put spaces between the arguments!
     exe 'setl foldexpr=<snr>' . sid . '_FoldValue(v:lnum,b:csv_filter)'
-    "setl foldexpr=s:FoldValue(v:lnum,@/)
-    " Be sure to also fold away single screen lines
-    setl fen fdm=expr fdl=0 fdc=2 fml=0
-    "setl foldtext=substitute(v:folddashes,'-','\ ','g')
-    let &foldtext=strlen(v:folddashes) . ' lines hidden'
-    setl fillchars-=fold:-
+
     " Move folded area to the bottom, so there is only on consecutive
     " non-folded area
     if exists("s:csv_move_folds") && s:csv_move_folds
