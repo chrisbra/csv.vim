@@ -126,6 +126,7 @@ fu! <sid>Init() "{{{3
         \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
         \ . "| unlet! b:csv_SplitWindow b:csv_headerline"
         \ . "| unlet! b:csv_thousands_sep b:csv_decimal_sep"
+        \. " | unlet! b:browsefilter"
 
  " Delete all functions
  " disabled currently, because otherwise when switching ft
@@ -166,6 +167,10 @@ fu! <sid>LocalSettings(type) "{{{3
 
         " undo when setting a new filetype
         let b:undo_ftplugin = "setlocal sol& tw< wrap<"
+
+        " Set browsefilter
+        let b:browsefilter="CSV Files (*.csv, *.dat)\t*.csv;*.dat\n".
+                 \ "All Files\t*.*\n"
 
         if has("conceal")
             setl cole=2 cocu=nc
