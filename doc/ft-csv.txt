@@ -497,12 +497,12 @@ replaced by the content of the actual column.
 For example, suppose you want to convert your data into HTML, then you first
 call the >
 
-    ConvertData
+    :ConvertData
 
 At this point, Vim will ask you for input. First, you need to specify, what
 needs to be done before processing the data:
 
-Pre convert text: <html><body><table> `
+    Pre convert text: <html><body><table> `
 
 This would specify to put the HTML Header before the actual data can be
 processed. If the variable g:csv_pre_convert is already defined, Vim will
@@ -510,15 +510,15 @@ already show you its' content as default value. Simply pressing Enter will use
 this data. After that, Vim asks, what the end of the converted file needs to
 look like:
 
-Post convert text: </table></body></html>
+    Post convert text: </table></body></html> `
 
 So here you are defining how to finish up the HTML file. If the variable
 g:csv_post_convert is already defined, Vim will already show you its' content
 as default value which you can confirm by pressing Enter. Last, you define,
 how your columns need to be converted. Again, Vim asks you for how to do that:
 
-Converted text, use %s for column input:
-<tr><td>%s</td><td>%s</td><td>%s</td></tr>
+    Converted text, use %s for column input: `
+    <tr><td>%s</td><td>%s</td><td>%s</td></tr>
 
 This time, you can use '%s' expandos. They tell Vim, that they need to be
 replaced by the actual content of your file. It does by going from the first
@@ -543,11 +543,12 @@ But may be you want your data converted into SQL-insert statements. That could
 be done like this: >
     
     ConvertData!
+<
     Pre convert text: `
 
 (Leave this empty. It won't be used).
 
-    Post convert text: Commit;`
+    Post convert text: Commit; `
 
 After inserting the data, commit it into the database.
 
@@ -560,10 +561,9 @@ quoted for the database.
 
 After hitting Enter, a new Window will be opened, which might look like this:
 
-Insert into table foobar values('Foobar', '2', 2011);
-Insert into table foobar values('Bar', '1', 2011);
-...
-Commit;           
+    Insert into table foobar values('Foobar', '2', 2011); `
+    Insert into table foobar values('Bar', '1', 2011); `
+    Commit; `
 
 Since the command was used with the bang attribute (!), the converted data
 doesn't include the column delimiters.
