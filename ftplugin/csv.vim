@@ -764,22 +764,28 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
         " Split Window
         let _stl = &l:stl
         let _sbo = &sbo
+        let a = []
+        let b=b:col
         if a:hor
             setl scrollopt=hor scrollbind
             let lines = empty(a:lines) ? s:csv_fold_headerline : a:lines
-            abo sp
+            let a = getline(1,lines)
+            " Does it make sense to use the preview window?
+            " sil! pedit %
+            sp +enew
+            call setline(1, a)
+            " Needed for syntax highlighting
+            "let b:col=b
+            "setl syntax=csv
+            sil! doautocmd FileType csv
             1
             exe "resize" . lines
-            setl scrollopt=hor scrollbind winfixheight
+            setl scrollopt=hor winfixheight nowrap
             "let &l:stl=repeat(' ', winwidth(0))
             let &l:stl="%#Normal#".repeat(' ',winwidth(0))
-            " Highlight first row
-            let win = winnr()
         else
             setl scrollopt=ver scrollbind
             0
-            let b=b:col
-            let a=[]
             let a=<sid>CopyCol('',1)
             " Force recalculating columns width
             unlet! b:csv_list
@@ -788,21 +794,26 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             catch /ColWidth/
                 call <sid>Warn("Error: getting Column Width, using default!")
             endtry
-            let b=b:col
+            " Does it make sense to use the preview window?
+            "vert sil! pedit |wincmd w | enew!
             abo vsp +enew
-            let b:col=b
             call append(0, a)
             $d _
             sil %s/.*/\=printf("%.*s", width, submatch(0))/eg
             0
             exe "vert res" width
-            setl scrollopt=ver scrollbind winfixwidth
-            setl buftype=nowrite bufhidden=hide noswapfile nobuflisted
-            let win = winnr()
+            let b:col=b
+            call matchadd("CSVHeaderLine", b:col)
+            setl scrollopt=ver winfixwidth
         endif
-        call matchadd("CSVHeaderLine", b:col)
-        exe "wincmd p"
+        let win = winnr()
+        setl scrollbind buftype=nowrite bufhidden=wipe noswapfile nobuflisted
+        wincmd p
         let b:csv_SplitWindow = win
+        aug CSV_Preview
+            au!
+            au BufWinLeave <buffer> call <sid>SplitHeaderLine(0, 1, 0)
+        aug END
     else
         " Close split window
         if !exists("b:csv_SplitWindow")
@@ -810,14 +821,19 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
         endif
         exe b:csv_SplitWindow . "wincmd w"
         if exists("_stl")
-            let &l_stl = _stl
+            let &l:stl = _stl
         endif
         if exists("_sbo")
             let &sbo = _sbo
         endif
         setl noscrollbind
         wincmd c
+        "pclose!
         unlet! b:csv_SplitWindow
+        aug CSV_Preview
+            au!
+        aug END
+        aug! CSV_Preview
     endif
 endfu
 
