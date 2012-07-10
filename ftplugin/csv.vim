@@ -247,6 +247,7 @@ fu! <sid>DoAutoCommands() "{{{3
             au FileType csv call <sid>Menu(1)
             au BufEnter <buffer> call <sid>Menu(1) " enable
             au BufLeave <buffer> call <sid>Menu(0) " disable
+            au BufNewFile,BufNew * call <sid>Menu(0)
         augroup END
         "let b:undo_ftplugin .= '| sil! amenu disable CSV'
         let b:undo_ftplugin .= '| sil! call <sid>Menut(0)'
