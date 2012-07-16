@@ -169,8 +169,11 @@ fu! <sid>LocalSettings(type) "{{{3
         let b:undo_ftplugin = "setlocal sol& tw< wrap<"
 
         " Set browsefilter
-        let b:browsefilter="CSV Files (*.csv, *.dat)\t*.csv;*.dat\n".
+        if (v:version > 703 || (v:version == 703 && has("patch593")))
+                    \ && has("browsefilter")
+            let b:browsefilter="CSV Files (*.csv, *.dat)\t*.csv;*.dat\n".
                  \ "All Files\t*.*\n"
+        endif
 
         if has("conceal")
             setl cole=2 cocu=nc
