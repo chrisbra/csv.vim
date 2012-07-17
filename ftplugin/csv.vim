@@ -170,7 +170,7 @@ fu! <sid>LocalSettings(type) "{{{3
 
         " Set browsefilter
         if (v:version > 703 || (v:version == 703 && has("patch593")))
-                    \ && has("browsefilter")
+                    \ && exists("browsefilter")
             let b:browsefilter="CSV Files (*.csv, *.dat)\t*.csv;*.dat\n".
                  \ "All Files\t*.*\n"
         endif
