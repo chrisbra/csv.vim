@@ -33,6 +33,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.20 Analyze a column.......................|csv-analyze|
     3.21 Vertical Folding.......................|csv-vertfold|
     3.22 Transposing columns....................|csv-transpose|
+    3.23 Transforming into a table..............|csv-tabularize|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -684,6 +685,36 @@ file, using the: >
 command. If [range] is not given, it will transpose the complete file,
 otherwise it will only transpose the lines in the range given. Note, comments
 will be deleted and transposing does not work with fixed-width columns.
+
+                                                            *CSV-Tabularize*
+3.23 Transforming into a table                              *csv-tabularize*
+------------------------------
+
+You  can also transform your csv data into a visual table, using the: >
+
+    :Tabularize
+<
+command. This will make a frame around your csv data and substitute all
+delimiters by '|', so that it will look like a table.
+
+e.g. consider this data:
+
+First,Second,Third
+10,5,2
+5,2,10
+2,10,5
+10,5,2
+
+This will be transformed into:
+
+|---------------------|
+| First| Second| Third|
+|------|-------|------|
+|    10|      5|     2|
+|     5|      2|    10|
+|     2|     10|     5|
+|    10|      5|     2|
+|---------------------|
 
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
