@@ -2066,7 +2066,9 @@ fu! <sid>Tabularize() "{{{3
     endfor
     exe 'sil %s/'. b:delimiter. '/|/g'
     " Add delimiter in first column, so it can be turned into a line later
-    %s/^./|&/
+    sil %s/^./|&/
+    " And add a final vertical bar, if there isn't already
+    sil %s/[^|]$/&|/
     syn off
     let &l:ma = _ma
     call winrestview(_c)
