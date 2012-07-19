@@ -2056,8 +2056,6 @@ fu! <sid>NrColumns(bang) "{{{3
 endfu
 
 fu! <sid>Tabularize() "{{{3
-    "TODO: make this work with comments
-    "and fixed width columns
     let _c = winsaveview()
     let _ma = &l:ma
     setl ma
@@ -2068,7 +2066,6 @@ fu! <sid>Tabularize() "{{{3
         let colwidth = strlen(substitute(getline('$'), '.', 'x', 'g'))
     else
         sil call <sid>ArrangeCol(1, line('$'), 1)
-        let colwidth = eval(join(b:col_width, '+')) + <sid>MaxColumns()
     endif
 
     if s:csv_fold_headerline > 0
@@ -2076,9 +2073,6 @@ fu! <sid>Tabularize() "{{{3
         exe 'sil '. (s:csv_fold_headerline+1).
             \ 's/\s\+/\=repeat("-", strlen(submatch(0)))/g'
     endif
-    for line in [0, line('$')+1]
-        call append(line, repeat('-', colwidth))
-    endfor
     if exists("b:csv_fixed_width_cols")
         " There is no delimiter:
         exe 'sil %s/'. pat. '/|/ge'
@@ -2089,7 +2083,11 @@ fu! <sid>Tabularize() "{{{3
     sil %s/^[^|]/|&/e
     " And add a final vertical bar, if there isn't already
     sil %s/[^|]$/&|/e
-    syn off
+    let colwidth = strlen(substitute(getline('$'), '.', 'x', 'g'))
+    for line in [0, line('$')+1]
+        call append(line, repeat('-', colwidth))
+    endfor
+    syn clear
     let &l:ma = _ma
     call winrestview(_c)
 endfu
