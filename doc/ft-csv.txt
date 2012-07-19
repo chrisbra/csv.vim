@@ -697,24 +697,24 @@ You  can also transform your csv data into a visual table, using the: >
 command. This will make a frame around your csv data and substitute all
 delimiters by '|', so that it will look like a table.
 
-e.g. consider this data:
+e.g. consider this data: >
 
-First,Second,Third
-10,5,2
-5,2,10
-2,10,5
-10,5,2
+    First,Second,Third
+    10,5,2
+    5,2,10
+    2,10,5
+    10,5,2
 
-This will be transformed into:
+This will be transformed into: >
 
-|---------------------|
-| First| Second| Third|
-|------|-------|------|
-|    10|      5|     2|
-|     5|      2|    10|
-|     2|     10|     5|
-|    10|      5|     2|
-|---------------------|
+    |---------------------| 
+    | First| Second| Third|
+    |------|-------|------|
+    |    10|      5|     2|
+    |     5|      2|    10|
+    |     2|     10|     5|
+    |    10|      5|     2|
+    |---------------------|
 
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
@@ -1287,6 +1287,8 @@ Alternatively, you can simply call |InitCSV| and ignore the error.
 
 0.26 (unreleased) {{{1
 - Better handling of setting filetype specific options
+- |CSV-Tabularize|
+- fix some small errors
 
 0.25 May 17, 2012 {{{1
 - |SearchInColumn_CSV| should match non-greedily, patch by Matěj Korvas,
