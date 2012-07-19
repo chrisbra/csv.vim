@@ -1,8 +1,21 @@
 ## Open items ##
 ----------------
 
-- Header/VHeader command should be more robust. May be use the preview
-  window to display the header? Does scrollbinding then still work?
+- Convert to a visual table, something like this:
+
+  a,header,line
+  foo,bar,10
+  baz,bum,5
+
+  :VisualTable results in:
+
+  -------------------
+  |a   |header| line|
+  -----|------|-----|
+  |foo |bar   |   10|
+  |baz |bum   |    5|
+  -------------------
+
 - Add more scripting functions?
 - wrap/shorten long fields (scopus.csv). Is this even possible with Vim?
   (maybe conceal trailing and leading whitespace?)
@@ -17,6 +30,8 @@
 ## Fixed items ##
 -----------------
 
+- Header/VHeader command should be more robust. May be use the preview
+  window to display the header? Does scrollbinding then still work?
 - Transposing columns (should work now)
 - add a wizard, for defining fixed-width columns
   (should work now)
