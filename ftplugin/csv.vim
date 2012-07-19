@@ -189,7 +189,7 @@ fu! <sid>LocalSettings(type) "{{{3
         setl fillchars-=fold:-
         " undo settings:
         let b:undo_ftplugin .=
-        \ "| setl fen< fdm< fdl< fdc< fml< fdt< fcs& fde<"
+        \ "| setl fen< fdm< fdl< fdc< fml< fdt&vim fcs& fde<"
     endif
 endfu
 
