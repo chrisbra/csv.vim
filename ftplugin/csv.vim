@@ -591,8 +591,18 @@ fu! <sid>ColWidth(colnr) "{{{3
             throw "ColWidth-error"
             return width
         endtry
-    elseif a:colnr > 0
-        return b:csv_fixed_width_cols[a:colnr] - b:csv_fixed_width_cols[(a:colnr - 1)]
+    else
+        let cols = len(b:csv_fixed_width_cols)
+        if a:colnr == cols
+            return strlen(substitute(getline('$'), '.', 'x', 'g')) -
+                \ b:csv_fixed_width_cols[cols-1] + 1
+        elseif a:colnr < cols && a:colnr > 0
+            return b:csv_fixed_width_cols[a:colnr] -
+                \ b:csv_fixed_width_cols[(a:colnr - 1)]
+        else
+            throw "ColWidth-error"
+            return 0
+        endif
     endif
 endfu
 
@@ -1654,7 +1664,12 @@ fu! <sid>NewRecord(line1, line2, count) "{{{3
     for item in range(1,<sid>MaxColumns())
         if !exists("b:col_width")
             " Best guess width
-            let record .= printf("%20s", b:delimiter)
+            if exists("b:csv_fixed_width_cols")
+                let record .= printf("%*s", <sid>ColWidth(item),
+                            \ b:delimiter)
+            else
+                let record .= printf("%20s", b:delimiter)
+            endif
         else
             let record .= printf("%*s", b:col_width[item-1]+1, b:delimiter)
         endif
@@ -2066,14 +2081,14 @@ fu! <sid>Tabularize() "{{{3
     endfor
     if exists("b:csv_fixed_width_cols")
         " There is no delimiter:
-        exe '%s/'. pat. '/|/g'
+        exe 'sil %s/'. pat. '/|/ge'
     else
-        exe 'sil %s/'. b:delimiter. '/|/g'
+        exe 'sil %s/'. b:delimiter. '/|/ge'
     endif
     " Add vertical bar in first column, if there isn't already one
-    sil %s/^[^|]/|&/
+    sil %s/^[^|]/|&/e
     " And add a final vertical bar, if there isn't already
-    sil %s/[^|]$/&|/
+    sil %s/[^|]$/&|/e
     syn off
     let &l:ma = _ma
     call winrestview(_c)
