@@ -1349,7 +1349,7 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
             \ '\)'
 
         let s:filter_count += 1
-        let b:csv_filter[col] = { 'pat': b, 'id': s:filter_count,
+        let b:csv_filter[s:filter_count] = { 'pat': b, 'id': s:filter_count,
             \ 'col': col, 'orig': a, 'match': a:match}
 
     endif
