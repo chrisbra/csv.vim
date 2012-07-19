@@ -2041,32 +2041,37 @@ fu! <sid>NrColumns(bang) "{{{3
 endfu
 
 fu! <sid>Tabularize() "{{{3
-    "TODO: Why doesn't that work?
-    " is this because of the range flag?
-    " It's because of the way, Vim works with
-    " a:firstline and a:lastline parameter, therefore
-    " explicitly give the range as argument to the function
-    if exists("b:csv_fixed_width_cols")
-        " Nothing to do
-        call <sid>Warn("ArrangeColumn does not work with fixed width column!")
-        return
-    endif
+    "TODO: make this work with comments
+    "and fixed width columns
     let _c = winsaveview()
     let _ma = &l:ma
     setl ma
     call <sid>CheckHeaderLine()
-    sil call <sid>ArrangeCol(1, line('$'), 1)
-    let colwidth = eval(join(b:col_width, '+')) + <sid>MaxColumns()
+    if exists("b:csv_fixed_width_cols")
+        let cols=copy(b:csv_fixed_width_cols)
+        let pat = join(map(cols, ' ''\(\%''. v:val. ''c\)'' '), '\|')
+        let colwidth = strlen(substitute(getline('$'), '.', 'x', 'g'))
+    else
+        sil call <sid>ArrangeCol(1, line('$'), 1)
+        let colwidth = eval(join(b:col_width, '+')) + <sid>MaxColumns()
+    endif
+
     if s:csv_fold_headerline > 0
         call <sid>NewRecord(s:csv_fold_headerline, s:csv_fold_headerline, 1)
-        exe 'sil '. (s:csv_fold_headerline+1). 's/\s\+/\=repeat("-", strlen(submatch(0)))/g'
+        exe 'sil '. (s:csv_fold_headerline+1).
+            \ 's/\s\+/\=repeat("-", strlen(submatch(0)))/g'
     endif
     for line in [0, line('$')+1]
         call append(line, repeat('-', colwidth))
     endfor
-    exe 'sil %s/'. b:delimiter. '/|/g'
-    " Add delimiter in first column, so it can be turned into a line later
-    sil %s/^./|&/
+    if exists("b:csv_fixed_width_cols")
+        " There is no delimiter:
+        exe '%s/'. pat. '/|/g'
+    else
+        exe 'sil %s/'. b:delimiter. '/|/g'
+    endif
+    " Add vertical bar in first column, if there isn't already one
+    sil %s/^[^|]/|&/
     " And add a final vertical bar, if there isn't already
     sil %s/[^|]$/&|/
     syn off
