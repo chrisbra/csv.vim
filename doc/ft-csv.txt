@@ -1285,7 +1285,7 @@ Alternatively, you can simply call |InitCSV| and ignore the error.
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
-0.26 (unreleased) {{{1
+0.26 Jul 25, 2012 {{{1
 - Better handling of setting filetype specific options
 - |CSV-Tabularize|
 - fix some small errors
