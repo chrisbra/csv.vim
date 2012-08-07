@@ -1,21 +1,8 @@
 ## Open items ##
 ----------------
 
-- Convert to a visual table, something like this:
-
-  a,header,line
-  foo,bar,10
-  baz,bum,5
-
-  :VisualTable results in:
-
-  -------------------
-  |a   |header| line|
-  -----|------|-----|
-  |foo |bar   |   10|
-  |baz |bum   |    5|
-  -------------------
-
+- Allow to set only a range of the file to filetype csv
+  (helps when writing text and one wants to insert some csv data)
 - Add more scripting functions?
 - wrap/shorten long fields (scopus.csv). Is this even possible with Vim?
   (maybe conceal trailing and leading whitespace?)
@@ -30,8 +17,24 @@
 ## Fixed items ##
 -----------------
 
+- Convert to a visual table, something like this:
+
+  a,header,line
+  foo,bar,10
+  baz,bum,5
+
+  :VisualTable results in:
+
+  -------------------
+  |a   |header| line|
+  -----|------|-----|
+  |foo |bar   |   10|
+  |baz |bum   |    5|
+  -------------------
+  (works using :Tabularize command)
 - Header/VHeader command should be more robust. May be use the preview
   window to display the header? Does scrollbinding then still work?
+  (should work now)
 - Transposing columns (should work now)
 - add a wizard, for defining fixed-width columns
   (should work now)
