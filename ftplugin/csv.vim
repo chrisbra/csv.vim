@@ -1154,7 +1154,7 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
             " parse the optional number format
             let str = matchstr(format, '/\zs[^/]*\ze/', 0, start)
             let s = matchlist(str, '\(.\)\?:\(.\)\?')[1:2]
-            if len(s) == 0
+            if empty(s)
                 " Number format wrong
                 call <sid>Warn("Numberformat wrong, needs to be /x:y/!")
                 return ''
@@ -1305,10 +1305,10 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
 
     if !a:add
         " remove last added item from filter
-        if len(b:csv_filter) > 0
+        if !empty(b:csv_filter)
             call <sid>RemoveLastItem(s:filter_count)
             let s:filter_count -= 1
-            if len(b:csv_filter) == 0
+            if empty(b:csv_filter)
                 call <sid>DisableFolding()
                 return
             endif
@@ -1398,7 +1398,7 @@ fu! <sid>OutputFilters(bang) "{{{3
         echo   printf("%s", title)
         echo   printf("%s", repeat("=",strdisplaywidth(title)))
         echohl "Normal"
-        if !exists("b:csv_filter") || len(b:csv_filter) == 0
+        if !exists("b:csv_filter") || empty(b:csv_filter)
             echo printf("%s", "No active filter")
         else
             let items = values(b:csv_filter)
@@ -1418,7 +1418,7 @@ fu! <sid>OutputFilters(bang) "{{{3
         endif
     else
         " Reapply filter again
-        if !exists("b:csv_filter") || len(b:csv_filter) == 0
+        if !exists("b:csv_filter") || empty(b:csv_filter)
             call <sid>Warn("No filters defined currently!")
             return
         else
