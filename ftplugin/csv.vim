@@ -247,13 +247,13 @@ fu! <sid>DoAutoCommands() "{{{3
     if has("gui_running") && !exists("#CSV_Menu#FileType")
         augroup CSV_Menu
             au!
-            au FileType csv call <sid>Menu(1)
+            au FileType * call <sid>Menu(&ft=='csv')
             au BufEnter <buffer> call <sid>Menu(1) " enable
             au BufLeave <buffer> call <sid>Menu(0) " disable
             au BufNewFile,BufNew * call <sid>Menu(0)
         augroup END
         "let b:undo_ftplugin .= '| sil! amenu disable CSV'
-        let b:undo_ftplugin .= '| sil! call <sid>Menut(0)'
+        let b:undo_ftplugin .= '| sil! call <sid>Menu(0)'
     endif
 endfu
 
