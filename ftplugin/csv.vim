@@ -1671,7 +1671,7 @@ fu! <sid>NewRecord(line1, line2, count) "{{{3
                 let record .= printf("%20s", b:delimiter)
             endif
         else
-            let record .= printf("%*s", b:col_width[item-1]+1, b:delimiter)
+            let record .= printf("%*s", get(b:col_width, item-1, 0)+1, b:delimiter)
         endif
     endfor
 
@@ -1805,7 +1805,8 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-nargs=1 -complete=custom,<sid>CompleteColumnNr')
     call <sid>LocalCmd('Transpose', ':call <sid>Transpose(<line1>, <line2>)',
         \ '-range=%')
-    call <sid>LocalCmd('Tabularize', ':call <sid>Tabularize()','')
+    call <sid>LocalCmd('Tabularize', ':call <sid>Tabularize(<bang>0,<line1>,<line2>)',
+        \ '-bang -range=%')
 endfu
 
 fu! <sid>Map(map, name, definition) "{{{3
@@ -2055,38 +2056,80 @@ fu! <sid>NrColumns(bang) "{{{3
     echo cols
 endfu
 
-fu! <sid>Tabularize() "{{{3
+fu! <sid>Tabularize(bang, first, last) "{{{3
     let _c = winsaveview()
+    " Table delimiter definition "{{{4
+    if !exists("s:td")
+        let s:td = {
+            \ 'hbar': (&enc =~# 'utf-8' ? '─' : '-'),
+            \ 'vbar': (&enc =~# 'utf-8' ? '│' : '|'),
+            \ 'scol': (&enc =~# 'utf-8' ? '├' : '|'),
+            \ 'ecol': (&enc =~# 'utf-8' ? '┤' : '|'),
+            \ 'ltop': (&enc =~# 'utf-8' ? '┌' : '+'),
+            \ 'rtop': (&enc =~# 'utf-8' ? '┐' : '+'),
+            \ 'lbot': (&enc =~# 'utf-8' ? '└' : '+'),
+            \ 'rbot': (&enc =~# 'utf-8' ? '┘' : '+'),
+            \ 'cros': (&enc =~# 'utf-8' ? '┼' : '+'),
+            \ 'dhor': (&enc =~# 'utf-8' ? '┬' : '-'),
+            \ 'uhor': (&enc =~# 'utf-8' ? '┴' : '-')
+            \ }
+    endif "}}}4
+    if match(getline(a:first), '^'.s:td.ltop) > -1
+        " Already tabularized, done
+        call <sid>Warn("Looks already Tabularized, aborting!")
+        return
+    endif
     let _ma = &l:ma
     setl ma
+    let colwidth = 0
+    let adjust_last = 0
+    call cursor(a:first,0)
     call <sid>CheckHeaderLine()
     if exists("b:csv_fixed_width_cols")
         let cols=copy(b:csv_fixed_width_cols)
         let pat = join(map(cols, ' ''\(\%''. v:val. ''c\)'' '), '\|')
         let colwidth = strlen(substitute(getline('$'), '.', 'x', 'g'))
+        let t=-1
+        let b:col_width = []
+        for item in b:csv_fixed_width_cols + [colwidth]
+            if t > -1
+                call add(b:col_width, item-t)
+            endif
+            let t = item
+        endfor
     else
-        sil call <sid>ArrangeCol(1, line('$'), 1)
+        sil call <sid>ArrangeCol(a:first, a:last, 1)
     endif
 
-    if s:csv_fold_headerline > 0
-        call <sid>NewRecord(s:csv_fold_headerline, s:csv_fold_headerline, 1)
-        exe 'sil '. (s:csv_fold_headerline+1).
-            \ 's/\s\+/\=repeat("-", strlen(submatch(0)))/g'
-    endif
-    if exists("b:csv_fixed_width_cols")
-        " There is no delimiter:
-        exe 'sil %s/'. pat. '/|/ge'
-    else
-        exe 'sil %s/'. b:delimiter. '/|/ge'
-    endif
+    let b:col_width[-1] += 1
+    let marginline = s:td.scol. join(map(copy(b:col_width), 'repeat(s:td.hbar, v:val)'), s:td.cros). s:td.ecol
+
+    exe printf('sil %d,%ds/%s/%s/ge', a:first, (a:last+adjust_last),
+        \ (exists("b:csv_fixed_width_cols") ? pat : b:delimiter ), s:td.vbar)
     " Add vertical bar in first column, if there isn't already one
-    sil %s/^[^|]/|&/e
+    exe printf('sil %d,%ds/%s/%s/e', a:first, a:last+adjust_last,
+        \ '^[^'. s:td.vbar. s:td.scol. ']', s:td.vbar.'&')
     " And add a final vertical bar, if there isn't already
-    sil %s/[^|]$/&|/e
-    let colwidth = strlen(substitute(getline('$'), '.', 'x', 'g'))
-    for line in [0, line('$')+1]
-        call append(line, repeat('-', colwidth))
-    endfor
+    exe printf('sil %d,%ds/%s/%s/e', a:first, a:last+adjust_last,
+        \ '[^'. s:td.vbar. s:td.ecol. ']$', '&'. s:td.vbar)
+    " Make nice intersection graphs
+    let line = split(getline(a:first), s:td.vbar)
+    call map(line, 'substitute(v:val, ''[^''.s:td.vbar. '']'', s:td.hbar, ''g'')')
+    " Set top and bottom margins
+    call append(a:first-1, s:td.ltop. join(line, s:td.dhor). s:td.rtop)
+    call append(a:last+adjust_last+1, s:td.lbot. join(line, s:td.uhor). s:td.rbot)
+
+    if s:csv_fold_headerline > 0 && !a:bang
+        "call <sid>NewRecord(s:csv_fold_headerline, s:csv_fold_headerline, 1)
+        call append(a:first + s:csv_fold_headerline, marginline)
+        let adjust_last += 1
+    endif
+
+    if a:bang
+        exe printf('sil %d,%ds/^%s\zs\n/&%s&/e', a:first + s:csv_fold_headerline, a:last + adjust_last,
+                    \ '[^'.s:td.scol. '][^'.s:td.hbar.'].*', marginline)
+    endif
+
     syn clear
     let &l:ma = _ma
     call winrestview(_c)
