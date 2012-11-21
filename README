@@ -1,7 +1,7 @@
-*ft-csv.txt*	For Vim version 7.3	Last Change: Wed, 25 Jul 2012
+*ft-csv.txt*	For Vim version 7.3	Last Change: Wed, 21 Nov 2012
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.26
+Version:	0.27
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -58,6 +58,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     6.3 Defining custom aggregate functions.....|csv-aggregate-functions|
     6.4 Autocommand on opening/closing files....|csv-arrange-autocmd|
     6.5 CSV Syntax error........................|csv-syntax-error|
+    6.6 Replace only within a column............|csv-replace-col|
 7. CSV Changelog................................|csv-changelog|
 
 ==============================================================================
@@ -716,6 +717,15 @@ This will be transformed into: >
     |    10|      5|     2|
     |---------------------|
 
+If your Vim uses an unicode 'encoding', the plugin makes a nice table using
+special unicode drawing glyphs (but it might be possible, that those chars are
+not being displayed correctly, if either your terminal or the gui font doesn't
+have characters for those codepoints). If you use the bang form, each row will
+be separated by a line. 
+You can also visual select a range of lines and use :Tabularize to have only
+that range converted into a nice ascii table.
+Note: Might not work with fixed-width columns.
+
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
 
@@ -1282,8 +1292,25 @@ and :filetype plugin (|:filetype-plugin-on|) statements in your |.vimrc|
 
 Alternatively, you can simply call |InitCSV| and ignore the error.
 
+6.6 Replace only within a certain column                     *csv-replace-col*
+----------------------------------------
+
+It is possible to replace only within a certain column, although it is not
+straightforward. First use |SearchInColumn_CSV| to generate a search pattern
+that matches your desired values within a specific column. If you want to keep
+certain values, use the |\(\)| pattern to capture its value so it will be
+available with a |\1| in the replacement part of the pattern.
+Now you can simply issue a >
+    :s//<replacement>/g
+to replace within that specific column, since the :s command reuses the last
+search pattern, if none is given.
+
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
+
+0.27 Nov 21, 2012 {{{1
+- Better |CSV-Tabularize|
+- Documentation update
 
 0.26 Jul 25, 2012 {{{1
 - Better handling of setting filetype specific options

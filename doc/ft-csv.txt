@@ -1,7 +1,7 @@
-*ft-csv.txt*	For Vim version 7.3	Last Change: Wed, 25 Jul 2012
+*ft-csv.txt*	For Vim version 7.3	Last Change: Wed, 21 Nov 2012
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.26
+Version:	0.27
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -1308,7 +1308,7 @@ search pattern, if none is given.
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
-0.27 (unreleased) {{{1
+0.27 Nov 21, 2012 {{{1
 - Better |CSV-Tabularize|
 - Documentation update
 
