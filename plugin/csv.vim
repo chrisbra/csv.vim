@@ -15,5 +15,18 @@ elseif exists("#CSV_Edit#BufReadPost")
     aug! CSV_Edit
 endif
 
+com! -range -bang Table -call <sid>Table(<bang>0, <line1>, <line2>)
+
+fu! <sid>Table(bang, line1, line2)
+    let _a = [ &lz, &syntax, &ft]
+    setl ft=csv lz
+    InitCSV
+    if exists(":Tabularize")
+	exe printf("%d,%dTabularize%s", a:line1, a:line2, empty(a:bang) ? '' : '!')
+    endif
+    let [ &lz, &syntax, &ft] = _a
+endfu
+    
+
 let &cpo = s:cpo_save
 unlet s:cpo_save

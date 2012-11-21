@@ -573,6 +573,7 @@ fu! <sid>ColWidth(colnr) "{{{3
             let b:csv_list=getline(1,'$')
             let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
             call filter(b:csv_list, 'v:val !~ pat')
+            call filter(b:csv_list, '!empty(v:val)')
             call map(b:csv_list, 'split(v:val, b:col.''\zs'')')
         endif
         try

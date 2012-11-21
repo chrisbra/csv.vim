@@ -687,8 +687,8 @@ command. If [range] is not given, it will transpose the complete file,
 otherwise it will only transpose the lines in the range given. Note, comments
 will be deleted and transposing does not work with fixed-width columns.
 
-                                                            *CSV-Tabularize*
-3.23 Transforming into a table                              *csv-tabularize*
+                                                          *CSV-Tabularize*
+3.23 Transforming into a table                      *Table* *csv-tabularize*
 ------------------------------
 
 You  can also transform your csv data into a visual table, using the: >
@@ -724,7 +724,11 @@ have characters for those codepoints). If you use the bang form, each row will
 be separated by a line. 
 You can also visual select a range of lines and use :Tabularize to have only
 that range converted into a nice ascii table.
-Note: Might not work with fixed-width columns.
+
+To be able to create ascii tables in all filetypes, this command is also
+available for non-CSV files as :Table
+
+Note: Each row must contain exactly as many fields as columns.
 
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
@@ -1307,6 +1311,9 @@ search pattern, if none is given.
 
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
+
+0.28 (unreleased) {{{1
+- new command :Table to create ascii tables for non-csv files
 
 0.27 Nov 21, 2012 {{{1
 - Better |CSV-Tabularize|
