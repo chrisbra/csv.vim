@@ -20,6 +20,8 @@ let s:cpo_save = &cpo
 set cpo&vim
 
 " Function definitions: "{{{2
+" 
+" Script specific functions "{{{2
 fu! <sid>Warn(mess) "{{{3
     echohl WarningMsg
     echomsg "CSV: " . a:mess
@@ -986,18 +988,6 @@ fu! <sid>Sort(bang, line1, line2, colnr) range "{{{3
     call winrestview(wsv)
 endfun
 
-fu! CSV_WCol(...) "{{{3
-    try
-        if exists("a:1") && (a:1 == 'Name' || a:1 == 1)
-            return printf("%s", <sid>WColumn(1))
-        else
-            return printf(" %d/%d", <SID>WColumn(), <SID>MaxColumns())
-        endif
-    catch
-        return ''
-    endtry
-endfun
-
 fu! <sid>CopyCol(reg, col) "{{{3
     " Return Specified Column into register reg
     let col = a:col == "0" ? <sid>WColumn() : a:col+0
@@ -1132,62 +1122,6 @@ fu! <sid>SumColumn(list) "{{{3
         return sum
     endif
 endfu
-
-fu! csv#EvalColumn(nr, func, first, last) range "{{{3
-    let save = winsaveview()
-    call <sid>CheckHeaderLine()
-    let nr = matchstr(a:nr, '^\d\+')
-    let col = (empty(nr) ? <sid>WColumn() : nr)
-    " don't take the header line into consideration
-    let start = a:first - 1 + s:csv_fold_headerline
-    let stop  = a:last  - 1 + s:csv_fold_headerline
-
-    let column = <sid>CopyCol('', col)[start : stop]
-    " Delete delimiter
-    call map(column, 'substitute(v:val, b:delimiter . "$", "", "g")')
-    call map(column, 'substitute(v:val, ''^\s\+$'', "", "g")')
-    " Delete empty values
-    " Leave this up to the function that does something
-    " with each value
-    "call filter(column, '!empty(v:val)')
-    
-    " parse the optional number format
-    let format = matchstr(a:nr, '/[^/]*/')
-    call <sid>NumberFormat()
-    if !empty(format)
-        try
-            let s = []
-            " parse the optional number format
-            let str = matchstr(format, '/\zs[^/]*\ze/', 0, start)
-            let s = matchlist(str, '\(.\)\?:\(.\)\?')[1:2]
-            if empty(s)
-                " Number format wrong
-                call <sid>Warn("Numberformat wrong, needs to be /x:y/!")
-                return ''
-            endif
-            if !empty(s[0])
-                let s:nr_format[0] = s[0]
-            endif
-            if !empty(s[1])
-                let s:nr_format[1] = s[1]
-            endif
-        endtry
-    endif
-    try
-        let result=call(function(a:func), [column])
-        return result
-    catch
-        " Evaluation of expression failed
-        echohl Title
-        echomsg "Evaluating" matchstr(a:func, '[a-zA-Z]\+$')
-        \ "failed for column" col . "!"
-        echohl Normal
-        return ''
-    finally
-        call winrestview(save)
-    endtry
-endfu
-
 
 fu! <sid>DoForEachColumn(start, stop, bang) range "{{{3
     " Do something for each column,
@@ -2149,6 +2083,63 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
     call winrestview(_c)
 endfu
 
+" Global functions "{{{2
+fu! csv#EvalColumn(nr, func, first, last) range "{{{3
+    let save = winsaveview()
+    call <sid>CheckHeaderLine()
+    let nr = matchstr(a:nr, '^\d\+')
+    let col = (empty(nr) ? <sid>WColumn() : nr)
+    " don't take the header line into consideration
+    let start = a:first - 1 + s:csv_fold_headerline
+    let stop  = a:last  - 1 + s:csv_fold_headerline
+
+    let column = <sid>CopyCol('', col)[start : stop]
+    " Delete delimiter
+    call map(column, 'substitute(v:val, b:delimiter . "$", "", "g")')
+    call map(column, 'substitute(v:val, ''^\s\+$'', "", "g")')
+    " Delete empty values
+    " Leave this up to the function that does something
+    " with each value
+    "call filter(column, '!empty(v:val)')
+    
+    " parse the optional number format
+    let format = matchstr(a:nr, '/[^/]*/')
+    call <sid>NumberFormat()
+    if !empty(format)
+        try
+            let s = []
+            " parse the optional number format
+            let str = matchstr(format, '/\zs[^/]*\ze/', 0, start)
+            let s = matchlist(str, '\(.\)\?:\(.\)\?')[1:2]
+            if empty(s)
+                " Number format wrong
+                call <sid>Warn("Numberformat wrong, needs to be /x:y/!")
+                return ''
+            endif
+            if !empty(s[0])
+                let s:nr_format[0] = s[0]
+            endif
+            if !empty(s[1])
+                let s:nr_format[1] = s[1]
+            endif
+        endtry
+    endif
+    try
+        let result=call(function(a:func), [column])
+        return result
+    catch
+        " Evaluation of expression failed
+        echohl Title
+        echomsg "Evaluating" matchstr(a:func, '[a-zA-Z]\+$')
+        \ "failed for column" col . "!"
+        echohl Normal
+        return ''
+    finally
+        call winrestview(save)
+    endtry
+endfu
+
+
 fu! CSVPat(colnr, ...) "{{{3
     " Make sure, we are working in a csv file
     if &ft != 'csv'
@@ -2163,6 +2154,18 @@ fu! CSVPat(colnr, ...) "{{{3
     "call setcmdpos(pos)
     return pat
 endfu
+
+fu! CSV_WCol(...) "{{{3
+    try
+        if exists("a:1") && (a:1 == 'Name' || a:1 == 1)
+            return printf("%s", <sid>WColumn(1))
+        else
+            return printf(" %d/%d", <SID>WColumn(), <SID>MaxColumns())
+        endif
+    catch
+        return ''
+    endtry
+endfun
 
 " Initialize Plugin "{{{2
 let b:csv_start = exists("b:csv_start") ? b:csv_start : 1
