@@ -725,6 +725,9 @@ be separated by a line.
 You can also visual select a range of lines and use :Tabularize to have only
 that range converted into a nice ascii table.
 
+To prevent name clashes with the Tabular plugin, :CSVTabularize is defined as
+an alias to the same function.
+
 To be able to create ascii tables in all filetypes, this command is also
 available for non-CSV files as :Table
 

@@ -15,22 +15,45 @@ elseif exists("#CSV_Edit#BufReadPost")
     aug! CSV_Edit
 endif
 
-com! -range -bang Table -call <sid>Table(<bang>0, <line1>, <line2>)
+com! -range -bang Table call <sid>Table(<bang>0, <line1>, <line2>)
 
 fu! <sid>Table(bang, line1, line2)
     " save and restore some options
-    let _a = [ &lz, &syntax, &ft, &sol, &tw, &wrap, &cole, &cocu, &fen, &fdm, &fdl, &fdc, &fml]
+    if has("conceal")
+	let _a = [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:cole, &l:cocu, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt]
+    else
+	let _a = [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt]
+    endif
     " try to guess the delimiter from the specified region, therefore, we need
     " to initialize the plugin to inspect only those lines
     let [ b:csv_start, b:csv_end ] = [ a:line1, a:line2 ]
     setl ft=csv lz
-    let b:csv_list=getline(a:line1, a:line2)
-    call filter(b:csv_list, '!empty(v:val)')
-    call map(b:csv_list, 'split(v:val, b:col.''\zs'')')
-    if exists(":Tabularize")
-	exe printf("%d,%dTabularize%s", a:line1, a:line2, empty(a:bang) ? '' : '!')
-    endif
-    let [ &lz, &syntax, &ft, &sol, &tw, &wrap, &cole, &cocu, &fen, &fdm, &fdl, &fdc, &fml] = _a
+    " get indent
+    let indent = matchstr(getline(a:line1), '^\s\+')
+    exe printf(':sil %d,%ds/^\s\+//e', a:line1, a:line2)
+    let last = line('$')
+
+    try
+	let b:csv_list=getline(a:line1, a:line2)
+	call filter(b:csv_list, '!empty(v:val)')
+	call map(b:csv_list, 'split(v:val, b:col.''\zs'')')
+	if exists(":CSVTabularize")
+	    exe printf("%d,%dCSVTabularize%s", a:line1, a:line2, empty(a:bang) ? '' : '!')
+	endif
+	unlet! b:col_width b:csv_list
+    catch
+    finally
+	if !empty(indent)
+	    " Added one line above a:line1 and several lines below, so need to
+	    " correct the range
+	    exe printf(':sil %d,%ds/^/%s/e', (a:line1 - 1), (a:line2 + line('$') - last), indent)
+	endif
+	if has("conceal")
+	    let [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:cole, &l:cocu, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt] = _a
+	else
+	    let [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt] = _a
+	endif
+    endtry
 endfu
     
 

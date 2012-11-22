@@ -621,6 +621,10 @@ fu! <sid>ArrangeCol(first, last, bang) range "{{{3
     endif
     let cur=winsaveview()
     if a:bang || !exists("b:col_width")
+        if a:bang
+            " Force recalculating the Column width
+            unlet! b:csv_list
+        endif
         " Force recalculation of Column width
         call <sid>CalculateColumnWidth()
     endif
@@ -677,13 +681,13 @@ fu! <sid>CalculateColumnWidth() "{{{3
     " Internal function, not called from external,
     " does not work with fixed width columns
     let b:col_width=[]
-    " Force recalculating the Column width
-    unlet! b:csv_list
-    let s:max_cols=<SID>MaxColumns()
     try
+        let s:max_cols=<SID>MaxColumns(line('.'))
         for i in range(1,s:max_cols)
             call add(b:col_width, <SID>ColWidth(i))
         endfor
+    catch /csv:no_col/
+        call <sid>Warn("Error: getting Column numbers, aborting!")
     catch /ColWidth/
         call <sid>Warn("Error: getting Column Width, using default!")
     endtry
@@ -1808,6 +1812,9 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-range=%')
     call <sid>LocalCmd('Tabularize', ':call <sid>Tabularize(<bang>0,<line1>,<line2>)',
         \ '-bang -range=%')
+    " Alias for :Tabularize, might be taken by Tabular plugin
+    call <sid>LocalCmd('CSVTabularize', ':call <sid>Tabularize(<bang>0,<line1>,<line2>)',
+        \ '-bang -range=%')
 endfu
 
 fu! <sid>Map(map, name, definition) "{{{3
@@ -2099,9 +2106,15 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
             let t = item
         endfor
     else
-        sil call <sid>ArrangeCol(a:first, a:last, 1)
+        " don't clear column width variable, might have been set in the
+        " plugin!
+        sil call <sid>ArrangeCol(a:first, a:last, 0)
     endif
 
+    if empty(b:col_width)
+        call <sid>Warn('An error occured, aborting!')
+        return
+    endif
     let b:col_width[-1] += 1
     let marginline = s:td.scol. join(map(copy(b:col_width), 'repeat(s:td.hbar, v:val)'), s:td.cros). s:td.ecol
 
