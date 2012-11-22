@@ -26,7 +26,7 @@ fu! <sid>Warn(mess) "{{{3
     echohl Normal
 endfu
 
-fu! <sid>Init() "{{{3
+fu! <sid>Init(startline, endline) "{{{3
     " Hilight Group for Columns
     if exists("g:csv_hiGroup")
         let s:hiGroup = g:csv_hiGroup
@@ -42,7 +42,7 @@ fu! <sid>Init() "{{{3
 
     " Determine default Delimiter
     if !exists("g:csv_delim")
-        let b:delimiter=<SID>GetDelimiter()
+        let b:delimiter=<SID>GetDelimiter(a:startline, a:endline)
     else
         let b:delimiter=g:csv_delim
     endif
@@ -119,6 +119,7 @@ fu! <sid>Init() "{{{3
     call <sid>Menu(1)
     call <sid>DisableFolding()
     silent do Syntax
+    unlet! b:csv_start b:csv_end
 
     " Remove configuration variables
     let b:undo_ftplugin .=  "| unlet! b:delimiter b:col"
@@ -126,7 +127,7 @@ fu! <sid>Init() "{{{3
         \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
         \ . "| unlet! b:csv_SplitWindow b:csv_headerline"
         \ . "| unlet! b:csv_thousands_sep b:csv_decimal_sep"
-        \. " | unlet! b:browsefilter"
+        \. " | unlet! b:browsefilter b:csv_start b:csv_end"
 
  " Delete all functions
  " disabled currently, because otherwise when switching ft
@@ -453,7 +454,7 @@ fu! <sid>HiCol(colnr, bang) "{{{3
     endif
 endfu
 
-fu! <sid>GetDelimiter() "{{{3
+fu! <sid>GetDelimiter(first, last) "{{{3
     if !exists("b:csv_fixed_width_cols")
         let _cur = getpos('.')
         let _s   = @/
@@ -464,7 +465,7 @@ fu! <sid>GetDelimiter() "{{{3
         set nolz
         for i in  values(Delim)
             redir => temp[i]
-            exe "silent! %s/" . i . "/&/nge"
+            exe "silent! ". a:first. ",". a:last. "s/" . i . "/&/nge"
             redir END
         endfor
         let &lz = _lz
@@ -1560,7 +1561,6 @@ fu! <sid>AnalyzeColumn(...) "{{{3
     unlet max_items
 endfunc
 
-
 fu! <sid>Vertfold(bang, col) "{{{3
     if a:bang
         do Syntax
@@ -1644,7 +1644,7 @@ fu! <sid>InitCSVFixedWidth() "{{{3
         endfor
         let b:csv_fixed_width=join(sort(b:csv_fixed_width_cols,
             \ "<sid>SortList"), ',')
-        call <sid>Init()
+        call <sid>Init(1, line('$'))
     endif
     let &l:cc=_cc
     redraw!
@@ -1765,7 +1765,7 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("UnArrangeColumn",
         \':call <sid>PrepUnArrangeCol(<line1>, <line2>)',
         \ '-range')
-    call <sid>LocalCmd("InitCSV", ':call <sid>Init()', '')
+    call <sid>LocalCmd("InitCSV", ':call <sid>Init(<line1>,<line2>)', '-range=%')
     call <sid>LocalCmd('Header',
         \ ':call <sid>SplitHeaderLine(<q-args>,<bang>0,1)',
         \ '-nargs=? -bang')
@@ -1902,7 +1902,7 @@ fu! <sid>NewDelimiter(newdelimiter) "{{{3
         call setbufvar('', '&'. key, value)
     endfor
     "reinitialize the plugin
-    call <sid>Init()
+    call <sid>Init(1,line('$'))
 endfu
 
 fu! <sid>IN(list, value) "{{{3
@@ -2152,7 +2152,10 @@ fu! CSVPat(colnr, ...) "{{{3
 endfu
 
 " Initialize Plugin "{{{2
-call <SID>Init()
+let b:csv_start = exists("b:csv_start") ? b:csv_start : 1
+let b:csv_end   = exists("b:csv_end") ? b:csv_end : line('$')
+
+call <SID>Init(b:csv_start, b:csv_end)
 let &cpo = s:cpo_save
 unlet s:cpo_save
 

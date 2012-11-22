@@ -18,13 +18,19 @@ endif
 com! -range -bang Table -call <sid>Table(<bang>0, <line1>, <line2>)
 
 fu! <sid>Table(bang, line1, line2)
-    let _a = [ &lz, &syntax, &ft]
+    " save and restore some options
+    let _a = [ &lz, &syntax, &ft, &sol, &tw, &wrap, &cole, &cocu, &fen, &fdm, &fdl, &fdc, &fml]
+    " try to guess the delimiter from the specified region, therefore, we need
+    " to initialize the plugin to inspect only those lines
+    let [ b:csv_start, b:csv_end ] = [ a:line1, a:line2 ]
     setl ft=csv lz
-    InitCSV
+    let b:csv_list=getline(a:line1, a:line2)
+    call filter(b:csv_list, '!empty(v:val)')
+    call map(b:csv_list, 'split(v:val, b:col.''\zs'')')
     if exists(":Tabularize")
 	exe printf("%d,%dTabularize%s", a:line1, a:line2, empty(a:bang) ? '' : '!')
     endif
-    let [ &lz, &syntax, &ft] = _a
+    let [ &lz, &syntax, &ft, &sol, &tw, &wrap, &cole, &cocu, &fen, &fdm, &fdl, &fdc, &fml] = _a
 endfu
     
 
