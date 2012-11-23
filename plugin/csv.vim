@@ -24,6 +24,7 @@ fu! <sid>Table(bang, line1, line2)
     else
 	let _a = [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt]
     endif
+    let _a = winsaveview()
     " try to guess the delimiter from the specified region, therefore, we need
     " to initialize the plugin to inspect only those lines
     let [ b:csv_start, b:csv_end ] = [ a:line1, a:line2 ]
@@ -53,6 +54,7 @@ fu! <sid>Table(bang, line1, line2)
 	else
 	    let [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt] = _a
 	endif
+	call winrestview(_a)
     endtry
 endfu
     
