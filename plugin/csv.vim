@@ -24,10 +24,12 @@ fu! <sid>Table(bang, line1, line2)
     else
 	let _a = [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt]
     endif
-    let _a = winsaveview()
+    let _b = winsaveview()
     " try to guess the delimiter from the specified region, therefore, we need
     " to initialize the plugin to inspect only those lines
     let [ b:csv_start, b:csv_end ] = [ a:line1, a:line2 ]
+    " Reset b:did_ftplugin just to be sure
+    unlet! b:did_ftplugin
     setl ft=csv lz
     " get indent
     let indent = matchstr(getline(a:line1), '^\s\+')
@@ -54,7 +56,7 @@ fu! <sid>Table(bang, line1, line2)
 	else
 	    let [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt] = _a
 	endif
-	call winrestview(_a)
+	call winrestview(_b)
     endtry
 endfu
     
