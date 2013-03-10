@@ -770,6 +770,16 @@ fu! <sid>GetColPat(colnr, zs_flag) "{{{3
     return pat . (a:zs_flag ? '\zs' : '')
 endfu
 
+fu! <sid>SetupQuitPre() "{{{3
+    " Setup QuitPre autocommand to quit cleanly
+    if exists("##QuitPre")
+        let bufnr=bufnr('')
+        noa wincmd p
+        exe "au QuitPre * ". bufnr. "bw"
+        noa wincmd p
+    endif
+endfu
+
 fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
     if exists("b:csv_fixed_width_cols")
         call <sid>Warn("Header does not work with fixed width column!")
@@ -828,6 +838,7 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             call matchadd("CSVHeaderLine", b:col)
             setl scrollopt=ver winfixwidth
         endif
+        call <sid>SetupQuitPre()
         let win = winnr()
         setl scrollbind buftype=nowrite bufhidden=wipe noswapfile nobuflisted
         wincmd p
