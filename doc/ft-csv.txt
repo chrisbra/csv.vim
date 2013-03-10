@@ -1315,6 +1315,10 @@ search pattern, if none is given.
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
+0.29 (unreleased) {{{1
+- setup |QuitPre| autocommand to quit cleanly in newer vims when using :Header
+  and :VHeader
+
 0.28 Dec 14, 2012 {{{1
 - new command :Table to create ascii tables for non-csv files
 
