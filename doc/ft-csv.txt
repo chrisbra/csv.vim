@@ -34,6 +34,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.21 Vertical Folding.......................|csv-vertfold|
     3.22 Transposing columns....................|csv-transpose|
     3.23 Transforming into a table..............|csv-tabularize|
+    3.24 Add new empty columns..................|AddColumn_CSV|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -733,6 +734,24 @@ available for non-CSV files as :Table
 
 Note: Each row must contain exactly as many fields as columns.
 
+3.24 Add new empty columns                                   *AddColumn_CSV*
+--------------------------
+
+If you want to add new empty columns to your file you can use the
+:AddColumn command: >
+
+    :[range]AddColumn [column] [count]
+
+By default, this works for the whole file, but you can give a different range
+to which the AddColumn command applies. If no arguments are given, the new
+empty column will be added after the column on which the cursor is. You can
+however add as first argument the column number after which the new column
+needs to be added.
+
+Additionally, you can also add a count number to add several columns at once
+after the specified column number. You 0 for the column number, if you want to
+add several columns after the current column.
+
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
 
@@ -1318,6 +1337,7 @@ search pattern, if none is given.
 0.29 (unreleased) {{{1
 - setup |QuitPre| autocommand to quit cleanly in newer vims when using :Header
   and :VHeader
+- new |AddColumn_CSV| command
 
 0.28 Dec 14, 2012 {{{1
 - new command :Table to create ascii tables for non-csv files

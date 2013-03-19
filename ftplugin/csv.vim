@@ -160,7 +160,7 @@ fu! <sid>Init(startline, endline) "{{{3
  " \ delf <sid>NewDelimiter | delf <sid>DuplicateRows | delf <sid>IN |
  " \ delf <sid>SaveOptions | delf <sid>CheckDuplicates |
  " \ delf <sid>CompleteColumnNr | delf <sid>CSVPat | delf <sid>Transpose |
- " \ delf <sid>LocalSettings()
+ " \ delf <sid>LocalSettings() | delf <sid>AddColumn
 endfu
 
 fu! <sid>LocalSettings(type) "{{{3
@@ -1069,21 +1069,21 @@ fu! <sid>MoveColumn(start, stop, ...) range "{{{3
         endif
         if !exists("b:csv_fixed_width_cols")
             let fields=split(content, b:col . '\zs')
+            " Add delimiter to destination column, in case there was none,
+            " remove delimiter from source, in case destination did not have one
+            if matchstr(fields[dest], '.$') !~? b:delimiter
+                let fields[dest] = fields[dest] . b:delimiter
+                if matchstr(fields[source], '.$') =~? b:delimiter
+                let fields[source] = substitute(fields[source],
+                    \ '^\(.*\).$', '\1', '')
+                endif
+            endif
         else
             let fields=[]
+            " this is very inefficient!
             for j in range(1, max, 1)
                 call add(fields, matchstr(content, <sid>GetColPat(j,0)))
             endfor
-        endif
-
-        " Add delimiter to destination column, in case there was none,
-        " remove delimiter from source, in case destination did not have one
-        if matchstr(fields[dest], '.$') !~? b:delimiter
-            let fields[dest] = fields[dest] . b:delimiter
-            if matchstr(fields[source], '.$') =~? b:delimiter
-            let fields[source] = substitute(fields[source],
-                \ '^\(.*\).$', '\1', '')
-            endif
         endif
 
         let fields= (source == 0 ? [] : fields[0 : (source-1)])
@@ -1095,6 +1095,54 @@ fu! <sid>MoveColumn(start, stop, ...) range "{{{3
 
     call winrestview(wsv)
 
+endfu
+
+fu! <sid>AddColumn(start, stop, ...) range "{{{3
+    " Add new empty column
+    " Explicitly give the range as argument,
+    " cause otherwise, Vim would move the cursor
+    if exists("b:csv_fixed_width_cols")
+        call <sid>Warn("Adding Columns only works for delimited files")
+        return
+    endif
+
+    let wsv = winsaveview()
+
+    let col = <sid>WColumn()
+    let max = <sid>MaxColumns()
+
+    " If no argument is given, move current column after last column
+    let pos=(exists("a:1") && a:1 >= 0 && a:1 <= max ? a:1 : col)
+    let cnt=(exists("a:2") && a:2 > 0 ? a:2 : 1)
+
+    if pos == 0
+        let pos = col
+    endif
+
+    " translate 1 based columns into zero based list index
+    let pos -= 1
+    let col -= 1
+
+    if pos == 0
+        let pat = '^'
+    elseif pos == max-1
+        let pat = '$'
+    else
+        let pat = <sid>GetColPat(pos,1)
+    endif
+
+    " instead of reading the whole range into memory
+
+    for i in range(a:start, a:stop)
+        let content = getline(i)
+        if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+            " skip comments
+            continue
+        endif
+        exe printf("%ds/%s/%s/e", i, pat, repeat(' '.b:delimiter, cnt))
+    endfor
+
+    call winrestview(wsv)
 endfu
 
 fu! <sid>SumColumn(list) "{{{3
@@ -1760,6 +1808,9 @@ fu! <sid>CommandDefinitions() "{{{3
     " Alias for :Tabularize, might be taken by Tabular plugin
     call <sid>LocalCmd('CSVTabularize', ':call <sid>Tabularize(<bang>0,<line1>,<line2>)',
         \ '-bang -range=%')
+    call <sid>LocalCmd("AddColumn",
+        \ ':call <sid>AddColumn(<line1>,<line2>,<f-args>)',
+        \ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
 endfu
 
 fu! <sid>Map(map, name, definition) "{{{3
@@ -1803,6 +1854,7 @@ fu! <sid>Menu(enable) "{{{3
         amenu CSV.Column.Analy&ze           :Analyze<cr>
         amenu CSV.Column.&Arrange           :%ArrangeCol<cr>
         amenu CSV.Column.&UnArrange         :%UnArrangeCol<cr>
+        amenu CSV.Column.&Add               :%AddColumn<cr>
         amenu CSV.-sep2-                    <nul>
         amenu CSV.&Toggle\ Header           :HeaderToggle<cr>
         amenu CSV.&ConvertData              :ConvertData<cr>
