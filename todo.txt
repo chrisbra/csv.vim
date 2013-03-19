@@ -1,9 +1,12 @@
 ## Open items ##
 ----------------
 
+- new command: AddColumn adds an empty column after cursor or after
+  specified column number (possibly followed by number of columns to
+  add)
 - Allow to set only a range of the file to filetype csv
   (helps when writing text and one wants to insert some csv data)
-- Add more scripting functions?
+- Add more scripting functions? (which ones?)
 - wrap/shorten long fields (scopus.csv). Is this even possible with Vim?
   (maybe conceal trailing and leading whitespace?)
 - Better support for newlines within a column (Is this worth the
