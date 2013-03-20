@@ -1111,13 +1111,17 @@ fu! <sid>AddColumn(start, stop, ...) range "{{{3
     let col = <sid>WColumn()
     let max = <sid>MaxColumns()
 
-    " If no argument is given, move current column after last column
-    let pos=(exists("a:1") && a:1 >= 0 && a:1 <= max ? a:1 : col)
-    let cnt=(exists("a:2") && a:2 > 0 ? a:2 : 1)
-
-    if pos == 0
+    " If no argument is given, add column after current column
+    if exists("a:1")
+        if a:1 == '$' || a:1 >= max
+            let pos = max
+        elseif a:1 <= 0
+            let pos = col
+        endif
+    else
         let pos = col
     endif
+    let cnt=(exists("a:2") && a:2 > 0 ? a:2 : 1)
 
     " translate 1 based columns into zero based list index
     let pos -= 1
@@ -1131,16 +1135,32 @@ fu! <sid>AddColumn(start, stop, ...) range "{{{3
         let pat = <sid>GetColPat(pos,1)
     endif
 
-    " instead of reading the whole range into memory
+    if pat != '$' || (pat == '$' &&  getline(a:stop)[-1:] == b:delimiter)
+        let subst = repeat(' '. b:delimiter, cnt)
+    else
+        let subst = repeat(b:delimiter. ' ', cnt)
+    endif
 
-    for i in range(a:start, a:stop)
-        let content = getline(i)
-        if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
-            " skip comments
-            continue
-        endif
-        exe printf("%ds/%s/%s/e", i, pat, repeat(' '.b:delimiter, cnt))
-    endfor
+    " if the data contains comments, substitute one line after another
+    " skipping comment lines (we could do it with a single :s statement,
+    " but that would fail for the first and last column.
+
+    let commentpat = '\%(\%>'.(a:start-1).'l\V'.
+                \ escape(b:csv_cmt[0], '\\').'\m\)'. '\&\%(\%<'.
+                \ (a:stop+1). 'l\V'. escape(b:csv_cmt[0], '\\'). '\m\)'
+    if search(commentpat)
+        for i in range(a:start, a:stop)
+            let content = getline(i)
+            if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+                " skip comments
+                continue
+            endif
+            exe printf("sil %ds/%s/%s/e", i, pat, subst)
+        endfor
+    else
+        " comments should by default be skipped (pattern shouldn't match)
+        exe printf("sil %d,%ds/%s/%s/e", a:start, a:stop, pat, subst)
+    endif
 
     call winrestview(wsv)
 endfu
