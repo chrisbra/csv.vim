@@ -468,6 +468,13 @@ changed the |<Leader>| or |<LocalLeader>| variables, those the <Localleader>
 is equival to a single backslash '\', e.g. \K would run the lookup function on
 the word under the cursor and \J would join this line with the previous line.
 
+If you want to prevent the mapping of keys, simply set the global variable
+g:csv_nomap_<key> to 1, e.g. to prevent mapping of <CR> in csv files, put >
+
+    let g:csv_nomap_cr = 1
+<
+into your |.vimrc|. Note, the keyname must be lower case.
+
 
                                                             *ConvertData_CSV*
 3.18 Converting a CSV File					 *csv-convert*
@@ -1338,6 +1345,8 @@ search pattern, if none is given.
 - setup |QuitPre| autocommand to quit cleanly in newer vims when using :Header
   and :VHeader
 - new |AddColumn_CSV| command
+- prevent mapping of keys, if g:csv_nomap_<keyname> is set
+  (reported by ping)
 
 0.28 Dec 14, 2012 {{{1
 - new command :Table to create ascii tables for non-csv files

@@ -1834,19 +1834,22 @@ fu! <sid>CommandDefinitions() "{{{3
 endfu
 
 fu! <sid>Map(map, name, definition) "{{{3
-    " All mappings are buffer local
-    exe a:map "<buffer> <silent>" a:name a:definition
-    " should already exists
-    if a:map == 'nnoremap'
-        let unmap = 'nunmap'
-    elseif a:map == 'noremap' || a:map == 'map'
-        let unmap = 'unmap'
-    elseif a:map == 'vnoremap'
-        let unmap = 'vunmap'
-    elseif a:map == 'omap'
-        let unmap = 'ounmap'
+    let keyname = substitute(a:name, '[<>]', '', 'g')
+    if !get(g:, "csv_nomap_". tolower(keyname), 0)
+        " All mappings are buffer local
+        exe a:map "<buffer> <silent>" a:name a:definition
+        " should already exists
+        if a:map == 'nnoremap'
+            let unmap = 'nunmap'
+        elseif a:map == 'noremap' || a:map == 'map'
+            let unmap = 'unmap'
+        elseif a:map == 'vnoremap'
+            let unmap = 'vunmap'
+        elseif a:map == 'omap'
+            let unmap = 'ounmap'
+        endif
+        let b:undo_ftplugin .= "| " . unmap . " <buffer> " . a:name
     endif
-    let b:undo_ftplugin .= "| " . unmap . " <buffer> " . a:name
 endfu
 
 fu! <sid>LocalCmd(name, definition, args) "{{{3
