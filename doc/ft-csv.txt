@@ -35,6 +35,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.22 Transposing columns....................|csv-transpose|
     3.23 Transforming into a table..............|csv-tabularize|
     3.24 Add new empty columns..................|AddColumn_CSV|
+    3.25 Substitute in columns..................|Substitute_CSV|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -759,6 +760,33 @@ Additionally, you can also add a count number to add several columns at once
 after the specified column number. You 0 for the column number, if you want to
 add several columns after the current column.
 
+3.25 Substitute in columns                                  *Substitute_CSV*
+--------------------------
+
+If you want to substitute only in specific columns, you can use the
+:Substitute command: >
+
+    :[range]Substitute [column/]pattern/string[/flags]
+
+This means in the range and within the given columns replace pattern by
+string. This works bascially like the |:s| command, except that you MUST use forward
+slashes / to delimit the command. The optional part `[column/]` can take either
+the form of an address or if you leave it out, substitution will only happen
+in the current column. Additionally, you can use the `1,5/` form to substitute
+within the columns 1 till 5 or you can even use `1,$` which means to
+substitute in each column (so in fact this simplifies to a simple `:s`
+command whithin the given range. For the use of `[/flags]` see |:s_flags|
+Here are some examples: >
+
+    :%Substitute 1,4/foobar/baz/gce
+
+Substitutes in the whole file in columns 1 till 4 the pattern foobar by baz
+for every match ('g' flag) and asks for confirmation ('c' flag).
+
+    :%S 3,$/(\d\+)/\1 EUR/g
+
+Substitutes in each column starting from the third each number and appends the
+EURO suffix to it.
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
 

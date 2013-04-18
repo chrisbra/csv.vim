@@ -1,6 +1,8 @@
 ## Open items ##
 ----------------
 
+- document how to "substitute in column" command, may be even provide a
+  command for that?
 - new command: AddColumn adds an empty column after cursor or after
   specified column number (possibly followed by number of columns to
   add)

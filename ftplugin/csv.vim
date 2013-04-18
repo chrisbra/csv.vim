@@ -160,7 +160,7 @@ fu! <sid>Init(startline, endline) "{{{3
  " \ delf <sid>NewDelimiter | delf <sid>DuplicateRows | delf <sid>IN |
  " \ delf <sid>SaveOptions | delf <sid>CheckDuplicates |
  " \ delf <sid>CompleteColumnNr | delf <sid>CSVPat | delf <sid>Transpose |
- " \ delf <sid>LocalSettings() | delf <sid>AddColumn
+ " \ delf <sid>LocalSettings() | delf <sid>AddColumn | delf <sid>SubstituteInColumn
 endfu
 
 fu! <sid>LocalSettings(type) "{{{3
@@ -1831,6 +1831,8 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("AddColumn",
         \ ':call <sid>AddColumn(<line1>,<line2>,<f-args>)',
         \ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd('Substitute', ':call <sid>SubstituteInColumn(<q-args>,<line1>,<line2>)',
+        \ '-nargs=1 -range=%')
 endfu
 
 fu! <sid>Map(map, name, definition) "{{{3
@@ -2167,6 +2169,83 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
     syn clear
     let &l:ma = _ma
     call winrestview(_c)
+endfu
+
+fu! <sid>SubstituteInColumn(command, line1, line2) range "{{{3
+    " Command can be something like 1,2/foobar/foobaz/ to replace in 1 and second column
+    " Command can be something like /foobar/foobaz/ to replace in the current column
+    " Command can be something like 1,$/foobar/foobaz/ to replace in all columns
+    " Command can be something like 3/foobar/foobaz/flags to replace only in the 3rd column
+
+    " Save position and search register
+    let _wsv = winsaveview()
+    let _search = [ '/', getreg('/'), getregtype('/')]
+    let columns = []
+    let maxcolnr = <sid>MaxColumns()
+    let simple_s_command = 0 " when set to 1, we can simply use an :s command
+
+    " try to split on '/' if it is not escaped or in a collection
+    let cmd = split(a:command, '\%([\\]\|\[[^]]*\)\@<!/')
+    if a:command !~? '^\%([$]\|\%(\d\+\)\%(,\%([0-9]\+\|[$]\)\)\?\)/'
+        " No Column address given
+        call add(columns, <sid>WColumn())
+        let cmd = [columns[0]] + cmd "First item of cmd list contains address!
+    elseif ((len(cmd) == 3 && cmd[2] !~# '^[&cgeiInp#l]\+$')
+    \ || len(cmd) == 4)
+        " command could be '1/foobbar/foobaz'
+        " but also 'foobar/foobar/g'
+        let columns = split(cmd[0], ',')
+        if empty(columns)
+            " No columns given? replace in current column only
+            let columns[0] = <sid>WColumn()
+        elseif columns[-1] == '$'
+            let columns[-1] = maxcolnr
+        endif
+    else " not reached ?
+        call add(columns, <sid>WColumn())
+    endif
+
+    try
+        if len(cmd) == 1 || columns[0] =~ '\D' || (len(columns) == 2 && columns[1] =~ '\D')
+            call <SID>Warn("Error! Usage :S [columns/]pattern/replace[/flags]")
+            return
+        endif
+
+        if len(columns) == 2 && columns[0] == 1 && columns[1] == maxcolnr
+            let simple_s_command = 1
+        elseif len(columns) == 2 
+            let columns = range(columns[0], columns[1])
+        endif
+
+        let has_flags = len(cmd) == 4
+
+        if simple_s_command
+            exe printf("%d,%ds/%s/%s%s", a:line1, a:line2, cmd[1], cmd[2], (has_flags ? '/'. cmd[3] : ''))
+        else
+            for colnr in columns
+                let @/ = <sid>GetPat(colnr, maxcolnr, cmd[1])
+                exe printf("%d,%ds//%s%s", a:line1, a:line2, cmd[2], (has_flags ? '/'. cmd[3] : ''))
+            endfor
+        endif
+    catch /^Vim\%((\a\+)\)\=:E486/
+        " Pattern not found
+        echohl Error
+        echomsg "E486: Pattern not found in column " . colnr . ": " . pat
+        if &vbs > 0
+            echomsg substitute(v:exception, '^[^:]*:', '','')
+        endif
+        echohl Normal
+    catch
+        echohl Error
+        "if &vbs > 0
+            echomsg substitute(v:exception, '^[^:]*:', '','')
+        "endif
+        echohl Normal
+    finally
+        " Restore position and search register
+        call winrestview(_wsv)
+        call call('setreg', _search)
+    endtry
 endfu
 
 " Global functions "{{{2
