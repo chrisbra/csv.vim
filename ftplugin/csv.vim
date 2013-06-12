@@ -729,26 +729,32 @@ fu! <sid>Columnize(field) "{{{3
     let width=get(b:col_width, (s:columnize_count % s:max_cols), 20)
 
     let s:columnize_count += 1
-    if !exists("g:csv_no_multibyte") &&
-        \ match(a:field, '[^ -~]') != -1
-        " match characters outside the ascii range
-        let a = split(a:field, '\zs')
-        let add = eval(join(map(a, 'len(v:val)'), '+'))
-        let add -= len(a)
+    if v:version > 703 || v:version == 703 && has("patch713")
+        " printf knows about %S (e.g. can handle char length
+        return printf("%*S", width+1 ,  a:field)
     else
-        let add = 0
-    endif
+        " printf only handles bytes
+        if !exists("g:csv_no_multibyte") &&
+            \ match(a:field, '[^ -~]') != -1
+            " match characters outside the ascii range
+            let a = split(a:field, '\zs')
+            let add = eval(join(map(a, 'len(v:val)'), '+'))
+            let add -= len(a)
+        else
+            let add = 0
+        endif
 
-    " Add one for the frame
-    " plus additional width for multibyte chars,
-    " since printf(%*s..) uses byte width!
-    let width = width + add  + 1
+        " Add one for the frame
+        " plus additional width for multibyte chars,
+        " since printf(%*s..) uses byte width!
+        let width = width + add  + 1
 
-    if width == strlen(a:field)
-        " Column has correct length, don't use printf()
-        return a:field
-    else
-        return printf("%*s", width ,  a:field)
+        if width == strlen(a:field)
+            " Column has correct length, don't use printf()
+            return a:field
+        else
+            return printf("%*s", width ,  a:field)
+        endif
     endif
 endfun
 
