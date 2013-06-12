@@ -60,7 +60,6 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     6.3 Defining custom aggregate functions.....|csv-aggregate-functions|
     6.4 Autocommand on opening/closing files....|csv-arrange-autocmd|
     6.5 CSV Syntax error........................|csv-syntax-error|
-    6.6 Replace only within a column............|csv-replace-col|
 7. CSV Changelog................................|csv-changelog|
 
 ==============================================================================
@@ -1353,19 +1352,6 @@ and :filetype plugin (|:filetype-plugin-on|) statements in your |.vimrc|
 
 Alternatively, you can simply call |InitCSV| and ignore the error.
 
-6.6 Replace only within a certain column                     *csv-replace-col*
-----------------------------------------
-
-It is possible to replace only within a certain column, although it is not
-straightforward. First use |SearchInColumn_CSV| to generate a search pattern
-that matches your desired values within a specific column. If you want to keep
-certain values, use the |\(\)| pattern to capture its value so it will be
-available with a |\1| in the replacement part of the pattern.
-Now you can simply issue a >
-    :s//<replacement>/g
-to replace within that specific column, since the :s command reuses the last
-search pattern, if none is given.
-
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
@@ -1375,6 +1361,8 @@ search pattern, if none is given.
 - new |AddColumn_CSV| command
 - prevent mapping of keys, if g:csv_nomap_<keyname> is set
   (reported by ping)
+- new |Substitute_CSV| command
+- better syntax highlighting
 
 0.28 Dec 14, 2012 {{{1
 - new command :Table to create ascii tables for non-csv files
