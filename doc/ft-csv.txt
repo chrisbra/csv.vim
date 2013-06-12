@@ -1363,6 +1363,7 @@ Alternatively, you can simply call |InitCSV| and ignore the error.
   (reported by ping)
 - new |Substitute_CSV| command
 - better syntax highlighting
+- small speedup for |ArrangeColumn_CSV|
 
 0.28 Dec 14, 2012 {{{1
 - new command :Table to create ascii tables for non-csv files
