@@ -1,19 +1,17 @@
 ## Open items ##
 ----------------
 
-- document how to "substitute in column" command, may be even provide a
-  command for that?
-- new command: AddColumn adds an empty column after cursor or after
-  specified column number (possibly followed by number of columns to
-  add)
+- wrap/shorten long fields (scopus.csv). Is this even possible with Vim?
+  (maybe conceal trailing and leading whitespace?)
+  This should work:
+    1) set a max width per column
+    2) for each column issue something like this:
+	:exe 'syn match CSVConcealed /\%'.line.'l\%>'.width. 'c.*/ conceal cchar=…'
 - Allow to set only a range of the file to filetype csv
   (helps when writing text and one wants to insert some csv data)
 - Add more scripting functions? (which ones?)
-- wrap/shorten long fields (scopus.csv). Is this even possible with Vim?
-  (maybe conceal trailing and leading whitespace?)
 - Better support for newlines within a column (Is this worth the
   effort?)
-- Better syntax highlighting (last char in last line is concealed)
 - add vertical folding (concealing columns)
   (works partly, can't conceal single columns?)
 - make plugin autoloadable (shouldn't be necessary, as the code is only
@@ -22,6 +20,7 @@
 ## Fixed items ##
 -----------------
 
+- Better syntax highlighting (last char in last line is concealed)
 - Convert to a visual table, something like this:
 
   a,header,line
@@ -65,5 +64,12 @@
 - apply Filter negatively, e.g. pressing enter on a value, hides all
   values, that don't have this value. (Maybe use <Space>, on the value?)
   (should work now)
+
+- document how to "substitute in column" command, may be even provide a
+  command for that?
+
+- new command: AddColumn adds an empty column after cursor or after
+  specified column number (possibly followed by number of columns to
+  add)
 
 vim:tw=72

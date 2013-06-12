@@ -63,6 +63,7 @@ fu! <sid>Init(startline, endline) "{{{3
     endif
 
     let s:del='\%(' . b:delimiter . '\|$\)'
+    let s:del_noend='\%(' . b:delimiter . '\)'
     " Pattern for matching a single column
     if !exists("g:csv_strict_columns") && !exists("g:csv_col")
         \ && !exists("b:csv_fixed_width")
@@ -78,9 +79,14 @@ fu! <sid>Init(startline, endline) "{{{3
                 \ '"\%(' . (exists("g:csv_nl") ? '\_' : '' ) .
                 \ '[^"]\|""\)*"\)' . s:del . '\)\|\%(' .
                 \  '[^' .  b:delimiter . ']*' . s:del . '\)\)'
+        let b:col_end='\%(\%(\%(' . (b:delimiter !~ '\s' ? '\s*' : '') .
+                \ '"\%(' . (exists("g:csv_nl") ? '\_' : '' ) .
+                \ '[^"]\|""\)*"\)' . s:del_noend . '\)\|\%(' .
+                \  '[^' .  b:delimiter . ']*' . s:del_noend . '\)\)'
     elseif !exists("g:csv_col") && exists("g:csv_strict_columns")
         " strict columns
         let b:col='\%([^' . b:delimiter . ']*' . s:del . '\)'
+        let b:col_end='\%([^' . b:delimiter . ']*' . s:del_noend . '\)'
     elseif exists("b:csv_fixed_width")
         " Fixed width column
         let b:col=''
@@ -96,6 +102,7 @@ fu! <sid>Init(startline, endline) "{{{3
     else
         " User given column definition
         let b:col = g:csv_col
+        let b:col_noend = g:csv_col
     endif
     
     " set filetype specific options

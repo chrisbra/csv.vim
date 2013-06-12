@@ -28,6 +28,7 @@ endfu
 fu! <sid>CheckSaneSearchPattern() "{{{3
     let s:del_def = ','
     let s:col_def = '\%([^' . s:del_def . ']*' . s:del_def . '\|$\)'
+    let s:col_def_end = '\%([^' . s:del_def . ']*' . s:del_def . '\)'
 
     " First: 
     " Check for filetype plugin. This syntax script relies on the filetype
@@ -58,6 +59,8 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     " don't exist
     let s:col  = exists("b:col") && !empty(b:col) ? b:col
 		\ : s:col_def
+    let s:col_end  = exists("b:col_end") && !empty(b:col_end) ? b:col_end
+		\ : s:col_def_end
     let s:del  = exists("b:delimiter") && !empty(b:delimiter) ? b:delimiter
 		\ : s:del_def
     let s:cmts = exists("b:csv_cmt") ? b:csv_cmt[0] : split(&cms, '&s')[0]
@@ -77,40 +80,37 @@ fu! <sid>DoHighlight() "{{{3
 	" old val
 	    "\ '\%(.\)\@=/ms=e,me=e contained conceal cchar=' .
 	    " Has a problem with the last line!
-	exe "syn match CSVDelimiter /" . s:col . 
-	    \ '\n\=/ms=e,me=e contained conceal cchar=' .
+	exe "syn match CSVDelimiter /" . s:col_end . 
+	    \ '/ms=e,me=e contained conceal cchar=' .
 	    \ (&enc == "utf-8" ? "│" : '|')
 	"exe "syn match CSVDelimiterEOL /" . s:del . 
 	"    \ '\?$/ contained conceal cchar=' .
 	"    \ (&enc == "utf-8" ? "│" : '|')
 	hi def link CSVDelimiter Conceal
-	hi def link CSVDelimiterEOL Conceal
     elseif !exists("b:csv_fixed_width_cols")
 	" The \%(.\)\@<= makes sure, the last char won't be concealed,
 	" if it isn't a delimiter
 	"exe "syn match CSVDelimiter /" . s:col . '\%(.\)\@<=/ms=e,me=e contained'
-	exe "syn match CSVDelimiter /" . s:col . '\n\=/ms=e,me=e contained'
+	exe "syn match CSVDelimiter /" . s:col_end . '/ms=e,me=e contained'
 	"exe "syn match CSVDelimiterEOL /" . s:del . '\?$/ contained'
 	if has("conceal")
 	    hi def link CSVDelimiter Conceal
-	    hi def link CSVDelimiterEOL Conceal
 	else
 	    hi def link CSVDelimiter Ignore
-	    hi def link CSVDelimiterEOL Ignore
 	endif
     endif " There is no delimiter for csv fixed width columns
 
 
     if !exists("b:csv_fixed_width_cols")
 	exe 'syn match CSVColumnEven nextgroup=CSVColumnOdd /'
-		    \ . s:col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
+		    \ . s:col . '/ contains=CSVDelimiter'
 	exe 'syn match CSVColumnOdd nextgroup=CSVColumnEven /'
-		    \ . s:col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
+		    \ . s:col . '/ contains=CSVDelimiter'
 
 	exe 'syn match CSVColumnHeaderEven nextgroup=CSVColumnHeaderOdd /\%1l'
-		    \. s:col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
+		    \. s:col . '/ contains=CSVDelimiter'
 	exe 'syn match CSVColumnHeaderOdd nextgroup=CSVColumnHeaderEven /\%1l'
-		    \. s:col . '/ contains=CSVDelimiter,CSVDelimiterEOL'
+		    \. s:col . '/ contains=CSVDelimiter'
     else
 	for i in range(len(b:csv_fixed_width_cols))
 	    let pat = '/\%' . b:csv_fixed_width_cols[i] . 'c.*' .
