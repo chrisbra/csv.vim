@@ -817,7 +817,7 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             let a = getline(1,lines)
             " Does it make sense to use the preview window?
             " sil! pedit %
-            sp +enew
+            above sp +enew
             call setline(1, a)
             " Needed for syntax highlighting
             "let b:col=b
@@ -841,7 +841,7 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             endtry
             " Does it make sense to use the preview window?
             "vert sil! pedit |wincmd w | enew!
-            abo vsp +enew
+            above vsp +enew
             call append(0, a)
             $d _
             sil %s/.*/\=printf("%.*s", width, submatch(0))/eg
