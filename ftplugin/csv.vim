@@ -240,19 +240,19 @@ fu! <sid>DoAutoCommands() "{{{3
         aug! CSV_Edit
     endif
     " undo autocommand:
-    let b:undo_ftplugin .= '| exe "sil! au! CSV_Edit BufRead,BufWritePost,BufWritePre *.csv,*.dat "'
+    let b:undo_ftplugin .= '| exe "sil! au! CSV_Edit "'
     let b:undo_ftplugin .= '| exe "sil! aug! CSV_Edit"'
 
-    if !exists("#CSV#ColorScheme")
+    if !exists("#CSV_ColorScheme#ColorScheme")
         " Make sure, syntax highlighting is applied
         " after changing the colorscheme
-        augroup CSV
+        augroup CSV_ColorScheme
             au!
             au ColorScheme *.csv,*.dat,*.tsv,*.tab do Syntax
         augroup end
     endif
-    let b:undo_ftplugin .= '| exe "sil! au! CSV ColorScheme *.csv,*.dat "'
-    let b:undo_ftplugin .= '| exe "sil! aug! CSV"'
+    let b:undo_ftplugin .= '| exe "sil! au! CSV_ColorScheme "'
+    let b:undo_ftplugin .= '| exe "sil! aug! CSV_ColorScheme"'
 
     if has("gui_running") && !exists("#CSV_Menu#FileType")
         augroup CSV_Menu
