@@ -788,7 +788,10 @@ fu! <sid>SetupQuitPre() "{{{3
     if exists("##QuitPre")
         let bufnr=bufnr('')
         noa wincmd p
-        exe "au QuitPre * ". bufnr. "bw"
+        augroup CSV_QuitPre
+            au!
+            exe "au QuitPre * ". bufnr. "bw"
+        augroup end
         noa wincmd p
     endif
 endfu
