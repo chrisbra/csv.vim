@@ -816,6 +816,7 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
         let b=b:col
         if a:hor
             setl scrollopt=hor scrollbind
+            let _fdc = &l:fdc
             let lines = empty(a:lines) ? s:csv_fold_headerline : a:lines
             let a = getline(1,lines)
             " Does it make sense to use the preview window?
@@ -831,6 +832,8 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             setl scrollopt=hor winfixheight nowrap
             "let &l:stl=repeat(' ', winwidth(0))
             let &l:stl="%#Normal#".repeat(' ',winwidth(0))
+            " set the foldcolumn to the same of the other window
+            let &l:fdc = _fdc
         else
             setl scrollopt=ver scrollbind
             0
