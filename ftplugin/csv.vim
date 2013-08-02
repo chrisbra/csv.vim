@@ -1890,15 +1890,6 @@ fu! <sid>Map(map, name, definition, ...) "{{{3
     endif
 endfu
 
-fu! <sid>ColumnMode() "{{{3
-    if mode() =~# 'R'
-        " (virtual) Replace mode
-        return "\<ESC>JE".mode()
-    else
-        return "\<CR>"
-    endif
-endfu
-
 fu! <sid>LocalCmd(name, definition, args) "{{{3
     if !exists(':'.a:name)
         exe "com! -buffer " a:args a:name a:definition
@@ -2290,6 +2281,17 @@ fu! <sid>SubstituteInColumn(command, line1, line2) range "{{{3
         call winrestview(_wsv)
         call call('setreg', _search)
     endtry
+endfu
+
+fu! <sid>ColumnMode() "{{{3
+    if mode() =~# 'R'
+        " (virtual) Replace mode
+        let new_line = (line('.') == line('$') ||
+        \ (synIDattr(synIDtrans(synID(line("."), col("."), 1)), "name") !~# "comment"))
+        return "\<ESC>". (new_line ? "o" : "JE".mode())
+    else
+        return "\<CR>"
+    endif
 endfu
 
 " Global functions "{{{2
