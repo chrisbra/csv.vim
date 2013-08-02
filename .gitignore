@@ -9,3 +9,7 @@ vim_passfile
 *.vmb
 # ignore *.orig files
 *.orig
+*.*~
+# various testfiles
+file*.*
+testfile*
