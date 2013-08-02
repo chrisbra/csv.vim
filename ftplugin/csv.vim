@@ -959,7 +959,20 @@ fu! <sid>MoveCol(forward, line) "{{{3
     if a:forward > 0
         call search(pat, 'W')
     elseif a:forward < 0
-        call search(pat, 'bWe')
+        if colnr > 0 || cpos == spos
+            call search('.\ze'.pat, 'bWe')
+            while getpos('.')[2] == cpos
+                " cursor didn't move, move cursor one cell to the left
+                norm! h
+                if colnr > 0
+                    call <sid>MoveCol(-1, line('.'))
+                else
+                    norm! 0
+                endif
+            endw
+        else
+            norm! 0
+        endif
         " Moving upwards/downwards
     elseif line >= line('.')
         call search(pat . '\%' . line . 'l', '', line)
@@ -1762,6 +1775,7 @@ fu! <sid>CSVMappings() "{{{3
         \ 0)<CR>')
     call <sid>Map('nnoremap', '<BS>', ':<C-U>call <SID>PrepareFolding(0,
         \ 1)<CR>')
+    call <sid>Map('imap', '<CR>', '<sid>ColumnMode()', 'expr')
     " Text object: Field
     call <sid>Map('vnoremap', 'if', ':<C-U>call <sid>MoveOver(0)<CR>')
     call <sid>Map('vnoremap', 'af', ':<C-U>call <sid>MoveOver(1)<CR>')
@@ -1854,11 +1868,12 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-nargs=1 -range=%')
 endfu
 
-fu! <sid>Map(map, name, definition) "{{{3
+fu! <sid>Map(map, name, definition, ...) "{{{3
     let keyname = substitute(a:name, '[<>]', '', 'g')
+    let expr = (exists("a:1") && a:1 == 'expr'  ? '<expr>' : '')
     if !get(g:, "csv_nomap_". tolower(keyname), 0)
         " All mappings are buffer local
-        exe a:map "<buffer> <silent>" a:name a:definition
+        exe a:map "<buffer> <silent>". expr a:name a:definition
         " should already exists
         if a:map == 'nnoremap'
             let unmap = 'nunmap'
@@ -1868,8 +1883,19 @@ fu! <sid>Map(map, name, definition) "{{{3
             let unmap = 'vunmap'
         elseif a:map == 'omap'
             let unmap = 'ounmap'
+        elseif a:map == 'imap'
+            let unmap = 'iunmap'
         endif
         let b:undo_ftplugin .= "| " . unmap . " <buffer> " . a:name
+    endif
+endfu
+
+fu! <sid>ColumnMode() "{{{3
+    if mode() =~# 'R'
+        " (virtual) Replace mode
+        return "\<ESC>JE".mode()
+    else
+        return "\<CR>"
     endif
 endfu
 
@@ -1997,7 +2023,6 @@ fu! <sid>DuplicateRows(columnlist) "{{{3
         call <sid>Warn("No Duplicate Row found!")
     endif
 endfu
-
 fu! <sid>CompleteColumnNr(A,L,P) "{{{3
     return join(range(1,<sid>MaxColumns()), "\n")
 endfu
