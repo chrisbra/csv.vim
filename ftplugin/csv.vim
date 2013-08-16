@@ -1899,6 +1899,10 @@ fu! <sid>LocalCmd(name, definition, args) "{{{3
         exe "com! -buffer " a:args a:name a:definition
         let b:undo_ftplugin .= "| sil! delc " . a:name
     endif
+    " Setup :CSV<Command> Aliases
+    if a:name !~ '^CSV'
+        call <sid>LocalCmd('CSV'.a:name, a:definition, a:args)
+    endif
 endfu
 
 fu! <sid>Menu(enable) "{{{3
