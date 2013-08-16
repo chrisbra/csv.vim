@@ -1132,6 +1132,13 @@ languages.
 After setting this variable, you should reinitialize the plugins using
 |InitCSV|
 
+                                                            *csv-foldtext*
+By default, the csv plugin sets the 'foldtext' option. If you don't want this,
+set the variable `g:csv_disable_fdt` in your |.vimrc| >
+
+    :let g:csv_disable_fdt = 1
+<
+
 ==============================================================================
 5. Functions                                                    *CSV-Funtions*
 
