@@ -2230,7 +2230,8 @@ fu! <sid>SubstituteInColumn(command, line1, line2) range "{{{3
     " try to split on '/' if it is not escaped or in a collection
     let cmd = split(a:command, '\%([\\]\|\[[^]]*\)\@<!/')
     if a:command !~? '^\%([$]\|\%(\d\+\)\%(,\%([0-9]\+\|[$]\)\)\?\)/' ||
-                \ len(cmd) == 2
+                \ len(cmd) == 2 ||
+                \ ((len(cmd) == 3 && cmd[2] =~# '^[&cgeiInp#l]\+$'))
         " No Column address given
         call add(columns, <sid>WColumn())
         let cmd = [columns[0]] + cmd "First item of cmd list contains address!
@@ -2266,12 +2267,18 @@ fu! <sid>SubstituteInColumn(command, line1, line2) range "{{{3
         if simple_s_command
             while search(cmd[1])
                 exe printf("%d,%ds/%s/%s%s", a:line1, a:line2, cmd[1], cmd[2], (has_flags ? '/'. cmd[3] : ''))
+                if !has_flags || (has_flags && cmd[3] !~# 'g')
+                    break
+                endif
             endw
         else
             for colnr in columns
                 let @/ = <sid>GetPat(colnr, maxcolnr, cmd[1])
                 while search(@/)
                     exe printf("%d,%ds//%s%s", a:line1, a:line2, cmd[2], (has_flags ? '/'. cmd[3] : ''))
+                    if !has_flags || (has_flags && cmd[3] !~# 'g')
+                        break
+                    endif
                 endw
             endfor
         endif

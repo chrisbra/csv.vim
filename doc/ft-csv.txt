@@ -1399,6 +1399,13 @@ Alternatively, you can simply call |InitCSV| and ignore the error.
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
+0.30 (unrelease) {{{1
+- |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is
+  given
+- Don't override 'fdt' setting (https://github.com/chrisbra/csv.vim/issues/18,
+  reported by Noah Frederick, thanks!)
+- Consistent Commands naming (https://github.com/chrisbra/csv.vim/issues/19,
+  reported by Noah Frederick, thanks!)
 0.29 Aug 14, 2013 {{{1
 - setup |QuitPre| autocommand to quit cleanly in newer vims when using :Header
   and :VHeader
