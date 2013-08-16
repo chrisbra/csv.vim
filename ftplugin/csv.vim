@@ -20,7 +20,7 @@ let s:cpo_save = &cpo
 set cpo&vim
 
 " Function definitions: "{{{2
-" 
+"
 " Script specific functions "{{{2
 fu! <sid>Warn(mess) "{{{3
     echohl WarningMsg
@@ -104,7 +104,7 @@ fu! <sid>Init(startline, endline) "{{{3
         let b:col = g:csv_col
         let b:col_noend = g:csv_col
     endif
-    
+
     " set filetype specific options
     call <sid>LocalSettings('all')
 
@@ -315,7 +315,7 @@ fu! <sid>SearchColumn(arg) "{{{3
                 throw "E684"
             endif
         else
-            " Determine whether the first word in the argument is a number 
+            " Determine whether the first word in the argument is a number
             " (of the column to search).
             let colnr = substitute( a:arg, '^\s*\(\d\+\)\s.*', '\1', '' )
             " If it is _not_ a number,
@@ -2045,7 +2045,7 @@ fu! <sid>Transpose(line1, line2) "{{{3
     if line('$') > 1
         let TrailingDelim = getline(1) =~ b:delimiter.'$'
     endif
-    
+
     let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
 
     try
@@ -2252,7 +2252,7 @@ fu! <sid>SubstituteInColumn(command, line1, line2) range "{{{3
 
         if len(columns) == 2 && columns[0] == 1 && columns[1] == maxcolnr
             let simple_s_command = 1
-        elseif len(columns) == 2 
+        elseif len(columns) == 2
             let columns = range(columns[0], columns[1])
         endif
 
@@ -2316,7 +2316,7 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     " Leave this up to the function that does something
     " with each value
     "call filter(column, '!empty(v:val)')
-    
+
     " parse the optional number format
     let format = matchstr(a:nr, '/[^/]*/')
     call <sid>NumberFormat()
@@ -2360,7 +2360,7 @@ fu! CSVPat(colnr, ...) "{{{3
     if &ft != 'csv'
         return ''
     endif
-    " encapsulates GetPat(), that returns the search pattern for a 
+    " encapsulates GetPat(), that returns the search pattern for a
     " given column and tries to set the cursor at the specific position
     let pat = <sid>GetPat(a:colnr, <SID>MaxColumns(), a:0 ? a:1 : '.*')
     "let pos = match(pat, '.*\\ze') + 1
