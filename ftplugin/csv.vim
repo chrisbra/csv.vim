@@ -193,17 +193,18 @@ fu! <sid>LocalSettings(type) "{{{3
 
     if a:type == 'all' || a:type == 'fold'
         let s:fdt = &l:fdt
+        let s:fcs = &l:fcs
         " Be sure to also fold away single screen lines
         setl fen fdm=expr fdl=0 fdc=2 fml=0
 
         if !get(g:, 'csv_disable_fdt',0)
             let &foldtext=strlen(v:folddashes) . ' lines hidden'
-            let b:undo_ftplugin .= printf("|setl fdt=%s", s:fdt)
+            setl fillchars-=fold:-
+            let b:undo_ftplugin .= printf("|setl fdt=%s fcs=%s", s:fdt, s:fcs)
         endif
-        setl fillchars-=fold:-
         " undo settings:
         let b:undo_ftplugin .=
-        \ "| setl fen< fdm< fdl< fdc< fml< fcs& fde<"
+        \ "| setl fen< fdm< fdl< fdc< fml< fde<"
     endif
 endfu
 
