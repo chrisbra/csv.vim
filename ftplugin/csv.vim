@@ -2374,7 +2374,29 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     endtry
 endfu
 
-
+" return field index (x,y) with leading/trailing whitespace and trailing
+" delimiter stripped (only when a:0 is not given)
+fu! CSVField(x, y, ...) "{{{3
+    if &ft != 'csv'
+        return
+    endif
+    let y = a:y - 1
+    let x = (a:x < 0 ? 0 : a:x)
+    let orig = !empty(a:0)
+    let y = (y < 0 ? 0 : y)
+    let x = (x > (<sid>MaxColumns()) ? (<sid>MaxColumns()) : x)
+    let col = <sid>CopyCol('',x)
+    if !orig
+    " remove leading and trainling whitespace and the delimiter
+        return matchstr(col[y], '^\s*\zs.\{-}\ze\s*'.b:delimiter.'\?$')
+    else
+        return col[y]
+    endif
+endfu
+" return current column number (if a:0 is given, returns the name
+fu! CSVCol(...) "{{{3
+    return <sid>WColumn(a:0)
+endfu
 fu! CSVPat(colnr, ...) "{{{3
     " Make sure, we are working in a csv file
     if &ft != 'csv'

@@ -54,12 +54,15 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     4.13 Using Comments.........................|csv-comments|
 5. Functions....................................|CSV-Functions|
     5.1 CSVPat()................................|CSVPat()|
+    5.2 CSVField()..............................|CSVField()|
+    5.3 CSVCol()................................|CSVCol()|
 6. CSV Tips and Tricks..........................|csv-tips|
     6.1 Statusline..............................|csv-stl|
     6.2 Slow ArrangeCol.........................|csv-slow|
     6.3 Defining custom aggregate functions.....|csv-aggregate-functions|
     6.4 Autocommand on opening/closing files....|csv-arrange-autocmd|
     6.5 CSV Syntax error........................|csv-syntax-error|
+    6.6 Calculating new column values...........|csv-calculate-column|
 7. CSV Changelog................................|csv-changelog|
 
 ==============================================================================
@@ -1200,6 +1203,18 @@ the string 'foobar' in the third column. After you press enter, the returned
 pattern will be put after the :s command so you can directly enter / and the
 substitute string.
 
+5.2 CSVField(x,y[, orig])					*CSVField()*
+-----------------------
+
+This function returns the field at index (x,y) (starting from 1). If the
+parameter orig is given, returns the column "as is" (e.g. including delimiter
+and leading and trailing whitespace, otherwise that will be stripped.
+
+5.2 CSVCol([name])				        	*CSVCol()*
+------------------
+
+If the name parameter is given, returns the name of the column, else returns
+the index of the current column, starting at 1.
 
 ==============================================================================
 6. CSV Tips and Tricks						*csv-tips*
@@ -1235,7 +1250,7 @@ second line of the function. In the third line of your function, put your
 desired 'statusline' settings as |expression|. Note the section starting with
 'if exists(..)' guards against not having loaded the filetype plugin.
 
-                                                                 *CSV_WCol*
+                                                                 *CSV_WCol()*
 
 The CSV_WCol() function controls, what will be outputed. In the simplest case,
 when no argument is given, it simply returns on which column the cursor is.
@@ -1396,16 +1411,38 @@ and :filetype plugin (|:filetype-plugin-on|) statements in your |.vimrc|
 
 Alternatively, you can simply call |InitCSV| and ignore the error.
 
+6.6 Calculate new columns               *csv-calculate-column*
+-------------------------
+
+Suppose you have a table like this:
+
+Index;Value1;Value2`
+1;100;3`
+2;20;4`
+
+And you need one more column, that is the calculated product of column 2 and
+3, you can make use of the provided |CSVField()| function using a
+|sub-replace-expression| of an |:s| command. In this case, you would do this: >
+
+    :2,3s/$/\=printf("%s%.2f", b:delimiter,
+    (CSVField(2,line('.'))+0.0)*(CSVField(3,line('.'))+0.0/
+
+Note: Enter as single line. The result will be this: >
+
+Index;Value1;Value2`
+1;100;3;300.00`
+2;20;4;80.00`
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
-0.30 (unrelease) {{{1
+0.30 (unreleased) {{{1
 - |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is
   given
 - Don't override 'fdt' setting (https://github.com/chrisbra/csv.vim/issues/18,
   reported by Noah Frederick, thanks!)
 - Consistent Commands naming (https://github.com/chrisbra/csv.vim/issues/19,
   reported by Noah Frederick, thanks!)
+- New Function |CSVField()| and |CSVCol()|
 0.29 Aug 14, 2013 {{{1
 - setup |QuitPre| autocommand to quit cleanly in newer vims when using :Header
   and :VHeader
