@@ -2328,7 +2328,10 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     let column = <sid>CopyCol('', col)[start : stop]
     " Delete delimiter
     call map(column, 'substitute(v:val, b:delimiter . "$", "", "g")')
+    " Revmoe trailing whitespace
     call map(column, 'substitute(v:val, ''^\s\+$'', "", "g")')
+    " Remove leading whitespace
+    call map(column, 'substitute(v:val, ''^\s\+'', "", "g")')
     " Delete empty values
     " Leave this up to the function that does something
     " with each value
