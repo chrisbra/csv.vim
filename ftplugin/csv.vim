@@ -200,7 +200,7 @@ fu! <sid>LocalSettings(type) "{{{3
         if !get(g:, 'csv_disable_fdt',0)
             let &foldtext=strlen(v:folddashes) . ' lines hidden'
             setl fillchars-=fold:-
-            let b:undo_ftplugin .= printf("|setl fdt=%s fcs=%s", s:fdt, s:fcs)
+            let b:undo_ftplugin .= printf("|setl fdt=%s fcs=%s", s:fdt, escape(s:fcs, '\\|'))
         endif
         " undo settings:
         let b:undo_ftplugin .=
