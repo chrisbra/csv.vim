@@ -189,22 +189,29 @@ fu! <sid>LocalSettings(type) "{{{3
             setl cole=2 cocu=nc
             let b:undo_ftplugin .= '| setl cole< cocu< '
         endif
-    endif
 
-    if a:type == 'all' || a:type == 'fold'
+    elseif a:type == 'fold'
         let s:fdt = &l:fdt
         let s:fcs = &l:fcs
-        " Be sure to also fold away single screen lines
-        setl fen fdm=expr fdl=0 fdc=2 fml=0
 
-        if !get(g:, 'csv_disable_fdt',0)
-            let &foldtext=strlen(v:folddashes) . ' lines hidden'
-            setl fillchars-=fold:-
-            let b:undo_ftplugin .= printf("|setl fdt=%s fcs=%s", s:fdt, escape(s:fcs, '\\|'))
+        if a:type == 'fold'
+            " Be sure to also fold away single screen lines
+            setl fen fdm=expr
+            setl fdl=0 fml=0 fdc=2
+            if !get(g:, 'csv_disable_fdt',0)
+                let &l:foldtext=strlen(v:folddashes) . ' lines hidden'
+                let &fcs=substitute(&fcs, 'fold:.,', '', '')
+                if !exists("b:csv_did_foldsettings")
+                    let b:undo_ftplugin .= printf("|set fdt<|setl fcs=%s", escape(s:fcs, '\\| '))
+                endif
+            endif
+            if !exists("b:csv_did_foldsettings")
+                let b:undo_ftplugin .=
+                \ "| setl fen< fdm< fdl< fdc< fml< fde<"
+                let b:csv_did_foldsettings = 1
+                let b:undo_ftplugin .= "| unlet! b:csv_did_foldsettings"
+            endif
         endif
-        " undo settings:
-        let b:undo_ftplugin .=
-        \ "| setl fen< fdm< fdl< fdc< fml< fde<"
     endif
 endfu
 
@@ -1519,7 +1526,10 @@ fu! <sid>RemoveLastItem(count) "{{{3
 endfu
 
 fu! <sid>DisableFolding() "{{{3
-    setl nofen fdm=manual fdc=0 fdl=0 fillchars+=fold:-
+    setl nofen fdm=manual fdc=0 fdl=0
+    if !get(g:, 'csv_disable_fdt',0) && exists("s:fdt") && exists("s:fcs")
+        exe printf("setl fdt=%s fcs=%s", s:fdt, escape(s:fcs, '\\|'))
+    endif
 endfu
 
 fu! <sid>GetSID() "{{{3
