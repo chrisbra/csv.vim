@@ -1,5 +1,45 @@
+## Open items ##
+----------------
+
+- wrap/shorten long fields (scopus.csv). Is this even possible with Vim?
+  (maybe conceal trailing and leading whitespace?)
+  This should work:
+    1) set a max width per column
+    2) for each column issue something like this:
+	:exe 'syn match CSVConcealed /\%'.line.'l\%>'.width. 'c.*/ conceal cchar=…'
+- Allow to set only a range of the file to filetype csv
+  (helps when writing text and one wants to insert some csv data)
+- Add more scripting functions? (which ones?)
+- Better support for newlines within a column (Is this worth the
+  effort?)
 - add vertical folding (concealing columns)
   (works partly, can't conceal single columns?)
+- make plugin autoloadable (shouldn't be necessary, as the code is only
+  loaded for file with &ft=csv)
+
+## Fixed items ##
+-----------------
+
+- Better syntax highlighting (last char in last line is concealed)
+- Convert to a visual table, something like this:
+
+  a,header,line
+  foo,bar,10
+  baz,bum,5
+
+  :VisualTable results in:
+
+  -------------------
+  |a   |header| line|
+  -----|------|-----|
+  |foo |bar   |   10|
+  |baz |bum   |    5|
+  -------------------
+  (works using :Tabularize command)
+- Header/VHeader command should be more robust. May be use the preview
+  window to display the header? Does scrollbinding then still work?
+  (should work now)
+- Transposing columns (should work now)
 - add a wizard, for defining fixed-width columns
   (should work now)
 - Reapply Filter, in case Search register changed
@@ -8,11 +48,28 @@
   (e.g. 10 000.01 should be counted as 10,000.01 in Australia,
   10.000 should be counted as 10,000 in Germany.
 
-  How can the user configure how to handle certain delimiters?
-  :SumCol 3 /.:,/ should use the ',' as decimal separator?
-  :SumCol 3 /,: / should use the ' ' as thousands separator?
-  :SumCol 3 /,: / /.:,/ treats ' ' as thousands separator and
-  , as decimal separator?
-- make plugin autoloadable
-- wrap/shorten long fields (scopus.csv). Is this
-  even possible with Vim?
+    How can the user configure how to handle certain delimiters?
+    :SumCol 3 /.:,/ should use the ',' as decimal separator?
+    :SumCol 3 /,: / should use the ' ' as thousands separator?
+    :SumCol 3 /,: / /.:,/ treats ' ' as thousands separator and
+    , as decimal separator?
+  (should work now)
+
+- When filtering, move all folded values together, so your file needs to
+  be reorded (and changed), but will leave all non-folded items
+  together. Make this configurable and only possible, when the file is
+  !read-only and modifiable)
+  (should work now)
+
+- apply Filter negatively, e.g. pressing enter on a value, hides all
+  values, that don't have this value. (Maybe use <Space>, on the value?)
+  (should work now)
+
+- document how to "substitute in column" command, may be even provide a
+  command for that?
+
+- new command: AddColumn adds an empty column after cursor or after
+  specified column number (possibly followed by number of columns to
+  add)
+
+vim:tw=72
