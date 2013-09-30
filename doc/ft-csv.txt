@@ -74,10 +74,10 @@ In order to have vim automatically detect csv files, you need to have
    :filetype plugin on
 
 <
-The plugin already sets up some logic, to detect CSV files. By default,
-the plugin recognizes *.csv and *.dat files as csv filetype. In order that the
-csv filetype plugin is loaded correctly, vim needs to be enabled to load
-|filetype-plugins|. This can be ensured, by putting a line like this into your
+The plugin already sets up some logic to detect CSV files. By default,
+the plugin recognizes *.csv and *.dat files as CSV filetype. In order that the
+CSV filetype plugin is loaded correctly, vim needs to be enabled to load
+|filetype-plugins|. This can be ensured by putting a line like this in your
 |.vimrc|: >
     :filetype plugin on
 <
@@ -528,7 +528,7 @@ Now you can copy it into your database, or further manipulate it.
 3.17 Dynamic filters      					 *csv-filter*
 --------------------      
 
-If you are one a value and only want to see lines, that have the same value in
+If you are on a value and only want to see lines that have the same value in
 this column, you can dynamically filter the file and fold away all lines not
 matching the value in the current column. To do so, simply press <CR> (Enter).
 Now Vim will fold away all lines, that don't have the same value in this
