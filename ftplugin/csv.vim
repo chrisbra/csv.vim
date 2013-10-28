@@ -136,7 +136,7 @@ fu! <sid>Init(startline, endline) "{{{3
         \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
         \ . "| unlet! b:csv_SplitWindow b:csv_headerline"
         \ . "| unlet! b:csv_thousands_sep b:csv_decimal_sep"
-        \. " | unlet! b:browsefilter b:csv_start b:csv_end"
+        \. " | unlet! b:browsefilter b:csv_cmt"
 
  " Delete all functions
  " disabled currently, because otherwise when switching ft
