@@ -275,7 +275,9 @@ fu! <sid>DoAutoCommands() "{{{3
             au BufNewFile,BufNew * call <sid>Menu(0)
         augroup END
         "let b:undo_ftplugin .= '| sil! amenu disable CSV'
-        let b:undo_ftplugin .= '| sil! call <sid>Menu(0)'
+        "
+        " b:undo_ftplugin does not support calling <sid> Functions
+        "let b:undo_ftplugin .= '| sil! call <sid>Menu(0)'
     endif
 endfu
 
