@@ -168,6 +168,7 @@ fu! <sid>Init(startline, endline) "{{{3
  " \ delf <sid>SaveOptions | delf <sid>CheckDuplicates |
  " \ delf <sid>CompleteColumnNr | delf <sid>CSVPat | delf <sid>Transpose |
  " \ delf <sid>LocalSettings() | delf <sid>AddColumn | delf <sid>SubstituteInColumn
+ " \ delf <sid>SetupQuitPre() | delf CSV_CloseBuffer
 endfu
 
 fu! <sid>LocalSettings(type) "{{{3
@@ -797,16 +798,13 @@ fu! <sid>GetColPat(colnr, zs_flag) "{{{3
     return pat . (a:zs_flag ? '\zs' : '')
 endfu
 
-fu! <sid>SetupQuitPre() "{{{3
+fu! <sid>SetupQuitPre(window) "{{{3
     " Setup QuitPre autocommand to quit cleanly
     if exists("##QuitPre")
-        let bufnr=bufnr('')
-        noa wincmd p
         augroup CSV_QuitPre
             au!
-            exe "au QuitPre * ". bufnr. "bw"
+            exe "au QuitPre * call CSV_CloseBuffer(".winbufnr(a:window).")"
         augroup end
-        noa wincmd p
     endif
 endfu
 
@@ -2440,6 +2438,23 @@ fu! CSV_WCol(...) "{{{3
         return ''
     endtry
 endfun
+
+fu! CSV_CloseBuffer(buffer) "{{{3
+    " Setup by SetupQuitPre autocommand
+    try
+        if bufnr((a:buffer)+0) > -1
+            exe a:buffer. "bw"
+        endif
+    catch /^Vim\%((\a\+)\)\=:E517/	" buffer already wiped
+    " no-op
+    finally
+        augroup CSV_QuitPre
+            au!
+        augroup END
+        augroup! CSV_QuitPre
+    endtry
+endfu
+        
 
 " Initialize Plugin "{{{2
 let b:csv_start = exists("b:csv_start") ? b:csv_start : 1
