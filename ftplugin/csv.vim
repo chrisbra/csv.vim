@@ -660,7 +660,7 @@ fu! <sid>ArrangeCol(first, last, bang) range "{{{3
     else
        let ro = 0
     endif
-    exe a:first . ',' . a:last .'s/' . (b:col) .
+    exe "sil". a:first . ',' . a:last .'s/' . (b:col) .
     \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
     " Clean up variables, that were only needed for <sid>Columnize() function
     unlet! s:columnize_count s:max_cols s:prev_line
