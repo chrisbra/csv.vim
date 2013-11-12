@@ -839,7 +839,7 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             "let b:col=b
             "setl syntax=csv
             sil! doautocmd FileType csv
-            1
+            noa 1
             exe "resize" . lines
             setl scrollopt=hor winfixheight nowrap
             "let &l:stl=repeat(' ', winwidth(0))
@@ -848,31 +848,28 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             let &l:fdc = _fdc
         else
             setl scrollopt=ver scrollbind
-            0
-            let a=<sid>CopyCol('',1)
-            " Force recalculating columns width
-            unlet! b:csv_list
-            try
-                let width = <sid>ColWidth(1)
-            catch /ColWidth/
-                call <sid>Warn("Error: getting Column Width, using default!")
-            endtry
+            noa 0
+            let a=<sid>CopyCol('',1,a:lines)
             " Does it make sense to use the preview window?
             "vert sil! pedit |wincmd w | enew!
             above vsp +enew
             call append(0, a)
             $d _
-            sil %s/.*/\=printf("%.*s", width, submatch(0))/eg
-            0
-            exe "vert res" width
-            let b:col=b
+            let b:col = b
+            noa 0
+            sil! doautocmd FileType csv
+            " remove leading delimiter
+            exe "sil :%s/^". b:delimiter. "//"
+            let b:csv_SplitWindow = winnr()
+            sil :call <sid>ArrangeCol(1,line('$'), 1)
+            exe "vert res" . len(split(getline(1), '\zs'))
             call matchadd("CSVHeaderLine", b:col)
             setl scrollopt=ver winfixwidth
         endif
-        call <sid>SetupQuitPre()
+        call <sid>SetupQuitPre(winnr())
         let win = winnr()
         setl scrollbind buftype=nowrite bufhidden=wipe noswapfile nobuflisted
-        wincmd p
+        noa wincmd p
         let b:csv_SplitWindow = win
         aug CSV_Preview
             au!
@@ -891,7 +888,12 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             let &sbo = _sbo
         endif
         setl noscrollbind
-        wincmd c
+        try
+            wincmd c
+        catch /^Vim\%((\a\+)\)\=:E444/	" cannot close last window
+        catch /^Vim\%((\a\+)\)\=:E517/	" buffer already wiped
+            " no-op
+        endtry
         "pclose!
         unlet! b:csv_SplitWindow
         aug CSV_Preview
@@ -1043,12 +1045,18 @@ fu! <sid>Sort(bang, line1, line2, colnr) range "{{{3
     call winrestview(wsv)
 endfun
 
-fu! <sid>CopyCol(reg, col) "{{{3
+fu! <sid>CopyCol(reg, col, cnt) "{{{3
     " Return Specified Column into register reg
     let col = a:col == "0" ? <sid>WColumn() : a:col+0
     let mcol = <sid>MaxColumns()
     if col == '$' || col > mcol
         let col = mcol
+    endif
+    " The number of columns to return
+    " by default (value of zero, will only return that specific column)
+    let cnt_cols = col
+    if !empty(a:cnt) && a:cnt > 0 && col + a:cnt <= mcol
+        let cnt_cols = col + a:cnt - 1
     endif
     let a = []
     " Don't get lines, that are currently filtered away
@@ -1068,9 +1076,12 @@ fu! <sid>CopyCol(reg, col) "{{{3
     call filter(a, 'v:val !~ pat')
 
     if !exists("b:csv_fixed_width_cols")
-        call map(a, 'split(v:val, ''^'' . b:col . ''\zs'')[col-1]')
+        call map(a, 'split(v:val, ''^'' . b:col . ''\zs'')[col-1:cnt_cols]')
     else
-        call map(a, 'matchstr(v:val, <sid>GetColPat(col, 0))')
+        call map(a, 'matchstr(v:val, <sid>GetColPat(col, 0)).*<sid>GetColPat(col+cnt_cols, 0)')
+    endif
+    if type(a[0]) == type([])
+        call map(a, 'join(v:val, "")')
     endif
     if a:reg =~ '[-"0-9a-zA-Z*+]'
         "exe  ':let @' . a:reg . ' = "' . join(a, "\n") . '"'
@@ -1574,7 +1585,7 @@ fu! <sid>AnalyzeColumn(...) "{{{3
 
     " Initialize s:fold_headerline
     call <sid>CheckHeaderLine()
-    let data = <sid>CopyCol('', colnr)[s:csv_fold_headerline : -1]
+    let data = <sid>CopyCol('', colnr, '')[s:csv_fold_headerline : -1]
     let qty = len(data)
     let res = {}
     for item in data
@@ -1845,8 +1856,8 @@ fu! <sid>CommandDefinitions() "{{{3
         \ ':call <sid>Sort(<bang>0, <line1>,<line2>,<q-args>)',
         \ '-nargs=* -bang -range=% -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("Column",
-        \ ':call <sid>CopyCol(empty(<q-reg>)?''"'':<q-reg>,<q-count>)',
-        \ '-count -register')
+        \ ':call <sid>CopyCol(empty(<q-reg>)?''"'':<q-reg>,<q-count>,<q-args>)',
+        \ '-count -register -nargs=?')
     call <sid>LocalCmd("MoveColumn",
         \ ':call <sid>MoveColumn(<line1>,<line2>,<f-args>)',
         \ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
@@ -2340,7 +2351,7 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     let start = a:first - 1 + s:csv_fold_headerline
     let stop  = a:last  - 1 + s:csv_fold_headerline
 
-    let column = <sid>CopyCol('', col)[start : stop]
+    let column = <sid>CopyCol('', col, '')[start : stop]
     " Delete delimiter
     call map(column, 'substitute(v:val, b:delimiter . "$", "", "g")')
     " Revmoe trailing whitespace
@@ -2400,7 +2411,7 @@ fu! CSVField(x, y, ...) "{{{3
     let orig = !empty(a:0)
     let y = (y < 0 ? 0 : y)
     let x = (x > (<sid>MaxColumns()) ? (<sid>MaxColumns()) : x)
-    let col = <sid>CopyCol('',x)
+    let col = <sid>CopyCol('',x,'')
     if !orig
     " remove leading and trainling whitespace and the delimiter
         return matchstr(col[y], '^\s*\zs.\{-}\ze\s*'.b:delimiter.'\?$')

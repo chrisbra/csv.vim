@@ -305,10 +305,11 @@ Note: this command does not work for fixed width columns |csv-fixedwidth|
                                                             *:CSVVHeader*
                                                             *VHeader_CSV*
 
-If you want a vertical header line, use `:VHeader` or `:CSVVHeader`. This works similar to the
-|Header_CSV| command, except that it will open a vertical split window with
-the first column always visible. It will always open the first column in the
-new split window. Use the '!' to close the window.
+If you want a vertical header line, use `:VHeader` or `:CSVVHeader`. This works
+similar to the |Header_CSV| command, except that it will open a vertical split
+window with the first column always visible. It will always open the first
+column in the new split window. Use the '!' to close the window. If you
+specify a count, that many columns will be visible (default: the first).
 
 Note, this won't work with linebreaks in the column.
 Note also: this command does not work for fixed width columns |csv-fixedwidth|
@@ -1448,6 +1449,8 @@ Index;Value1;Value2`
 - make |:CSVArrangeColumn| do not output the numer of substitutions happened
   (suggested by Caylan Larson, thanks!)
 - better cleaning up on exit, if Header windows were used
+- Let |:CSVVHeader| accept a number, of how many columns to show
+  (suggested by Caylan Larson, thanks!)
 0.29 Aug 14, 2013 {{{1
 - setup |QuitPre| autocommand to quit cleanly in newer vims when using :Header
   and :VHeader
