@@ -1676,57 +1676,54 @@ fu! <sid>InitCSVFixedWidth() "{{{3
     endif
     " Turn off syntax highlighting
     syn clear
+    let max_len = len(split(getline(1), '\zs'))
     let _cc  = &l:cc
     let &l:cc = 1
     redraw!
-    let list = []
+    let Dict = {'1': 1} " first column is always the start of a new column
     let tcc  = &l:cc
+    let &l:cc = 1
     echo "<Cursor>, <Space>, <ESC>, <BS>, <CR>..."
     let char=getchar()
     while 1
         if char == "\<Left>" || char == "\<Right>"
             let tcc = eval('tcc'.(char=="\<Left>" ? '-' : '+').'1')
+            if tcc < 0
+                let tcc=0
+            elseif tcc > max_len
+                let tcc = max_len
+            endif
         elseif char == "\<Space>" || char == 32 " Space
-            call add(list, tcc)
+            let Dict[tcc] = 1
         elseif char == "\<BS>" || char == 127
-            call remove(list, -1)
+            try
+                call remove(Dict, reverse(sort(keys(Dict)))[0])
+            catch /^Vim\%((\a\+)\)\=:E\(\%(716\)\|\%(684\)\)/	" Dict or List empty
+                break
+            endtry
         elseif char == "\<ESC>" || char == 27
             let &l:cc=_cc
             redraw!
             return
+        elseif char == "\<CR>" || char == "\n" || char == "\r"  " Enter
+            let Dict[tcc] = 1
+            break
         else
             break
         endif
-        let &l:cc=tcc . (!empty(list)? ',' . join(list, ','):'')
+        let &l:cc=tcc . (!empty(keys(Dict))? ',' . join(keys(Dict), ','):'')
         redraw!
         echo "<Cursor>, <Space>, <ESC>, <BS>, <CR>..."
         let char=getchar()
     endw
-    if tcc > 0
-        call add(list,tcc)
-    endif
     let b:csv_fixed_width_cols=[]
     let tcc=0
-    if !empty(list)
-        call Break()
-        " Remove duplicate entries
-        for val in sort(list, "<sid>SortList")
-            if val==tcc
-                continue
-            endif
-            call add(b:csv_fixed_width_cols, val)
-            let tcc=val
-        endfor
-        let b:csv_fixed_width=join(sort(b:csv_fixed_width_cols,
-            \ "<sid>SortList"), ',')
-        call <sid>Init(1, line('$'))
-    endif
+    let b:csv_fixed_width_cols = sort(keys(Dict), "<sid>SortList")
+    let b:csv_fixed_width = join(sort(keys(Dict), "<sid>SortList"), ',')
+    call <sid>Init(1, line('$'))
+
     let &l:cc=_cc
     redraw!
-endfu
-
-fu! Break()
-    return
 endfu
 
 fu! <sid>NewRecord(line1, line2, count) "{{{3
