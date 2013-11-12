@@ -1452,6 +1452,8 @@ Index;Value1;Value2`
 - Let |:CSVVHeader| accept a number, of how many columns to show
   (suggested by Caylan Larson, thanks!)
 - better error-handling for |CSVFixed|
+- selection of inner/outer text objects  was wrong, reported by Ingo Karkat,
+  thanks!)
 0.29 Aug 14, 2013 {{{1
 - setup |QuitPre| autocommand to quit cleanly in newer vims when using :Header
   and :VHeader

@@ -1765,23 +1765,35 @@ fu! <sid>MoveOver(outer) "{{{3
     " Move over a field
     " a:outer means include the delimiter
     let last = 0
-    let mode = a:outer
+    let outer_field = a:outer
+    let cur_field = <sid>WColumn()
+    let _wsv = winsaveview()
 
-    if <sid>WColumn() == <sid>MaxColumns()
+    if cur_field == <sid>MaxColumns()
         let last = 1
-        if !mode && getline('.')[-1:] != b:delimiter
+        if !outer_field && getline('.')[-1:] != b:delimiter
             " No trailing delimiter, so inner == outer
-            let mode = 1
+            let outer_field = 1
         endif
     endif
-    " Use the mapped key
-    exe ":sil! norm E"
+    " Move 1 column backwards, unless the cursor is in the first column
+    " or in front of a delimiter
+    if matchstr(getline('.'), '.\%'.virtcol('.').'v') != b:delimiter && virtcol('.') > 1
+        call <sid>MoveCol(-1, line('.'))
+    endif
+"    if cur_field != <sid>WColumn()
+        " cursor was at the beginning of the field, and moved back to the
+        " previous field, move back to original position
+"        call cursor(_wsv.lnum, _wsv.col)
+"    endif
     let _s = @/
     if last
-        exe "sil! norm! /" . b:col . "\<cr>v$h" . (mode ? "" : "\<Left>")
+        exe "sil! norm! v$h" . (outer_field ? "" : "\<Left>") . (&sel ==# 'exclusive' ? "\<Right>" : '')
     else
-        exe "sil! norm! /" . b:col . "\<cr>vn\<Left>" . (mode ? "" : "\<Left>")
+        exe "sil! norm! v/." . b:col . "\<cr>\<Left>" . (outer_field ? "" : "\<Left>") . (&sel ==# 'exclusive' ? "\<Right>" : '')
     endif
+    let _wsv.col = col('.')-1
+    call winrestview(_wsv)
     let @/ = _s
 endfu
 
