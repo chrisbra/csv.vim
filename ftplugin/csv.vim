@@ -1054,7 +1054,7 @@ fu! <sid>CopyCol(reg, col, cnt) "{{{3
     endif
     " The number of columns to return
     " by default (value of zero, will only return that specific column)
-    let cnt_cols = col
+    let cnt_cols = col - 1
     if !empty(a:cnt) && a:cnt > 0 && col + a:cnt <= mcol
         let cnt_cols = col + a:cnt - 1
     endif
