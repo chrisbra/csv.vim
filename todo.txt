@@ -1,6 +1,7 @@
 ## Open items ##
 ----------------
 
+- when using :VHeader, comments are not copied over
 - wrap/shorten long fields (scopus.csv). Is this even possible with Vim?
   (maybe conceal trailing and leading whitespace?)
   This should work:
