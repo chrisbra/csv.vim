@@ -2329,6 +2329,11 @@ endfu
 
 " Global functions "{{{2
 fu! csv#EvalColumn(nr, func, first, last) range "{{{3
+    " Make sure, the function is called for the correct filetype.
+    if match(split(&ft, '\.'), 'csv') == -1
+        call <sid>Warn("File is no CSV file!")
+        return
+    endif
     let save = winsaveview()
     call <sid>CheckHeaderLine()
     let nr = matchstr(a:nr, '^\d\+')
