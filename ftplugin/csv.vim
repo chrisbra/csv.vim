@@ -859,7 +859,7 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             noa 0
             sil! doautocmd FileType csv
             " remove leading delimiter
-            exe "sil :%s/^". b:delimiter. "//"
+            exe "sil :%s/^". b:delimiter. "//e"
             let b:csv_SplitWindow = winnr()
             sil :call <sid>ArrangeCol(1,line('$'), 1)
             exe "vert res" . len(split(getline(1), '\zs'))
