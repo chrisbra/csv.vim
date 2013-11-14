@@ -471,7 +471,8 @@ The csv filetype plugin redefines the following keys as:
 
 <C-Right> or L or W	Move [count] field forwards
 
-<C-Left> or E or H	Move [count] field backwards
+<C-Left> or E or H	Move [count] field backwards (but see |csv-mapping-H| 
+                        for the movement of H).
 
 <Up> or K		Move [count] lines upwards within the same column
 
@@ -490,7 +491,37 @@ The csv filetype plugin redefines the following keys as:
 <BS>                    Remove last item from the dynamic filter.
                         See |csv-filter|
 
-also, the csv plugin defines these text-object:
+                                                    *csv-mapping-H*
+Note how the mapping of 'H' differs from 'E'
+
+H step fields backwards but also stops at where the content of the columns
+begins.
+
+If you look into this example (with the cursor being '|')
+
+    aaa,   bbbb,|ccc `
+
+Pressing 'H' moves to
+
+    aaa,   |bbbb,ccc `
+
+Pressing 'H' again moves to
+
+    aaa,|   bbbb,ccc `
+
+Pressing 'H' again moves to 
+
+    |aaa,   bbbb,ccc `
+
+While with 'E', the cursor moves to: 
+
+     aaa,|  bbbb,ccc `
+
+and pressing  'E' again, it would move directly to 
+
+    |aaa,   bbbb,ccc `
+
+Also, the csv plugin defines these text-object:
 
 if                      Inner Field (contains everything up to the delimiter)
 

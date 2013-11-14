@@ -915,8 +915,11 @@ fu! <sid>SplitHeaderToggle(hor) "{{{3
 endfu
 
 " TODO: from here on add logic for fixed-width csv files!
-fu! <sid>MoveCol(forward, line) "{{{3
+fu! <sid>MoveCol(forward, line, ...) "{{{3
     " Move cursor position upwards/downwards left/right
+    " a:1 is there to have some mappings move in the same
+    " direction but still stop at a different position
+    " see :h csv-mapping-H
     let colnr=<SID>WColumn()
     let maxcol=<SID>MaxColumns()
     let cpos=getpos('.')[2]
@@ -987,6 +990,17 @@ fu! <sid>MoveCol(forward, line) "{{{3
                     norm! 0
                 endif
             endw
+            if (exists("a:1") && a:1)
+                " H also stops at the beginning of the content
+                " of a field.
+                let epos = getpos('.')
+                if getline('.')[col('.')-1] == ' '
+                    call search('\S', 'W', line('.'))
+                    if getpos('.')[2] > spos
+                        call setpos('.', epos)
+                    endif
+                endif
+            endif
         else
             norm! 0
         endif
@@ -1806,7 +1820,7 @@ fu! <sid>CSVMappings() "{{{3
     call <sid>Map('noremap', 'L', ':<C-U>call <SID>MoveCol(1, line("."))<CR>')
     call <sid>Map('noremap', 'E', ':<C-U>call <SID>MoveCol(-1, line("."))<CR>')
     call <sid>Map('noremap', '<C-Left>', ':<C-U>call <SID>MoveCol(-1, line("."))<CR>')
-    call <sid>Map('noremap', 'H', ':<C-U>call <SID>MoveCol(-1, line("."))<CR>')
+    call <sid>Map('noremap', 'H', ':<C-U>call <SID>MoveCol(-1, line("."), 1)<CR>')
     call <sid>Map('noremap', 'K', ':<C-U>call <SID>MoveCol(0,
         \ line(".")-v:count1)<CR>')
     call <sid>Map('noremap', '<Up>', ':<C-U>call <SID>MoveCol(0,
