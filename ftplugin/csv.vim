@@ -1805,9 +1805,9 @@ fu! <sid>MoveOver(outer) "{{{3
 "    endif
     let _s = @/
     if last
-        exe "sil! norm! v$h" . (outer_field ? "" : "\<Left>") . (&sel ==# 'exclusive' ? "\<Right>" : '')
+        exe "sil! norm! v$h" . (outer_field ? "" : "h") . (&sel ==# 'exclusive' ? "l" : '')
     else
-        exe "sil! norm! v/." . b:col . "\<cr>\<Left>" . (outer_field ? "" : "\<Left>") . (&sel ==# 'exclusive' ? "\<Right>" : '')
+        exe "sil! norm! v/." . b:col . "\<cr>h" . (outer_field ? "" : "h") . (&sel ==# 'exclusive' ? "l" : '')
     endif
     let _wsv.col = col('.')-1
     call winrestview(_wsv)
