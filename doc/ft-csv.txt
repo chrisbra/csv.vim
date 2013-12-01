@@ -41,24 +41,23 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     4.2 Column..................................|csv-column|
     4.3 HiGroup.................................|csv-higroup|
     4.4 Strict Columns..........................|csv-strict|
-    4.5 Multibyte Chars.........................|csv-mbyte|
-    4.6 Concealing..............................|csv-conceal|
-    4.7 Newlines................................|csv-newline|
-    4.8 Highlight column automatically..........|csv-hicol|
-    4.9 Fixed width columns.....................|csv-fixedwidth|
-        4.9.1 Manual setup
-        4.9.2 Setup using a Wizard
-    4.10 CSV Header lines.......................|csv-header|
-    4.11 Number format..........................|csv-nrformat|
-    4.12 Move folded lines......................|csv-move-folds|
-    4.13 Using Comments.........................|csv-comments|
+    4.5 Concealing..............................|csv-conceal|
+    4.6 Newlines................................|csv-newline|
+    4.7 Highlight column automatically..........|csv-hicol|
+    4.8 Fixed width columns.....................|csv-fixedwidth|
+        4.8.1 Manual setup
+        4.8.2 Setup using a Wizard
+    4.9 CSV Header lines........................|csv-header|
+    4.10 Number format..........................|csv-nrformat|
+    4.11 Move folded lines......................|csv-move-folds|
+    4.12 Using Comments.........................|csv-comments|
 5. Functions....................................|CSV-Functions|
     5.1 CSVPat()................................|CSVPat()|
     5.2 CSVField()..............................|CSVField()|
     5.3 CSVCol()................................|CSVCol()|
 6. CSV Tips and Tricks..........................|csv-tips|
     6.1 Statusline..............................|csv-stl|
-    6.2 Slow ArrangeCol.........................|csv-slow|
+    6.2 Slow CSV plugin.........................|csv-slow|
     6.3 Defining custom aggregate functions.....|csv-aggregate-functions|
     6.4 Autocommand on opening/closing files....|csv-arrange-autocmd|
     6.5 CSV Syntax error........................|csv-syntax-error|
@@ -978,26 +977,7 @@ more memory than 'maxmempattern'. In this case, either increase the
 'maxmempattern' or set the g:csv_strict_columns variable.
 
 
-4.5 Multibyte Chars						*csv-mbyte*
--------------------
-
-Unfortunately, when using the |ArrangeColumn_CSV| command, multibyte chars
-make some trouble, because internally Vim uses bytes to specify the width of a
-column. The CSV plugin tries to workaround that, by calculating the byte width
-of each column, before aligning them. This is quite expensive and can slow
-down processing. If you know, your data file only contains pure ASCII chars
-(or you simply don't care, if some lines a off a little bit), set the
-g:csv_no_multibyte variable: >
-
-    let g:csv_no_multibyte = 1
-
-And to force calculating the byte width of each column |unlet| the variable: >
-
-    unlet g:csv_no_multibyte
-
-You should reinitialize the plugin afterwards |InitCSV|
-
-4.6 Concealing					*csv-syntax*	*csv-conceal*
+4.5 Concealing					*csv-syntax*	*csv-conceal*
 -------------------
 
 The CSV plugin comes with a function to syntax highlight csv files. Basically
@@ -1037,7 +1017,7 @@ own syntax highlighting like this in your |.vimrc| >
 Note, these changes won't take effect, until you restart Vim.
 
 
-4.7 Newlines						*csv-newline*
+4.6 Newlines						*csv-newline*
 ------------
 
 RFC4180 allows newlines in double quoted strings. By default, the csv-plugin
@@ -1057,7 +1037,7 @@ seems to change on cursor movements. This could possibly be a bug in the
 syntax highlighting engine of Vim. Also, |WhatColumn_CSV| can't handle
 newlines inside fields and will most certainly be wrong.
 
-4.8 Highlight column automatically				*csv-hicol*
+4.7 Highlight column automatically				*csv-hicol*
 ----------------------------------
 
 You can let vim automatically highlight the column on which the cursor is.
@@ -1074,7 +1054,7 @@ and to disable it again, simply unset the variable >
 
 It is a good idea to reinitialize the plugin afterwards |InitCSV|
 
-4.9 Fixed width columns                                        *csv-fixedwidth*
+4.8 Fixed width columns                                        *csv-fixedwidth*
 -----------------------
 
 Sometimes there are no real columns, but rather the file is fixed width with
@@ -1086,7 +1066,7 @@ Note: Except for |ArrangeColumn_CSV| and the |Header_CSV| commands, all
 commands work in either mode. Those two commands won't do anything in the case
 of fixedwidth columns, since they don't really make sense here.
 
-4.9.1 Manual setup
+4.8.1 Manual setup
 ------------------
 You can do this, by setting the buffer-local variable
 b:csv_fixed_width like this >
@@ -1101,7 +1081,7 @@ After setting this variable, you should reinitialize the plugins using
 |InitCSV|
 
                                                                     *CSVFixed*
-4.9.2 Setup using a Wizard
+4.8.2 Setup using a Wizard
 --------------------------
 Alternatively, you can setup the fixed width columns using the :CSVFixed
 command. This provides a simple wizard to select each column. If you enter
@@ -1130,8 +1110,8 @@ Note: This only works, if your Vim has the 'colorcolumn' option available
 feature).
 
 
-4.10 CSV Header lines                                        *csv-header*
----------------------
+4.9 CSV Header lines                                        *csv-header*
+--------------------
 
 By default, dynamic filtering |csv-filter| will not fold away the first line.
 If you don't like that, you can define your header line using the variable
@@ -1143,7 +1123,7 @@ to disable, that a header line won't be folded away. If your header line
 instead is on line 5, simply set this variable to 5. This also applies to the
 |Header_CSV| command.
 
-4.11 Number format                                           *csv-nrformat*
+4.10 Number format                                           *csv-nrformat*
 ------------------
 When using the |SumCol_CSV| command, you can specify a certain number format
 using the /x:y/ argument. You can however also configure the plugin to detect
@@ -1160,7 +1140,7 @@ to have the space use as thousands separator and >
 
 to use the comma as decimal separator.
 
-4.12 Move folded lines                                        *csv-move-folds*
+4.11 Move folded lines                                        *csv-move-folds*
 ----------------------
 
 If you use dynamic filters (see |csv-filter|), you can configure the plugin to
@@ -1175,7 +1155,7 @@ consecutive area without being disrupted by folded lines.
 (Note, that this might currently not work
 correctly all the times, as there seems to be a bug within Vim currently).
 
-4.13 Using comments                                           *csv-comments*
+4.12 Using comments                                           *csv-comments*
 -------------------
 
 Strictly speaking, in csv files there can't be any comments. You might however
@@ -1302,7 +1282,7 @@ by e.g.
 which will output "Name 2/10" if the cursor is in the second column
 which is named "Name".
 
-6.2 Slow ArrangeCol						*csv-slow*
+6.2 Slow CSV plugin						*csv-slow*
 -------------------
 
 Processing a csv file using |ArrangeColumn_CSV| can be quite slow, because Vim
@@ -1318,27 +1298,13 @@ before, e.g. by issuing a :1ArrangeColumn command to arrange only the first
 line. Additionally you can also configure how this command behaves by setting
 some configuration variables.
 
-Here are some performance meassurements on how the various
-configuration settings influence the |ArrangeColumn_CSV| command on a file
-with 34 columns (on a 2.2GHz Core2Duo processor):
-
-    Lines   |   default |   strict¹     |   multibyte²  | strict + multibyte³
-    ------------------------------------------------------------------------
-     1000   |    6.93 s |     5.53 s    |     6.76 s    |   5.66 s
-     5000   |   15.2  s |     8.52 s    |    14.27 s    |   8.56 s
-    10000   |   36.2  s |    24.67 s    |    36.11 s    |  24.26 s
-    50000   |  162,23 s |    93.36 s    |   152.25 s    | 141.18 s
-
-¹ setting the g:csv_strict_columns variable (|csv-strict|)
-² setting the g:csv_no_multibyte variable (|csv-mbyte|)
-³ setting the g:csv_no_multibyte variable and g:csv_strict_columns variable
-
-Note, this was performed on a quite fast processor. If you need to work with
-large files, be sure to have enough memory available, cause Vim needs to read
-in the whole file into memory. You can also try the LargeFile plugin available
-at http://www.vim.org/scripts/script.php?script_id=1506 which tunes several
-Vim options (like |syn-off|, 'undolimits', 'fdm' and others).
-
+Also note, using dynamic filters (|csv-filter|), can slow down Vim
+considerably, since they internally work with complex regular expressions, and
+if you have a large file, containing many columns, you might hit a performance
+penalty (especially, if you want to filter many columns). It's best to avoid
+those functions if you are using a large csv file (so using strict columns
+|csv-strict| might help a little and also setting 're' to 1 might also
+alleviate it a little).
 
 
 6.3 Defining custom aggregate functions		    *csv-aggregate-functions*
