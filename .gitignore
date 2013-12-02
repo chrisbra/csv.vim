@@ -1,6 +1,6 @@
 post.pl
 vim_passfile
-/doc/tags
+doc/tags
 .*.un~
 .*.sw*
 # ignore csv files for tests
