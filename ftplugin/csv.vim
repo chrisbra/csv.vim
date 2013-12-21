@@ -1606,6 +1606,9 @@ fu! <sid>AnalyzeColumn(...) "{{{3
     let qty = len(data)
     let res = {}
     for item in data
+        if empty(item)
+            let item = 'NULL'
+        endif
         if !get(res, item)
             let res[item] = 0
         endif
