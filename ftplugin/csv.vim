@@ -1627,9 +1627,9 @@ fu! <sid>AnalyzeColumn(...) "{{{3
     else
         let  title="Nr\tCount\tValue"
     endif
-    echohl "Title"
+    echohl Title
     echo printf("%s", title)
-    echohl "Normal"
+    echohl Normal
     echo printf("%s", repeat('=', strdisplaywidth(title)))
 
     let i=1
