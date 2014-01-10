@@ -696,7 +696,11 @@ endfu
 
 fu! <sid>UnArrangeCol(match) "{{{3
     " Strip leading white space, also trims empty records:
-    return substitute(a:match, '^\s\+', '', '')
+    if get(b:, 'csv_arrange_leftalign',0)
+        return substitute(a:match, '\s\+\ze'. b:delimiter. '\?$', '', '')
+    else
+        return substitute(a:match, '^\s\+', '', '')
+    endif
     " only strip leading white space, if a non-white space follows:
     "return substitute(a:match, '^\s\+\ze\S', '', '')
 endfu
@@ -744,9 +748,18 @@ fu! <sid>Columnize(field) "{{{3
     let width=get(b:col_width, (s:columnize_count % s:max_cols), 20)
 
     let s:columnize_count += 1
+    let has_delimiter = (a:field =~# b:delimiter.'$')
     if v:version > 703 || v:version == 703 && has("patch713")
         " printf knows about %S (e.g. can handle char length
-        return printf("%*S", width+1 ,  a:field)
+        if get(b:, 'csv_arrange_leftalign',0)
+            " left-align content
+            return printf("%-*S%s", width+1 , 
+                \ (has_delimiter ?
+                \ matchstr(a:field, '.*\%('.b:delimiter.'\)\@=') : a:field),
+                \ (has_delimiter ? b:delimiter : ''))
+        else
+            return printf("%*S", width+1 ,  a:field)
+        endif
     else
         " printf only handles bytes
         if !exists("g:csv_no_multibyte") &&
@@ -768,7 +781,14 @@ fu! <sid>Columnize(field) "{{{3
             " Column has correct length, don't use printf()
             return a:field
         else
-            return printf("%*s", width ,  a:field)
+            if get(b:, 'csv_arrange_leftalign',0)
+                " left-align content
+                return printf("%-*s%s", width,  
+                \ (has_delimiter ?  matchstr(a:field, '.*\%('.b:delimiter.'\)\@=') : a:field),
+                \ (has_delimiter ? b:delimiter : ''))
+            else
+                return printf("%*s", width ,  a:field)
+            endif
         endif
     endif
 endfun
