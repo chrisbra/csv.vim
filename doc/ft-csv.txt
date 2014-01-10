@@ -220,7 +220,13 @@ if the '!' has not been given.
 
 If [range] is not given, it defaults to the current line.
 
-Note, this can be very slow on large files or many columns (see
+By default, the columns will be righ-aligned. If you want them to be
+left-aligned, set the buffer variable b:csv_arrange_leftalign = 1 for that
+particular buffer, e.g. >
+
+    :let b:csv_arrange_leftalign = 1
+<
+Note, arranging the columns can be very slow on large files or many columns (see
 |csv-slow| on how to increase performance for this command). To prevent you
 from accidently changing your csv file, the buffer will be set 'readonly'
 afterwards. Note: this command does not work for fixed width columns
@@ -1452,6 +1458,7 @@ Index;Value1;Value2`
 - selection of inner/outer text objects  was wrong, reported by Ingo Karkat,
   thanks!)
 - errors, when using |:CSVAnalyze| and there were empty attributes
+- allow to left-align columns when using |:CSVArrangeColumn|
 0.29 Aug 14, 2013 {{{1
 - setup |QuitPre| autocommand to quit cleanly in newer vims when using :Header
   and :VHeader
