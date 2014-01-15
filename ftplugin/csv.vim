@@ -1271,8 +1271,8 @@ fu! <sid>SumColumn(list) "{{{3
             if empty(item)
                 continue
             endif
-            let nr = matchstr(item, '\d\(.*\d\)\?$')
-            let format1 = '^\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
+            let nr = matchstr(item, '-\?\d\(.*\d\)\?$')
+            let format1 = '^-\?\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
             let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
             try
                 let nr = substitute(nr, format1, '', '')
@@ -2400,7 +2400,7 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     endif
     let save = winsaveview()
     call <sid>CheckHeaderLine()
-    let nr = matchstr(a:nr, '^\d\+')
+    let nr = matchstr(a:nr, '^\-\?\d\+')
     let col = (empty(nr) ? <sid>WColumn() : nr)
     " don't take the header line into consideration
     let start = a:first - 1 + s:csv_fold_headerline
