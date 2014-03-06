@@ -1460,6 +1460,8 @@ Index;Value1;Value2`
 - errors, when using |:CSVAnalyze| and there were empty attributes
 - allow to left-align columns when using |:CSVArrangeColumn|
 - |SumCol_CSV| did not detect negative values
+- make <cr> in (Virtual-) Replace work as documented
+
 0.29 Aug 14, 2013 {{{1
 - setup |QuitPre| autocommand to quit cleanly in newer vims when using :Header
   and :VHeader
