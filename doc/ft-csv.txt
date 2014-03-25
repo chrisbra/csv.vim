@@ -1194,7 +1194,7 @@ set the variable `g:csv_disable_fdt` in your |.vimrc| >
 <
 
 ==============================================================================
-5. Functions                                                    *CSV-Funtions*
+5. Functions                                                    *CSV-Functions*
 
 The csv plugins also defines some functions, that can be used for scripting
 when a csv file is open
@@ -1226,7 +1226,7 @@ substitute string.
 
 This function returns the field at index (x,y) (starting from 1). If the
 parameter orig is given, returns the column "as is" (e.g. including delimiter
-and leading and trailing whitespace, otherwise that will be stripped.
+and leading and trailing whitespace, otherwise that will be stripped.)
 
 5.2 CSVCol([name])				        	*CSVCol()*
 ------------------
