@@ -1,7 +1,7 @@
-*ft-csv.txt*	For Vim version 7.3	Last Change: Wed, 14 Aug 2013
+*ft-csv.txt*	For Vim version 7.3	Last Change: Thu, 27 Mar 2014
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.29
+Version:	0.30
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -1439,7 +1439,7 @@ Index;Value1;Value2`
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
-0.30 (unreleased) {{{1
+0.30 Mar 27, 2014 {{{1
 - |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is
   given
 - Don't override 'fdt' setting (https://github.com/chrisbra/csv.vim/issues/18,
