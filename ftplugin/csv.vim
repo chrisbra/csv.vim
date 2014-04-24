@@ -1002,7 +1002,8 @@ fu! <sid>MoveCol(forward, line, ...) "{{{3
     elseif a:forward < 0
         if colnr > 0 || cpos == spos
             call search('.\ze'.pat, 'bWe')
-            while getpos('.')[2] == cpos
+            let stime=localtime()
+            while getpos('.')[2] == cpos && <sid>Timeout(stime) " make sure loop terminates
                 " cursor didn't move, move cursor one cell to the left
                 norm! h
                 if colnr > 0
@@ -1848,20 +1849,13 @@ fu! <sid>CSVMappings() "{{{3
     call <sid>Map('noremap', 'E', ':<C-U>call <SID>MoveCol(-1, line("."))<CR>')
     call <sid>Map('noremap', '<C-Left>', ':<C-U>call <SID>MoveCol(-1, line("."))<CR>')
     call <sid>Map('noremap', 'H', ':<C-U>call <SID>MoveCol(-1, line("."), 1)<CR>')
-    call <sid>Map('noremap', 'K', ':<C-U>call <SID>MoveCol(0,
-        \ line(".")-v:count1)<CR>')
-    call <sid>Map('noremap', '<Up>', ':<C-U>call <SID>MoveCol(0,
-        \ line(".")-v:count1)<CR>')
-    call <sid>Map('noremap', 'J', ':<C-U>call <SID>MoveCol(0,
-        \ line(".")+v:count1)<CR>')
-    call <sid>Map('noremap', '<Down>', ':<C-U>call <SID>MoveCol(0,
-        \ line(".")+v:count1)<CR>')
-    call <sid>Map('nnoremap', '<CR>', ':<C-U>call <SID>PrepareFolding(1,
-        \ 1)<CR>')
-    call <sid>Map('nnoremap', '<Space>', ':<C-U>call <SID>PrepareFolding(1,
-        \ 0)<CR>')
-    call <sid>Map('nnoremap', '<BS>', ':<C-U>call <SID>PrepareFolding(0,
-        \ 1)<CR>')
+    call <sid>Map('noremap', 'K', ':<C-U>call <SID>MoveCol(0, line(".")-v:count1)<CR>')
+    call <sid>Map('noremap', '<Up>', ':<C-U>call <SID>MoveCol(0, line(".")-v:count1)<CR>')
+    call <sid>Map('noremap', 'J', ':<C-U>call <SID>MoveCol(0, line(".")+v:count1)<CR>')
+    call <sid>Map('noremap', '<Down>', ':<C-U>call <SID>MoveCol(0, line(".")+v:count1)<CR>')
+    call <sid>Map('nnoremap', '<CR>', ':<C-U>call <SID>PrepareFolding(1, 1)<CR>')
+    call <sid>Map('nnoremap', '<Space>', ':<C-U>call <SID>PrepareFolding(1, 0)<CR>')
+    call <sid>Map('nnoremap', '<BS>', ':<C-U>call <SID>PrepareFolding(0, 1)<CR>')
     call <sid>Map('imap', '<CR>', '<sid>ColumnMode()', 'expr')
     " Text object: Field
     call <sid>Map('vnoremap', 'if', ':<C-U>call <sid>MoveOver(0)<CR>')
@@ -2390,6 +2384,9 @@ fu! <sid>ColumnMode() "{{{3
     else
         return "\<CR>"
     endif
+endfu
+fu! <sid>Timeout(start) "{{{3
+    return localtime()-a:start < 2
 endfu
 
 " Global functions "{{{2
