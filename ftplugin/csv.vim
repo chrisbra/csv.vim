@@ -1209,8 +1209,10 @@ fu! <sid>AddColumn(start, stop, ...) range "{{{3
     if exists("a:1")
         if a:1 == '$' || a:1 >= max
             let pos = max
-        elseif a:1 <= 0
+        elseif a:1 < 0
             let pos = col
+        else
+            let pos = a:1
         endif
     else
         let pos = col
@@ -1218,7 +1220,7 @@ fu! <sid>AddColumn(start, stop, ...) range "{{{3
     let cnt=(exists("a:2") && a:2 > 0 ? a:2 : 1)
 
     " translate 1 based columns into zero based list index
-    let pos -= 1
+    "let pos -= 1
     let col -= 1
 
     if pos == 0
