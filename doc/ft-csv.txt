@@ -1444,6 +1444,9 @@ Index;Value1;Value2`
   (https://github.com/chrisbra/csv.vim/issues/31, reported by lahvak, thanks!)
 - fix that count for |AddColumn| did not work (according to the documentation)
   (https://github.com/chrisbra/csv.vim/issues/32, reported by lahvak, thanks!)
+- invalid reference to a WarningMsg() function
+- WhatColumn! error, if the first line did not contain as many fields
+  as the line to check.
 
 0.30 Mar 27, 2014 {{{1
 - |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is
