@@ -529,7 +529,7 @@ fu! <sid>WColumn(...) "{{{3
             let head  = split(getline(1),b:col.'\zs')
             " remove preceeding whitespace
             if len(head) < ret
-                call <sid>WarningMsg("Header has no field ". ret)
+                call <sid>Warn("Header has no field ". ret)
             else
                 let ret   = substitute(head[ret-1], '^\s\+', '', '')
                 " remove delimiter
@@ -1779,7 +1779,7 @@ endfu
 
 fu! <sid>NewRecord(line1, line2, count) "{{{3
     if a:count =~ "\D"
-        call <sid>WarningMsg("Invalid count specified")
+        call <sid>Warn("Invalid count specified")
         return
     endif
 
