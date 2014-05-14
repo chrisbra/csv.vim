@@ -25,9 +25,9 @@ com! -range -bang CSVTable call <sid>Table(<bang>0, <line1>, <line2>)
 fu! <sid>Table(bang, line1, line2)
     " save and restore some options
     if has("conceal")
-	let _a = [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:cole, &l:cocu, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt]
+	let _a = [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:cole, &l:cocu, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt, &l:ma, &l:ml]
     else
-	let _a = [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt]
+	let _a = [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt, &l:ma, &l:ml]
     endif
     let _b = winsaveview()
     " try to guess the delimiter from the specified region, therefore, we need
@@ -35,7 +35,7 @@ fu! <sid>Table(bang, line1, line2)
     let [ b:csv_start, b:csv_end ] = [ a:line1, a:line2 ]
     " Reset b:did_ftplugin just to be sure
     unlet! b:did_ftplugin
-    setl ft=csv lz
+    setl noml ft=csv lz ma
     " get indent
     let indent = matchstr(getline(a:line1), '^\s\+')
     exe printf(':sil %d,%ds/^\s\+//e', a:line1, a:line2)
@@ -47,6 +47,8 @@ fu! <sid>Table(bang, line1, line2)
 	call map(b:csv_list, 'split(v:val, b:col.''\zs'')')
 	if exists(":CSVTabularize")
 	    exe printf("%d,%dCSVTabularize%s", a:line1, a:line2, empty(a:bang) ? '' : '!')
+	else
+	    echoerr "Not possible to call :CSVTabularize"
 	endif
 	unlet! b:col_width b:csv_list
     catch
@@ -57,9 +59,9 @@ fu! <sid>Table(bang, line1, line2)
 	    exe printf(':sil %d,%ds/^/%s/e', (a:line1 - 1), (a:line2 + line('$') - last), indent)
 	endif
 	if has("conceal")
-	    let [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:cole, &l:cocu, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt] = _a
+	    let [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:cole, &l:cocu, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt, &l:ma, &l:ml] = _a
 	else
-	    let [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt] = _a
+	    let [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt, &l:ma, &l:ml] = _a
 	endif
 	call winrestview(_b)
     endtry
