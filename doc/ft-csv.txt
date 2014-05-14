@@ -774,7 +774,7 @@ will be deleted and transposing does not work with fixed-width columns.
 ------------------------------
 
 You  can also transform your csv data into a visual table, using the
-`:CSVTabularize` or  `:CSVTable`: >
+`:CSVTabularize` or `:CSVTable`: >
 
     :CSVTabularize
 <
@@ -806,13 +806,12 @@ not being displayed correctly, if either your terminal or the gui font doesn't
 have characters for those codepoints). If you use the bang form, each row will
 be separated by a line.
 You can also visual select a range of lines and use :Tabularize to have only
-that range converted into a nice ascii table.
+that range converted into a nice ascii table. Else it try to use the current
+paragraph and try to transform it.
 
-To prevent name clashes with the Tabular plugin, :CSVTabularize is defined as
-an alias to the same function.
-
-To be able to create ascii tables in all filetypes, this command is also
-available for non-CSV files as :Table
+In csv files, you can also use the :CSVTabularize command, in different
+filetypes you can use the :CSVTable command (and is available as plugin so it
+will be available for non-CSV filetypes).
 
 Note: Each row must contain exactly as many fields as columns.
 
