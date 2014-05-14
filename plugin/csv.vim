@@ -20,7 +20,7 @@ elseif exists("#CSV_Edit#BufReadPost")
     aug! CSV_Edit
 endif
 
-com! -range -bang Table call <sid>Table(<bang>0, <line1>, <line2>)
+com! -range -bang CSVTable call <sid>Table(<bang>0, <line1>, <line2>)
 
 fu! <sid>Table(bang, line1, line2)
     " save and restore some options

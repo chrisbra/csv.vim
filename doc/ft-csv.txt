@@ -770,13 +770,13 @@ otherwise it will only transpose the lines in the range given. Note, comments
 will be deleted and transposing does not work with fixed-width columns.
 
                                                           *:CSVTabularize*
-3.23 Transforming into a table                      *Table* *csv-tabularize*
+3.23 Transforming into a table                      *:CSVTable* *csv-tabularize*
 ------------------------------
 
 You  can also transform your csv data into a visual table, using the
-`:Tabularize` or `:CSVTabularize` : >
+`:CSVTabularize` or  `:CSVTable`: >
 
-    :Tabularize
+    :CSVTabularize
 <
 command. This will make a frame around your csv data and substitute all
 delimiters by '|', so that it will look like a table.
@@ -1447,6 +1447,9 @@ Index;Value1;Value2`
 - invalid reference to a WarningMsg() function
 - WhatColumn! error, if the first line did not contain as many fields
   as the line to check.
+- Rename |:Table| command to |:CSVTable| (
+  https://github.com/chrisbra/csv.vim/issues/33,
+  reported by Peter Jaros, thanks!)
 
 0.30 Mar 27, 2014 {{{1
 - |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is

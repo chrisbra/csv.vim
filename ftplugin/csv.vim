@@ -1937,9 +1937,6 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-nargs=1 -complete=custom,<sid>CompleteColumnNr')
     call <sid>LocalCmd('Transpose', ':call <sid>Transpose(<line1>, <line2>)',
         \ '-range=%')
-    call <sid>LocalCmd('Tabularize', ':call <sid>Tabularize(<bang>0,<line1>,<line2>)',
-        \ '-bang -range=%')
-    " Alias for :Tabularize, might be taken by Tabular plugin
     call <sid>LocalCmd('CSVTabularize', ':call <sid>Tabularize(<bang>0,<line1>,<line2>)',
         \ '-bang -range=%')
     call <sid>LocalCmd("AddColumn",
