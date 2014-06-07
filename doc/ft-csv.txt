@@ -862,6 +862,10 @@ width csv file, see |csv-fixedwidth| for configuring the plugin appropriately.
 If you changed the delimiter, you should reinitiliaze the plugin using
 |InitCSV|
 
+Note: the delimiter will be used to generate a regular expression that matches
+a column. Therefore, you need to escape special characters. So instead of '^'
+use '\^'.
+
 4.2 Column							*csv-column*
 ----------
 The definition, of what a column is, is defined as buffer-local variable
@@ -1404,6 +1408,10 @@ Index;Value1;Value2~
 - Rename |:Table| command to |:CSVTable| (
   https://github.com/chrisbra/csv.vim/issues/33,
   reported by Peter Jaros, thanks!)
+- Mention to escape special characters when manually specifying the delimiter.
+  https://github.com/chrisbra/csv.vim/issues/35), also detect '^' as
+  delimiter.
+
 
 0.30 Mar 27, 2014 {{{1
 - |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is
