@@ -806,18 +806,18 @@ fu! <sid>GetColPat(colnr, zs_flag) "{{{3
         else
             if a:colnr >= len(b:csv_fixed_width_cols)
             " Get last column
-                let pat='\%' . b:csv_fixed_width_cols[-1] . 'c.*'
+                let pat='\%' . b:csv_fixed_width_cols[-1] . 'v.*'
             else
             let pat='\%' . b:csv_fixed_width_cols[(a:colnr - 1)] .
-            \ 'c.\{-}\%' .   b:csv_fixed_width_cols[a:colnr] . 'c'
+            \ 'c.\{-}\%' .   b:csv_fixed_width_cols[a:colnr] . 'v'
             endif
         endif
     elseif !exists("b:csv_fixed_width_cols")
         let pat=b:col
     else
-        let pat='\%' . b:csv_fixed_width_cols[0] . 'c.\{-}' .
+        let pat='\%' . b:csv_fixed_width_cols[0] . 'v.\{-}' .
             \ (len(b:csv_fixed_width_cols) > 1 ?
-            \ '\%' . b:csv_fixed_width_cols[1] . 'c' :
+            \ '\%' . b:csv_fixed_width_cols[1] . 'v' :
             \ '')
     endif
     return pat . (a:zs_flag ? '\zs' : '')
