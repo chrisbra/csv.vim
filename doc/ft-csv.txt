@@ -1411,7 +1411,10 @@ Index;Value1;Value2~
 - Mention to escape special characters when manually specifying the delimiter.
   https://github.com/chrisbra/csv.vim/issues/35), also detect '^' as
   delimiter.
-
+- Csv fixed with columns better use '\%v' to match columns, otherwise, one
+  could get problems with multibyte chars
+- Sorting should work better with csv fixed with patterns (could generate an
+  inavlide pattern before)
 
 0.30 Mar 27, 2014 {{{1
 - |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is
