@@ -1078,12 +1078,12 @@ fu! <sid>Sort(bang, line1, line2, colnr) range "{{{3
         if !exists("b:csv_fixed_width_cols")
             let pat= '^' . <SID>GetColPat(col-1,1) . b:col
         else
-            let pat= '^' . <SID>GetColPat(col,0)
+            let pat= <SID>GetColPat(col,0)
         endif
     else
         let pat= '^' . <SID>GetColPat(col,0)
     endif
-    exe a:line1 ',' a:line2 . "sort" . (a:bang ? '!' : '') .
+    exe a:line1. ','. a:line2. "sort". (a:bang ? '!' : '') .
         \' r ' . (numeric ? 'n' : '') . ' /' . pat . '/'
     call winrestview(wsv)
 endfun
