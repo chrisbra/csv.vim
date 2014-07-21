@@ -160,7 +160,7 @@ fu! <sid>Init(startline, endline) "{{{3
  " \ delf <sid>PrepareFolding | delf <sid>OutputFilters |
  " \ delf <sid>SortFilter | delf <sid>GetColumn |
  " \ delf <sid>RemoveLastItem | delf <sid>DisableFolding |
- " \ delf <sid>GetSID | delf <sid>CheckHeaderLine |
+ " \ delf <sid>CheckHeaderLine |
  " \ delf <sid>AnalyzeColumn | delf <sid>Vertfold |
  " \ delf <sid>InitCSVFixedWidth | delf <sid>LocalCmd |
  " \ delf <sid>CommandDefinitions | delf <sid>NumberFormat |
@@ -1488,12 +1488,11 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
 "    for val in sort(values(b:csv_filter), '<sid>SortFilter')
 "        let @/ .= val.pat . (val.id == s:filter_count ? '' : '\&')
 "    endfor
-    let sid = <sid>GetSID()
 
     " Fold settings:
     call <sid>LocalSettings('fold')
     " Don't put spaces between the arguments!
-    exe 'setl foldexpr=<snr>' . sid . '_FoldValue(v:lnum,b:csv_filter)'
+    exe 'setl foldexpr=<snr>' . s:SID . '_FoldValue(v:lnum,b:csv_filter)'
 
     " Move folded area to the bottom, so there is only on consecutive
     " non-folded area
@@ -1541,8 +1540,7 @@ fu! <sid>OutputFilters(bang) "{{{3
             call <sid>Warn("No filters defined currently!")
             return
         else
-            let sid = <sid>GetSID()
-            exe 'setl foldexpr=<snr>' . sid . '_FoldValue(v:lnum,b:csv_filter)'
+            exe 'setl foldexpr=<snr>' . s:SID . '_FoldValue(v:lnum,b:csv_filter)'
         endif
     endif
 endfu
@@ -1588,17 +1586,11 @@ fu! <sid>DisableFolding() "{{{3
     endif
 endfu
 
-fu! <sid>GetSID() "{{{3
-    let sid = ''
-    if v:version > 703 || v:version == 703 && has("patch032")
-        let sid = get(maparg('W', "", "", 1), 'sid', '')
-    endif
-    if empty(sid)
-        "let sid = substitute(maparg('W'), '\(<SNR>\d\+\)_', '\1', '')
-        let sid = matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_GetSID$')
-    endif
-    return sid
+fu! <sid>DetermineSID()
+    let s:SID = matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_DetermineSID$')
 endfu
+call s:DetermineSID()
+delf s:DetermineSID
 
 fu! <sid>NumberFormat() "{{{3
     let s:nr_format = [',', '.']
