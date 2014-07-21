@@ -1589,12 +1589,15 @@ fu! <sid>DisableFolding() "{{{3
 endfu
 
 fu! <sid>GetSID() "{{{3
+    let sid = ''
     if v:version > 703 || v:version == 703 && has("patch032")
-        return maparg('W', "", "", 1).sid
-    else
-        "return substitute(maparg('W'), '\(<SNR>\d\+\)_', '\1', '')
-        return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_GetSID$')
+        let sid = get(maparg('W', "", "", 1), 'sid', '')
     endif
+    if empty(sid)
+        "let sid = substitute(maparg('W'), '\(<SNR>\d\+\)_', '\1', '')
+        let sid = matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_GetSID$')
+    endif
+    return sid
 endfu
 
 fu! <sid>NumberFormat() "{{{3
