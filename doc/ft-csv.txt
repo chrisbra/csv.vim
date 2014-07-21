@@ -1415,6 +1415,8 @@ Index;Value1;Value2~
   could get problems with multibyte chars
 - Sorting should work better with csv fixed with patterns (could generate an
   inavlide pattern before)
+- Refactor GetSID() (provided by Ingo Karkat
+  https://github.com/chrisbra/csv.vim/pull/37, thanks!)
 
 0.30 Mar 27, 2014 {{{1
 - |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is
