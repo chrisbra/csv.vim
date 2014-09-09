@@ -517,7 +517,13 @@ fu! <sid>WColumn(...) "{{{3
     " Return on which column the cursor is
     let _cur = getpos('.')
     if !exists("b:csv_fixed_width_cols")
-        let line=getline('.')
+        if line('.') == line('$') && line('.') > 1
+            " in case we are adding a line at the bottom,
+            " check from the line above
+            let line = getline(line('.')-1)
+        else
+            let line=getline('.')
+        endif
         " move cursor to end of field
         "call search(b:col, 'ec', line('.'))
         call search(b:col, 'ec')
