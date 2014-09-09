@@ -54,6 +54,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     5.1 CSVPat()................................|CSVPat()|
     5.2 CSVField()..............................|CSVField()|
     5.3 CSVCol()................................|CSVCol()|
+    5.4 CSVSum()................................|CSVSum()|
 6. CSV Tips and Tricks..........................|csv-tips|
     6.1 Statusline..............................|csv-stl|
     6.2 Slow CSV plugin.........................|csv-slow|
@@ -1189,10 +1190,16 @@ This function returns the field at index (x,y) (starting from 1). If the
 parameter orig is given, returns the column "as is" (e.g. including delimiter
 and leading and trailing whitespace, otherwise that will be stripped.)
 
-5.2 CSVCol([name])				        	*CSVCol()*
+5.3 CSVCol([name])				        	*CSVCol()*
 ------------------
 If the name parameter is given, returns the name of the column, else returns
 the index of the current column, starting at 1.
+
+5.4 CSVSum(col, fmt, startline, endline)                        *CSVSum()*
+----------------------------------------
+Returns the sum for column col. Uses fmt to parse number format (see
+|:CSVSumCol|) startline and endline specify the lines to consider, if empty,
+will be first and last line.
 
 ==============================================================================
 6. CSV Tips and Tricks						*csv-tips*
@@ -1417,6 +1424,7 @@ Index;Value1;Value2~
   inavlide pattern before)
 - Refactor GetSID() (provided by Ingo Karkat
   https://github.com/chrisbra/csv.vim/pull/37, thanks!)
+- New public function |CSVSum()|
 
 0.30 Mar 27, 2014 {{{1
 - |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is

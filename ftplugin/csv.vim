@@ -2522,8 +2522,18 @@ fu! CSV_CloseBuffer(buffer) "{{{3
         augroup! CSV_QuitPre
     endtry
 endfu
-        
 
+fu! CSVSum(col, fmt, first, last) "{{{3
+    let first = a:first
+    let last  = a:last
+    if empty(first)
+        let first = 1
+    endif
+    if empty(last)
+        let last = line('$')
+    endif
+    return csv#EvalColumn(col, '<sid>SumnColumn', first, last)
+endfu
 " Initialize Plugin "{{{2
 let b:csv_start = exists("b:csv_start") ? b:csv_start : 1
 let b:csv_end   = exists("b:csv_end") ? b:csv_end : line('$')
