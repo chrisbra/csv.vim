@@ -19,16 +19,16 @@ dist-clean: clean
 vimball: $(PLUGIN).vmb install
 
 install:
-	vim -N -c 'ru! vimballPlugin.vim' -c':so %' -c':q!' ${PLUGIN}.vmb
+	vim -N -u NONE -i NONE -c 'ru! plugin/vimballPlugin.vim' -c 'ru! vimballPlugin.vim' -c':so %' -c':q!' ${PLUGIN}.vmb
 
 uninstall:
-	vim -N -c 'ru! vimballPlugin.vim' -c':RmVimball ${PLUGIN}.vmb'
+	vim -N -u NONE -i NONE -c 'ru! plugin/vimballPlugin.vim' -c 'ru! vimballPlugin.vim' -c':RmVimball ${PLUGIN}.vmb'
 
 undo:
 	for i in */*.orig; do mv -f "$$i" "$${i%.*}"; done
 
 csv.vmb:
-	vim -N -c 'ru! vimballPlugin.vim' -c ':let g:vimball_home=getcwd()'  -c ':call append("0", ["ftplugin/csv.vim", "doc/ft-csv.txt", "syntax/csv.vim", "ftdetect/csv.vim", "plugin/csv.vim"])' -c '$$d' -c ':%MkVimball! ${PLUGIN}' -c':q!'
+	vim -N -u NONE -i NONE -c 'ru! plugin/vimballPlugin.vim' -c ':let g:vimball_home=getcwd()'  -c ':call append("0", ["ftplugin/csv.vim", "doc/ft-csv.txt", "syntax/csv.vim", "ftdetect/csv.vim", "plugin/csv.vim"])' -c '$$d' -c ':%MkVimball! ${PLUGIN}' -c':q!'
 	ln -f $(PLUGIN).vmb $(PLUGIN)-$(VERSION).vmb
 
 csv:
