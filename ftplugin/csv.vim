@@ -2404,6 +2404,9 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     call <sid>CheckHeaderLine()
     let nr = matchstr(a:nr, '^\-\?\d\+')
     let col = (empty(nr) ? <sid>WColumn() : nr)
+    if col == 0
+        let col = 1
+    endif
     " don't take the header line into consideration
     let start = a:first - 1 + s:csv_fold_headerline
     let stop  = a:last  - 1 + s:csv_fold_headerline
