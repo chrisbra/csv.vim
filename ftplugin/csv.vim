@@ -517,9 +517,9 @@ fu! <sid>WColumn(...) "{{{3
     " Return on which column the cursor is
     let _cur = getpos('.')
     if !exists("b:csv_fixed_width_cols")
-        if line('.') == line('$') && line('.') > 1
-            " in case we are adding a line at the bottom,
-            " check from the line above
+        if line('.') > 1 && mode('') != 'n'
+            " in insert mode, get line from above, just in case the current
+            " line is empty
             let line = getline(line('.')-1)
         else
             let line=getline('.')
