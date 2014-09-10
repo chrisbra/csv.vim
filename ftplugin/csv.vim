@@ -2532,7 +2532,7 @@ fu! CSVSum(col, fmt, first, last) "{{{3
     if empty(last)
         let last = line('$')
     endif
-    return csv#EvalColumn(col, '<sid>SumnColumn', first, last)
+    return csv#EvalColumn(a:col, '<sid>SumColumn', first, last)
 endfu
 " Initialize Plugin "{{{2
 let b:csv_start = exists("b:csv_start") ? b:csv_start : 1
