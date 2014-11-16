@@ -655,11 +655,17 @@ fu! <sid>ArrangeCol(first, last, bang) range "{{{3
         return
     endif
     let cur=winsaveview()
-    if a:bang || !exists("b:col_width")
+    if a:bang
         if a:bang
             " Force recalculating the Column width
-            unlet! b:csv_list
+            unlet! b:csv_list b:col_width
         endif
+    elseif exists("g:csv_autocmd_arrange_size") &&
+        \ g:csv_autocmd_arrange_size < getfsize(fnamemodify(bufname(''), ':p'))
+        return
+    endif
+
+    if !exists("b:col_width")
         " Force recalculation of Column width
         call <sid>CalculateColumnWidth()
     endif

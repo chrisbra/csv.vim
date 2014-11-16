@@ -1365,7 +1365,12 @@ You can also simply set the variable >
     let g:csv_autocmd_arrange = 1
 <
 in your vimrc and an autocmd will be installed, that visually arranges your
-csv file whenever you open them for editing.
+csv file whenever you open them for editing. Alternatively, you can restrict
+this setting to files below a certain size. For example, if you only want to
+enable this feature for files smaller than 1 MB, put this into your |.vimrc| >
+
+    let g:csv_autocmd_arrange      = 1
+    let g:csv_autocmd_arrange_size = 1024*1024
 
 Note, this is highly experimental and especially on big files, this might
 slow down Vim considerably.
@@ -1425,6 +1430,8 @@ Index;Value1;Value2~
 - Refactor GetSID() (provided by Ingo Karkat
   https://github.com/chrisbra/csv.vim/pull/37, thanks!)
 - New public function |CSVSum()|
+- Restrict |csv-arrange-autocmd| to specific file sizes (suggested by Spencer
+  Boucher in https://github.com/chrisbra/csv.vim/issues/39, thanks!)
 
 0.30 Mar 27, 2014 {{{1
 - |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is
