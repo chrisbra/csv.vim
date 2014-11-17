@@ -6,18 +6,28 @@ let g:loaded_csv = 1
 let s:cpo_save = &cpo
 set cpo&vim
 
-if exists("g:csv_autocmd_arrange") &&
-    \ !exists("#CSV_Edit#BufReadPost")
-    aug CSV_Editing
-	au!
-	au BufReadPost,BufWritePost *.csv,*.dat,*.tsv,*.tab :ru! ftplugin/csv.vim | exe ":sil! InitCSV" | exe ":sil! %ArrangeCol" | setl noro
-	au BufWritePre *.csv,*.dat,*.tsv,*.tab :%UnArrangeCol
-    aug end
-elseif exists("#CSV_Edit#BufReadPost")
-    aug CSV_Edit
-	au!
-    aug end
-    aug! CSV_Edit
+if exists("g:csv_autocmd_arrange")
+    if !exists("*CSVDoBufLoadAutocmd")
+	fu! CSVDoBufLoadAutocmd()
+	    " Visually arrange columns when opening a csv file
+	    if exists("g:csv_autocmd_arrange") &&
+		\ !exists("#CSV_Edit#BufReadPost")
+		aug CSV_Edit
+		    au!
+		    au BufReadPost,BufWritePost *.csv,*.dat,*.tsv,*.tab :exe
+				\ printf(":call CSVArrangeCol(1, %d, 0, %d)",
+				\ line('$'), get(g:, 'csv_autocmd_arrange_size', -1))
+		    au BufWritePre *.csv,*.dat,*.tsv,*.tab :sil %UnArrangeColumn
+		aug end
+	    elseif exists("#CSV_Edit#BufReadPost")
+		aug CSV_Edit
+		    au!
+		aug end
+		aug! CSV_Edit
+	    endif
+	endfu
+	call CSVDoBufLoadAutocmd()
+    endif
 endif
 
 com! -range -bang CSVTable call <sid>Table(<bang>0, <line1>, <line2>)
