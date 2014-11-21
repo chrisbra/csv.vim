@@ -1432,6 +1432,8 @@ Index;Value1;Value2~
 - New public function |CSVSum()|
 - Restrict |csv-arrange-autocmd| to specific file sizes (suggested by Spencer
   Boucher in https://github.com/chrisbra/csv.vim/issues/39, thanks!)
+- Make |:CSVSearchInColumn| wrap pattern in '%\(..\)' pairs, so it works
+  correctly with '\|' atoms
 
 0.30 Mar 27, 2014 {{{1
 - |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is
