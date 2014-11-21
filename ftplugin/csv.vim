@@ -328,11 +328,6 @@ fu! <sid>SearchColumn(arg) "{{{3
                     throw "E684"
                 endif
             endif
-"             let colnr=arglist[0]
-"             let pat=substitute(arglist[1], '^\(.\)\(.*\)\1$', '\2', '')
-"             if pat == arglist[1]
-"                 throw "E684"
-"             endif
         endif
     "catch /^Vim\%((\a\+)\)\=:E684/
     catch /E684/	" catch error index out of bounds
@@ -344,7 +339,7 @@ fu! <sid>SearchColumn(arg) "{{{3
         call <SID>Warn("There exists no column " . colnr)
         return 1
     endif
-    let @/ = <sid>GetPat(colnr, maxcolnr, pat)
+    let @/ = <sid>GetPat(colnr, maxcolnr, '\%('.pat. '\)')
     try
         norm! n
     catch /^Vim\%((\a\+)\)\=:E486/
