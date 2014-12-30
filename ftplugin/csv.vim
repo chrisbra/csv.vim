@@ -147,7 +147,7 @@ fu! <sid>Init(startline, endline) "{{{3
     let b:undo_ftplugin .=  "| unlet! b:delimiter b:col"
         \ . "| unlet! b:csv_fixed_width_cols b:csv_filter"
         \ . "| unlet! b:csv_fixed_width b:csv_list b:col_width"
-        \ . "| unlet! b:csv_SplitWindow b:csv_headerline"
+        \ . "| unlet! b:csv_SplitWindow b:csv_headerline b:csv_cmt"
         \ . "| unlet! b:csv_thousands_sep b:csv_decimal_sep"
         \. " | unlet! b:browsefilter b:csv_cmt"
         \. " | unlet! b:csv_arrange_leftalign"
@@ -1906,7 +1906,7 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("CSVFixed", ':call <sid>InitCSVFixedWidth()', '')
     call <sid>LocalCmd("NewRecord", ':call <sid>NewRecord(<line1>,
         \ <line2>, <q-args>)', '-nargs=? -range')
-    call <sid>LocalCmd("NewDelimiter", ':call <sid>NewDelimiter(<q-args>)',
+    call <sid>LocalCmd("NewDelimiter", ':call <sid>NewDelimiter(<q-args>, 1, line(''$''))',
         \ '-nargs=1')
     call <sid>LocalCmd("Duplicates", ':call <sid>CheckDuplicates(<q-args>)',
         \ '-nargs=1 -complete=custom,<sid>CompleteColumnNr')
@@ -1993,7 +1993,7 @@ fu! <sid>SaveOptions(list) "{{{3
     return save
 endfu
 
-fu! <sid>NewDelimiter(newdelimiter) "{{{3
+fu! <sid>NewDelimiter(newdelimiter, firstl, lastl) "{{{3
     let save = <sid>SaveOptions(['ro', 'ma'])
     if exists("b:csv_fixed_width_cols")
         call <sid>Warn("NewDelimiter does not work with fixed width column!")
@@ -2005,8 +2005,8 @@ fu! <sid>NewDelimiter(newdelimiter) "{{{3
     if &l:ro
         setl noro
     endif
-    let line=1
-    while line <= line('$')
+    let line=a:firstl
+    while line <= a:lastl
         " Don't change delimiter for comments
         if getline(line) =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
             let line+=1
@@ -2229,15 +2229,16 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
         call <sid>Warn('An error occured, aborting!')
         return
     endif
-    let b:col_width[-1] += 1
+    "let b:col_width[-1] += 1
     let marginline = s:td.scol. join(map(copy(b:col_width), 'repeat(s:td.hbar, v:val)'), s:td.cros). s:td.ecol
 
-    exe printf('sil %d,%ds/%s/%s/ge', a:first, (a:last+adjust_last),
-        \ (exists("b:csv_fixed_width_cols") ? pat : b:delimiter ), s:td.vbar)
+    call <sid>NewDelimiter(s:td.vbar, a:first, a:last+adjust_last)
+    "exe printf('sil %d,%ds/%s/%s/ge', a:first, (a:last+adjust_last),
+    "    \ (exists("b:csv_fixed_width_cols") ? pat : b:delimiter ), s:td.vbar)
     " Add vertical bar in first column, if there isn't already one
     exe printf('sil %d,%ds/%s/%s/e', a:first, a:last+adjust_last,
         \ '^[^'. s:td.vbar. s:td.scol. ']', s:td.vbar.'&')
-    " And add a final vertical bar, if there isn't already
+    " And add a final vertical bar, if there isn't one already
     exe printf('sil %d,%ds/%s/%s/e', a:first, a:last+adjust_last,
         \ '[^'. s:td.vbar. s:td.ecol. ']$', '&'. s:td.vbar)
     " Make nice intersection graphs
@@ -2252,6 +2253,12 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
         call append(a:first + s:csv_fold_headerline, marginline)
         let adjust_last += 1
     endif
+    " Adjust headerline to header of new table
+    let b:csv_headerline = (exists('b:csv_headerline')?b:csv_headerline+2:3)
+    call <sid>CheckHeaderLine()
+    " Adjust syntax highlighting
+    unlet! b:current_syntax
+    ru syntax/csv.vim
 
     if a:bang
         exe printf('sil %d,%ds/^%s\zs\n/&%s&/e', a:first + s:csv_fold_headerline, a:last + adjust_last,

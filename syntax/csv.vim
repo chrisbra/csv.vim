@@ -106,10 +106,9 @@ fu! <sid>DoHighlight() "{{{3
 		    \ . s:col . '/ contains=CSVDelimiter'
 	exe 'syn match CSVColumnOdd nextgroup=CSVColumnEven /'
 		    \ . s:col . '/ contains=CSVDelimiter'
-
-	exe 'syn match CSVColumnHeaderEven nextgroup=CSVColumnHeaderOdd /\%1l'
+	exe 'syn match CSVColumnHeaderEven nextgroup=CSVColumnHeaderOdd /\%<'. (get(b:, 'csv_headerline', 1)+1).'l'
 		    \. s:col . '/ contains=CSVDelimiter'
-	exe 'syn match CSVColumnHeaderOdd nextgroup=CSVColumnHeaderEven /\%1l'
+	exe 'syn match CSVColumnHeaderOdd nextgroup=CSVColumnHeaderEven /\%<'. (get(b:, 'csv_headerline', 1)+1).'l'
 		    \. s:col . '/ contains=CSVDelimiter'
     else
 	for i in range(len(b:csv_fixed_width_cols))

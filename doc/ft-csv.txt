@@ -787,6 +787,8 @@ You can also visual select a range of lines and use :Tabularize to have only
 that range converted into a nice ascii table. Else it try to use the current
 paragraph and try to transform it.
 
+If you use the '!' bang argument, between each row, a line will be drawn.
+
 In csv files, you can also use the :CSVTabularize command, in different
 filetypes you can use the :CSVTable command (and is available as plugin so it
 will be available for non-CSV filetypes).
