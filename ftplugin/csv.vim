@@ -619,10 +619,6 @@ fu! <sid>ColWidth(colnr) "{{{3
 endfu
 
 fu! <sid>ArrangeCol(first, last, bang, limit) range "{{{3
-    "TODO: Why doesn't that work?
-    " is this because of the range flag?
-    " It's because of the way, Vim works with
-    " a:firstline and a:lastline parameter, therefore
     " explicitly give the range as argument to the function
     if exists("b:csv_fixed_width_cols")
         " Nothing to do
@@ -744,7 +740,7 @@ fu! <sid>Columnize(field) "{{{3
         " printf knows about %S (e.g. can handle char length
         if get(b:, 'csv_arrange_leftalign',0)
             " left-align content
-            return printf("%-*S%s", width+1 , 
+            return printf("%-*S%s", width , 
                 \ (has_delimiter ?
                 \ matchstr(a:field, '.*\%('.b:delimiter.'\)\@=') : a:field),
                 \ (has_delimiter ? b:delimiter : ''))
@@ -2258,8 +2254,7 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
     call append(a:first-1, s:td.ltop. join(line, s:td.dhor). s:td.rtop)
     call append(a:last+adjust_last+1, s:td.lbot. join(line, s:td.uhor). s:td.rbot)
 
-    if s:csv_fold_headerline > 0 && !a:bang
-        "call <sid>NewRecord(s:csv_fold_headerline, s:csv_fold_headerline, 1)
+    if s:csv_fold_headerline > 0
         call append(a:first + s:csv_fold_headerline, marginline)
         let adjust_last += 1
     endif
