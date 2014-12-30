@@ -2024,7 +2024,17 @@ fu! <sid>NewDelimiter(newdelimiter, firstl, lastl) "{{{3
         call setbufvar('', '&'. key, value)
     endfor
     "reinitialize the plugin
+    if exists("g:csv_delim")
+        let _delim = g:csv_delim
+    endif
+    let g:csv_delim = a:newdelimiter
     call <sid>Init(1,line('$'))
+    if exists("_delim")
+        let g:csv_delim = _delim
+    else
+        unlet g:csv_delim
+    endif
+    unlet! _delim
 endfu
 
 fu! <sid>IN(list, value) "{{{3
