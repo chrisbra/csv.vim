@@ -90,7 +90,7 @@ fu! <sid>Init(startline, endline) "{{{3
         " - Should work with most ugly solutions that are available
         let b:col='\%(\%(\%(' . (b:delimiter !~ '\s' ? '\s*' : '') .
                 \ '"\%(' . (exists("g:csv_nl") ? '\_' : '' ) .
-                \ '[^"]\|""\)*"\)' . s:del . '\)\|\%(' .
+                \ '[^"]\|""\)*"\s*\)' . s:del . '\)\|\%(' .
                 \  '[^' .  b:delimiter . ']*' . s:del . '\)\)'
         let b:col_end='\%(\%(\%(' . (b:delimiter !~ '\s' ? '\s*' : '') .
                 \ '"\%(' . (exists("g:csv_nl") ? '\_' : '' ) .
