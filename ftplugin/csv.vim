@@ -740,7 +740,7 @@ fu! <sid>Columnize(field) "{{{3
         " printf knows about %S (e.g. can handle char length
         if get(b:, 'csv_arrange_leftalign',0)
             " left-align content
-            return printf("%-*S%s", width , 
+            return printf("%-*S%s", width+1 , 
                 \ (has_delimiter ?
                 \ matchstr(a:field, '.*\%('.b:delimiter.'\)\@=') : a:field),
                 \ (has_delimiter ? b:delimiter : ''))
@@ -2001,6 +2001,10 @@ fu! <sid>NewDelimiter(newdelimiter, firstl, lastl) "{{{3
     if &l:ro
         setl noro
     endif
+    let delimiter = a:newdelimiter
+    if a:newdelimiter is '\t'
+        let delimiter="\t"
+    endif
     let line=a:firstl
     while line <= a:lastl
         " Don't change delimiter for comments
@@ -2012,7 +2016,7 @@ fu! <sid>NewDelimiter(newdelimiter, firstl, lastl) "{{{3
         " Remove field delimiter
         call map(fields, 'substitute(v:val, b:delimiter .
             \ ''\?$'' , "", "")')
-        call setline(line, join(fields, a:newdelimiter))
+        call setline(line, join(fields, delimiter))
         let line+=1
     endwhile
     " reset local buffer options
@@ -2023,7 +2027,7 @@ fu! <sid>NewDelimiter(newdelimiter, firstl, lastl) "{{{3
     if exists("g:csv_delim")
         let _delim = g:csv_delim
     endif
-    let g:csv_delim = a:newdelimiter
+    let g:csv_delim = delimiter
     call <sid>Init(1,line('$'))
     if exists("_delim")
         let g:csv_delim = _delim
@@ -2213,6 +2217,23 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
     let adjust_last = 0
     call cursor(a:first,0)
     call <sid>CheckHeaderLine()
+    let line=a:first
+    if exists("g:csv_table_leftalign")
+        let b:csv_arrange_leftalign = 1
+    endif
+    let newlines=[]
+    while line <= a:last
+        let curline = getline(line)
+        if empty(split(curline, b:delimiter))
+            " only empty delimiters, add one empty delimiter
+            " (:NewDelimiter strips trailing delimiter
+            let curline = repeat(b:delimiter, <sid>MaxColumns())
+            call add(newlines, line)
+            call setline(line, curline)
+        endif
+        let line+=1
+    endw
+    unlet! line
     if exists("b:csv_fixed_width_cols")
         let cols=copy(b:csv_fixed_width_cols)
         let pat = join(map(cols, ' ''\(\%''. v:val. ''c\)'' '), '\|')
@@ -2229,13 +2250,26 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
         " don't clear column width variable, might have been set in the
         " plugin!
         sil call <sid>ArrangeCol(a:first, a:last, 0, -1)
+        if !get(b:, 'csv_arrange_leftalign',0)
+            for line in newlines
+                let cline = getline(line)
+                let cline = substitute(cline, '\s$', ' ', '')
+                call setline(line, cline)
+            endfor
+            unlet! line
+        endif
     endif
 
     if empty(b:col_width)
         call <sid>Warn('An error occured, aborting!')
         return
     endif
-    "let b:col_width[-1] += 1
+    if get(b:, 'csv_arrange_leftalign', 0)
+        call map(b:col_width, 'v:val+1')
+    endif
+    if b:delimiter == "\t" && !get(b:, 'csv_arrange_leftalign',0)
+        let b:col_width[-1] += 1
+    endif
     let marginline = s:td.scol. join(map(copy(b:col_width), 'repeat(s:td.hbar, v:val)'), s:td.cros). s:td.ecol
 
     call <sid>NewDelimiter(s:td.vbar, a:first, a:last+adjust_last)

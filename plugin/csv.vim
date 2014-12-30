@@ -22,9 +22,9 @@ if exists("g:csv_autocmd_arrange")
     endif
 endif
 
-com! -range -bang CSVTable call <sid>Table(<bang>0, <line1>, <line2>)
+com! -range -bang -nargs=? CSVTable call <sid>Table(<bang>0, <line1>, <line2>, <q-args>)
 
-fu! <sid>Table(bang, line1, line2)
+fu! <sid>Table(bang, line1, line2, delim)
     " save and restore some options
     if has("conceal")
 	let _a = [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:cole, &l:cocu, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt, &l:ma, &l:ml]
@@ -39,6 +39,10 @@ fu! <sid>Table(bang, line1, line2)
 	" use the current paragraph
 	let line1 = line("'{") + 1 
 	let line2 = line("'}") - 1
+    endif
+
+    if !empty(a:delim)
+	let g:csv_delim = a:delim
     endif
     " try to guess the delimiter from the specified region, therefore, we need
     " to initialize the plugin to inspect only those lines
@@ -72,6 +76,7 @@ fu! <sid>Table(bang, line1, line2)
 	else
 	    let [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt, &l:ma, &l:ml] = _a
 	endif
+	unlet! g:csv_delim
 	call winrestview(_b)
     endtry
 endfu
