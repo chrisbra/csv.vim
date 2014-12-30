@@ -437,6 +437,7 @@ If you want to change the field delimiter of your file you can use the
     :NewDelimiter char
 
 This changes the field delimiter of your file to the new delimiter "char".
+Note: Will remove trailing delimiters.
 
                                                             *:CSVDuplicate*
 3.16 Check for duplicate records                            *Duplicate_CSV*
@@ -1436,6 +1437,7 @@ Index;Value1;Value2~
   Boucher in https://github.com/chrisbra/csv.vim/issues/39, thanks!)
 - Make |:CSVSearchInColumn| wrap pattern in '%\(..\)' pairs, so it works
   correctly with '\|' atoms
+- Small improvements on |:CSVTable| and |:NewDelimiter| command
 
 0.30 Mar 27, 2014 {{{1
 - |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is
