@@ -42,7 +42,7 @@ fu! <sid>Table(bang, line1, line2, delim)
     endif
 
     if !empty(a:delim)
-	let g:csv_delim = a:delim
+	let g:csv_delim = (a:delim ==# '\t' ? "\t" : a:delim)
     endif
     " try to guess the delimiter from the specified region, therefore, we need
     " to initialize the plugin to inspect only those lines
