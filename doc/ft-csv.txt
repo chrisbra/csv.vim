@@ -1441,6 +1441,8 @@ Index;Value1;Value2~
 - Make |:CSVSearchInColumn| wrap pattern in '%\(..\)' pairs, so it works
   correctly with '\|' atoms
 - Small improvements on |:CSVTable| and |:NewDelimiter| command
+- <Up> and <Down> should skip folds (like in normal Vi mode, suggested by
+  Kamaraju Kusuma, thanks!)
 
 0.30 Mar 27, 2014 {{{1
 - |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is
