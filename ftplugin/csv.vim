@@ -955,6 +955,9 @@ fu! <sid>MoveCol(forward, line, ...) "{{{3
     elseif line > line('$')
         let line=line('$')
     endif
+    if foldclosed(line) != -1
+        let line = line > line('.') ? foldclosedend(line) : foldclosed(line)
+    endif
 
     " Generate search pattern
     if colnr == 1
