@@ -1,7 +1,7 @@
-*ft-csv.txt*	For Vim version 7.3	Last Change: Thu, 27 Mar 2014
+*ft-csv.txt*	For Vim version 7.4	Last Change: Thu, 15 Jan 2015
 
 Author:		Christian Brabandt <cb@256bit.org>
-Version:	0.30
+Version:	0.31
 Homepage:	http://www.vim.org/scripts/script.php?script_id=2830
 
 The VIM LICENSE applies to the CSV filetype plugin (see |copyright|).
@@ -1415,7 +1415,7 @@ Index;Value1;Value2~
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
-0.31 (unreleased) "{{{1
+0.31 Jan 15, 2015 "{{{1
 - fix that H on the very first cell, results in an endless loop
   (https://github.com/chrisbra/csv.vim/issues/31, reported by lahvak, thanks!)
 - fix that count for |AddColumn| did not work (according to the documentation)
