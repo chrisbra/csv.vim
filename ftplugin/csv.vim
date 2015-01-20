@@ -195,7 +195,7 @@ fu! <sid>LocalSettings(type) "{{{3
 
         " Set browsefilter
         let b:browsefilter="CSV Files (*.csv, *.dat)\t*.csv;*.dat\n".
-            \ "All Files\t*.*\n"
+                 \ "All Files\t*.*\n"
 
         if has("conceal")
             setl cole=2 cocu=nc
@@ -706,6 +706,8 @@ fu! <sid>CalculateColumnWidth() "{{{3
     " delete buffer content in variable b:csv_list,
     " this was only necessary for calculating the max width
     unlet! b:csv_list
+    unlet! s:columnize_count
+    unlet! s:decimal_column
 endfu
 
 fu! <sid>Columnize(field) "{{{3
@@ -729,18 +731,82 @@ fu! <sid>Columnize(field) "{{{3
     " Careful: Keep this fast! Using
     " let width=get(b:col_width,<SID>WColumn()-1,20)
     " is too slow, so we are using:
-    let width=get(b:col_width, (s:columnize_count % s:max_cols), 20)
+    let colnr = s:columnize_count % s:max_cols
+    let width=get(b:col_width, colnr, 20)
+    let align='r'
+    if exists('b:csv_arrange_align')
+        let align_list=split(get(b:, 'csv_arrange_align', " "), '\zs')
+        try
+            let align = align_list[colnr]
+        catch
+            let align = 'r'
+        endtry
+    endif
+    if ((align isnot? 'r' && align isnot? 'l' &&
+       \ align isnot? 'c' && align isnot? '.') || get(b:, 'csv_arrange_leftalign', 0))
+       let align = 'r'
+    endif
 
     let s:columnize_count += 1
     let has_delimiter = (a:field =~# b:delimiter.'$')
-    " printf knows about %S (e.g. can handle char length
-    if get(b:, 'csv_arrange_leftalign',0)
+    if align is? 'l'
         " left-align content
         return printf("%-*S%s", width+1 , 
-            \ (has_delimiter ?
-            \ matchstr(a:field, '.*\%('.b:delimiter.'\)\@=') : a:field),
-            \ (has_delimiter ? b:delimiter : ''))
+            \ (has_delimiter ? a:field[:-2] : a:field),
+            \ (has_delimiter ? b:delimiter : ' '))
+    elseif align is? 'c'
+        " center the column
+        let t = width - len(split(a:field, '\zs'))
+        let leftwidth = t/2
+        " uneven width, add one
+        let rightwidth = (t%2 ? leftwidth+1 : leftwidth)
+        let field = (has_delimiter ?  a:field[:-2] : a:field).  repeat(' ', rightwidth)
+        return printf("%*S%s", width , field, (has_delimiter ? b:delimiter : ' '))
+    elseif align is? '.'
+        if !exists("s:decimal_column")
+            let s:decimal_column = {}
+        endif
+        if get(s:decimal_column, colnr, 0) == 0
+            call <sid>CheckHeaderLine()
+            call <sid>NumberFormat()
+            let data = <sid>CopyCol('', colnr+1, '')[s:csv_fold_headerline : -1]
+            let pat1 = escape(s:nr_format[1], '.').'\zs[^'.s:nr_format[1].']*\ze'.
+                        \ (has_delimiter ? b:delimiter : '').'$'
+            let pat2 = '\d\+\ze\%(\%('.escape(s:nr_format[1], '.'). '\d\+\)\|'.
+                        \ (has_delimiter ? b:delimiter : '').'$\)'
+            let data1 = map(copy(data), 'matchstr(v:val, pat1)')
+            let data2 = map(data, 'matchstr(v:val, pat2)')
+            " strlen should be okay for decimals...
+            let data1 = map(data1, 'strlen(v:val)')
+            let data2 = map(data2, 'strlen(v:val)')
+            let dec = max(data1)
+            let scal = max(data2)
+            if dec + scal + 1 + (has_delimiter ? 1 : 0) > width
+                let width = dec + scal + 1 + (has_delimiter ? 1 :0)
+                let b:col_width[colnr] = width
+            endif
+
+            let s:decimal_column[colnr] = dec
+        else
+            let dec = get(s:decimal_column, colnr)
+        endif
+        let field = (has_delimiter ?  a:field[:-2] : a:field)
+        let fmt = printf("%%%d.%df", width+1, dec)
+        try
+            if s:nr_format[1] isnot '.'
+                let field = substitute(field, s:nr_format[1], '.', 'g')
+                let field = substitute(field, s:nr_format[0], '', 'g')
+            endif
+            if field =~? '\h' " text in the column, can't be converted to float
+                throw "no decimal"
+            endif
+            let result = printf(fmt, str2float(field)). (has_delimiter ? b:delimiter : ' ')
+        catch
+            let result = printf("%*S", width+2, a:field)
+        endtry
+        return result
     else
+        " right align
         return printf("%*S", width+1 ,  a:field)
     endif
 endfun

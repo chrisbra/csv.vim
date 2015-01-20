@@ -219,12 +219,17 @@ if the '!' has not been given.
 
 If [range] is not given, it defaults to the current line.
 
-By default, the columns will be righ-aligned. If you want them to be
-left-aligned, set the buffer variable b:csv_arrange_leftalign = 1 for that
-particular buffer, e.g. >
+By default, the columns will be righ-aligned. If you want a different
+alignment you need to specify this through the b:csv_arrange_align variable.
+This is a string of flags ('r': right align, 'l': left align, 'c': center
+alignment, '.': decimal alignment) where each flag defines the alignment for
+a particular column (starting from left). Missing columns will be right aligned.
+So this: >
 
-    :let b:csv_arrange_leftalign = 1
+    :let b:csv_arrange_align = 'lc.'
 <
+Will left-align the first column, center align the second column, decimal
+align the third column and all following columns right align.
 Note, arranging the columns can be very slow on large files or many columns (see
 |csv-slow| on how to increase performance for this command). To prevent you
 from accidently changing your csv file, the buffer will be set 'readonly'
@@ -1415,7 +1420,12 @@ Index;Value1;Value2~
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
-0.31 Jan 15, 2015 "{{{1
+0.32 (unreleased) {{{1
+- Remove old Vim 7.3 workarounds (plugin needs now a Vim version 7.4)
+- allow to align columns differently (right/left or center align) for
+  |ArrangeColumn_CSV|
+
+0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop
   (https://github.com/chrisbra/csv.vim/issues/31, reported by lahvak, thanks!)
 - fix that count for |AddColumn| did not work (according to the documentation)
