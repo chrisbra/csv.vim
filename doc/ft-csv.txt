@@ -229,7 +229,10 @@ So this: >
     :let b:csv_arrange_align = 'lc.'
 <
 Will left-align the first column, center align the second column, decimal
-align the third column and all following columns right align.
+align the third column and all following columns right align. (Note: decimal
+aligning might slow down Vim and additionally, if the value is no decimal
+number it will be right aligned).
+
 Note, arranging the columns can be very slow on large files or many columns (see
 |csv-slow| on how to increase performance for this command). To prevent you
 from accidently changing your csv file, the buffer will be set 'readonly'
@@ -1004,6 +1007,16 @@ own syntax highlighting like this in your |.vimrc| >
     hi CSVColumnHeaderEven ...
     hi CSVColumnHeaderOdd ...
 
+Alternatively, you can simply link those highlighting groups to some other
+ones, you really like: >
+
+    hi link CSVColumnOdd MoreMsg
+    hi link CSVColumnEven Question
+<
+If you do not want column highlighting, set the variable
+g:csv_no_column_highlight to 1 >
+
+    :let g:csv_no_column_highlight = 1
 <
 Note, these changes won't take effect, until you restart Vim.
 
@@ -1423,7 +1436,9 @@ Index;Value1;Value2~
 0.32 (unreleased) {{{1
 - Remove old Vim 7.3 workarounds (plugin needs now a Vim version 7.4)
 - allow to align columns differently (right/left or center align) for
-  |ArrangeColumn_CSV|
+  |ArrangeColumn_CSV| (suggested by Giorgio Robino, thanks!)
+- document better how to adjust syntax highlighting (suggested by Giorgio
+  Robino, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop

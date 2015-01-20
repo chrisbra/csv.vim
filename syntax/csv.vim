@@ -136,8 +136,13 @@ fu! <sid>DoSyntaxDefinitions() "{{{3
 
     hi def link CSVColumnHeaderOdd  WarningMsg
     hi def link CSVColumnHeaderEven WarningMsg
-    hi def link CSVColumnOdd	    DiffAdd
-    hi def link CSVColumnEven	    DiffChange
+    if get(g:, 'csv_no_column_highlight', 0)
+	hi def link CSVColumnOdd	    Normal
+	hi def link CSVColumnEven	    Normal
+    else
+	hi def link CSVColumnOdd	    DiffAdd
+	hi def link CSVColumnEven	    DiffChange
+    endif
 endfun
 
 " Main: {{{2 
