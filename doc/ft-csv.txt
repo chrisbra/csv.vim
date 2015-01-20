@@ -316,7 +316,16 @@ If you want a vertical header line, use `:VHeader` or `:CSVVHeader`. This works
 similar to the |Header_CSV| command, except that it will open a vertical split
 window with the first column always visible. It will always open the first
 column in the new split window. Use the '!' to close the window. If you
-specify a count, that many columns will be visible (default: the first).
+specify a count, that many columns will be visible (default: the first). Add
+the bang to the count, if you only want the specific column to be visible.
+>
+    :VHeader 2
+<
+This will open a vertical split window containing the first 2 columns, while
+>
+    :VHeader 2!
+<
+Opens a new vertical split window containing only the 2 second column.
 
 Note, this won't work with linebreaks in the column.
 Note also: this command does not work for fixed width columns |csv-fixedwidth|
@@ -1439,6 +1448,8 @@ Index;Value1;Value2~
   |ArrangeColumn_CSV| (suggested by Giorgio Robino, thanks!)
 - document better how to adjust syntax highlighting (suggested by Giorgio
   Robino, thanks!)
+- Allow the |:CSVHeader| command to only display a specific column (suggested
+  by Giorgio Robino, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop

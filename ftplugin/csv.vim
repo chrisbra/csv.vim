@@ -865,7 +865,7 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
         let a = []
         let b=b:col
         if a:hor
-            setl scrollopt=hor scrollbind
+            setl scrollopt=hor scrollbind cursorbind
             let _fdc = &l:fdc
             let lines = empty(a:lines) ? s:csv_fold_headerline : a:lines
             let a = getline(1,lines)
@@ -878,16 +878,21 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             "setl syntax=csv
             sil! doautocmd FileType csv
             noa 1
+            sil! sign unplace *
             exe "resize" . lines
-            setl scrollopt=hor winfixheight nowrap
+            setl scrollopt=hor winfixheight nowrap cursorbind
             "let &l:stl=repeat(' ', winwidth(0))
             let &l:stl="%#Normal#".repeat(' ',winwidth(0))
             " set the foldcolumn to the same of the other window
             let &l:fdc = _fdc
         else
-            setl scrollopt=ver scrollbind
+            setl scrollopt=ver scrollbind cursorbind
             noa 0
-            let a=<sid>CopyCol('',1,a:lines)
+            if a:lines[-1:] is? '!'
+                let a=<sid>CopyCol('',a:lines,'')
+            else
+                let a=<sid>CopyCol('',1, a:lines-1)
+            endif
             " Does it make sense to use the preview window?
             "vert sil! pedit |wincmd w | enew!
             above vsp +enew
@@ -903,9 +908,10 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             noa 0
             let b:csv_SplitWindow = winnr()
             sil :call <sid>ArrangeCol(1,line('$'), 1, -1)
+            sil! sign unplace *
             exe "vert res" . len(split(getline(1), '\zs'))
             call matchadd("CSVHeaderLine", b:col)
-            setl scrollopt=ver winfixwidth
+            setl scrollopt=ver winfixwidth cursorbind
         endif
         call <sid>SetupQuitPre(winnr())
         let win = winnr()
