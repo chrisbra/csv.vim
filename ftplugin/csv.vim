@@ -194,11 +194,8 @@ fu! <sid>LocalSettings(type) "{{{3
         let b:undo_ftplugin = "setlocal sol& tw< wrap<"
 
         " Set browsefilter
-        if (v:version > 703 || (v:version == 703 && has("patch593")))
-                    \ && exists("browsefilter")
-            let b:browsefilter="CSV Files (*.csv, *.dat)\t*.csv;*.dat\n".
-                 \ "All Files\t*.*\n"
-        endif
+        let b:browsefilter="CSV Files (*.csv, *.dat)\t*.csv;*.dat\n".
+            \ "All Files\t*.*\n"
 
         if has("conceal")
             setl cole=2 cocu=nc
@@ -736,47 +733,15 @@ fu! <sid>Columnize(field) "{{{3
 
     let s:columnize_count += 1
     let has_delimiter = (a:field =~# b:delimiter.'$')
-    if v:version > 703 || v:version == 703 && has("patch713")
-        " printf knows about %S (e.g. can handle char length
-        if get(b:, 'csv_arrange_leftalign',0)
-            " left-align content
-            return printf("%-*S%s", width+1 , 
-                \ (has_delimiter ?
-                \ matchstr(a:field, '.*\%('.b:delimiter.'\)\@=') : a:field),
-                \ (has_delimiter ? b:delimiter : ''))
-        else
-            return printf("%*S", width+1 ,  a:field)
-        endif
+    " printf knows about %S (e.g. can handle char length
+    if get(b:, 'csv_arrange_leftalign',0)
+        " left-align content
+        return printf("%-*S%s", width+1 , 
+            \ (has_delimiter ?
+            \ matchstr(a:field, '.*\%('.b:delimiter.'\)\@=') : a:field),
+            \ (has_delimiter ? b:delimiter : ''))
     else
-        " printf only handles bytes
-        if !exists("g:csv_no_multibyte") &&
-            \ match(a:field, '[^ -~]') != -1
-            " match characters outside the ascii range
-            let a = split(a:field, '\zs')
-            let add = eval(join(map(a, 'len(v:val)'), '+'))
-            let add -= len(a)
-        else
-            let add = 0
-        endif
-
-        " Add one for the frame
-        " plus additional width for multibyte chars,
-        " since printf(%*s..) uses byte width!
-        let width = width + add  + 1
-
-        if width == strlen(a:field)
-            " Column has correct length, don't use printf()
-            return a:field
-        else
-            if get(b:, 'csv_arrange_leftalign',0)
-                " left-align content
-                return printf("%-*s%s", width,  
-                \ (has_delimiter ?  matchstr(a:field, '.*\%('.b:delimiter.'\)\@=') : a:field),
-                \ (has_delimiter ? b:delimiter : ''))
-            else
-                return printf("%*s", width ,  a:field)
-            endif
-        endif
+        return printf("%*S", width+1 ,  a:field)
     endif
 endfun
 
