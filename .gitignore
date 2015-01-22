@@ -7,7 +7,7 @@ doc/tags
 *.csv
 # ignore vimballs
 *.vba
-*.vmb
+*-*.vmb
 # ignore *.orig files
 *.orig
 *.*~
