@@ -1452,7 +1452,9 @@ Index;Value1;Value2~
   by Giorgio Robino, thanks!)
 - When using |VHeader_CSV| or |Header_CSV| command, check
   number/relativenumber and foldcolumn to make sure, header line is always
-  aligened with main window (suggested by Giorgio Robino, thanks)
+  aligened with main window (suggested by Giorgio Robino, thanks!)
+- hide search pattern, when calling |SearchInColumn_CSV| (suggested by Giorgio
+  Robino, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop

@@ -2,7 +2,7 @@
 UseVimball
 finish
 ftplugin/csv.vim	[[[1
-2624
+2626
 " Filetype plugin for editing CSV files. "{{{1
 " Author:  Christian Brabandt <cb@256bit.org>
 " Version: 0.31
@@ -343,7 +343,7 @@ fu! <sid>SearchColumn(arg) "{{{3
     endif
     let @/ = <sid>GetPat(colnr, maxcolnr, '\%('.pat. '\)')
     try
-        norm! n
+        exe "norm! n\<c-l>"
     catch /^Vim\%((\a\+)\)\=:E486/
         " Pattern not found
         echohl Error
@@ -919,6 +919,8 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             setl scrollopt=ver winfixwidth cursorbind nonu nornu fdc=0
         endif
         call <sid>SetupAutoCmd(winnr(),bufnr)
+        " disable airline
+        let w:airline_disabled = 1
         let win = winnr()
         setl scrollbind buftype=nowrite bufhidden=wipe noswapfile nobuflisted
         noa wincmd p
@@ -2628,7 +2630,7 @@ unlet s:cpo_save
 " Vim Modeline " {{{2
 " vim: set foldmethod=marker et:
 doc/ft-csv.txt	[[[1
-1743
+1746
 *ft-csv.txt*	For Vim version 7.4	Last Change: Thu, 15 Jan 2015
 
 Author:		Christian Brabandt <cb@256bit.org>
@@ -4081,6 +4083,9 @@ Index;Value1;Value2~
   Robino, thanks!)
 - Allow the |:CSVHeader| command to only display a specific column (suggested
   by Giorgio Robino, thanks!)
+- When using |VHeader_CSV| or |Header_CSV| command, check
+  number/relativenumber and foldcolumn to make sure, header line is always
+  aligened with main window (suggested by Giorgio Robino, thanks)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop

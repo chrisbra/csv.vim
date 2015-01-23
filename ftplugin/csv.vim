@@ -338,7 +338,8 @@ fu! <sid>SearchColumn(arg) "{{{3
     endif
     let @/ = <sid>GetPat(colnr, maxcolnr, '\%('.pat. '\)')
     try
-        norm! n
+        " force redraw, so that the search pattern isn't shown
+        exe "norm! n\<c-l>"
     catch /^Vim\%((\a\+)\)\=:E486/
         " Pattern not found
         echohl Error
@@ -914,6 +915,8 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             setl scrollopt=ver winfixwidth cursorbind nonu nornu fdc=0
         endif
         call <sid>SetupAutoCmd(winnr(),bufnr)
+        " disable airline
+        let w:airline_disabled = 1
         let win = winnr()
         setl scrollbind buftype=nowrite bufhidden=wipe noswapfile nobuflisted
         noa wincmd p
