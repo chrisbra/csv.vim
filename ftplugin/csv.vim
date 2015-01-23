@@ -182,7 +182,7 @@ fu! <sid>Init(startline, endline) "{{{3
  " \ delf <sid>SaveOptions | delf <sid>CheckDuplicates |
  " \ delf <sid>CompleteColumnNr | delf <sid>CSVPat | delf <sid>Transpose |
  " \ delf <sid>LocalSettings() | delf <sid>AddColumn | delf <sid>SubstituteInColumn
- " \ delf <sid>SetupQuitPre() | delf CSV_CloseBuffer
+ " \ delf <sid>SetupAutoCmd() | delf CSV_CloseBuffer
 endfu
 
 fu! <sid>LocalSettings(type) "{{{3
@@ -836,14 +836,13 @@ fu! <sid>GetColPat(colnr, zs_flag) "{{{3
     return pat . (a:zs_flag ? '\zs' : '')
 endfu
 
-fu! <sid>SetupQuitPre(window) "{{{3
+fu! <sid>SetupAutoCmd(window,bufnr) "{{{3
     " Setup QuitPre autocommand to quit cleanly
-    if exists("##QuitPre")
-        augroup CSV_QuitPre
-            au!
-            exe "au QuitPre * call CSV_CloseBuffer(".winbufnr(a:window).")"
-        augroup end
-    endif
+    aug CSV_QuitPre
+        au!
+        exe "au QuitPre * call CSV_CloseBuffer(".winbufnr(a:window).")"
+        exe "au CursorHold <buffer=".a:bufnr."> call CSV_SetSplitOptions(".a:window.")"
+    aug END
 endfu
 
 fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
@@ -864,6 +863,7 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
         let _sbo = &sbo
         let a = []
         let b=b:col
+        let bufnr = bufnr('.')
         if a:hor
             setl scrollopt=hor scrollbind cursorbind
             let _fdc = &l:fdc
@@ -881,8 +881,8 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             sil! sign unplace *
             exe "resize" . lines
             setl scrollopt=hor winfixheight nowrap cursorbind
-            "let &l:stl=repeat(' ', winwidth(0))
             let &l:stl="%#Normal#".repeat(' ',winwidth(0))
+            let s:local_stl = &l:stl
             " set the foldcolumn to the same of the other window
             let &l:fdc = _fdc
         else
@@ -911,9 +911,9 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
             sil! sign unplace *
             exe "vert res" . len(split(getline(1), '\zs'))
             call matchadd("CSVHeaderLine", b:col)
-            setl scrollopt=ver winfixwidth cursorbind
+            setl scrollopt=ver winfixwidth cursorbind nonu nornu fdc=0
         endif
-        call <sid>SetupQuitPre(winnr())
+        call <sid>SetupAutoCmd(winnr(),bufnr)
         let win = winnr()
         setl scrollbind buftype=nowrite bufhidden=wipe noswapfile nobuflisted
         noa wincmd p
@@ -934,9 +934,9 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
         if exists("_sbo")
             let &sbo = _sbo
         endif
-        setl noscrollbind
+        setl noscrollbind nocursorbind
         try
-            wincmd c
+            noa wincmd c
         catch /^Vim\%((\a\+)\)\=:E444/	" cannot close last window
         catch /^Vim\%((\a\+)\)\=:E517/	" buffer already wiped
             " no-op
@@ -2570,8 +2570,23 @@ fu! CSV_WCol(...) "{{{3
     endtry
 endfun
 
+fu! CSV_SetSplitOptions(window) "{{{3
+    if exists("s:local_stl")
+        " local horizontal statusline
+        for opt in items({'&nu': &l:nu, '&rnu': &l:rnu, '&fdc': &fdc})
+            if opt[1] != getwinvar(a:window, opt[0])
+                call setwinvar(a:window, opt[0], opt[1])
+            endif
+        endfor
+        " Check statusline (airline might change it)
+        if getwinvar(a:window, '&l:stl') != s:local_stl
+            call setwinvar(a:window, '&stl', s:local_stl)
+        endif
+    endif
+endfun
+
 fu! CSV_CloseBuffer(buffer) "{{{3
-    " Setup by SetupQuitPre autocommand
+    " Setup by SetupAutoCmd autocommand
     try
         if bufnr((a:buffer)+0) > -1
             exe a:buffer. "bw"
