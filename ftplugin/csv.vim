@@ -2232,6 +2232,10 @@ fu! <sid>NrColumns(bang) "{{{3
 endfu
 
 fu! <sid>Tabularize(bang, first, last) "{{{3
+    if match(split(&ft, '\.'),'csv') == -1
+        call <sid>Warn("No CSV filetype, aborting!")
+        return
+    endif
     let _c = winsaveview()
     " Table delimiter definition "{{{4
     if !exists("s:td")
