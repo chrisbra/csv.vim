@@ -25,6 +25,13 @@ endif
 com! -range -bang -nargs=? CSVTable call <sid>Table(<bang>0, <line1>, <line2>, <q-args>)
 
 fu! <sid>Table(bang, line1, line2, delim)
+    if match(split(&ft, '\.'), 'csv') > -1
+	" Use CSVTabularize command
+	echohl WarningMsg
+	echomsg "For CSV files, use the :CSVTabularize command!"
+	echohl None
+	return
+    endif
     " save and restore some options
     if has("conceal")
 	let _a = [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:cole, &l:cocu, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt, &l:ma, &l:ml]
