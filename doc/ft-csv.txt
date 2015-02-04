@@ -1455,6 +1455,9 @@ Index;Value1;Value2~
   aligened with main window (suggested by Giorgio Robino, thanks!)
 - hide search pattern, when calling |SearchInColumn_CSV| (suggested by Giorgio
   Robino, thanks!)
+- compute correct width of marginline for |:CSVTable|
+- do not allow |:CSVTable| command for csv files, that's what the
+  |:CSVTabularize| command is for.
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop
