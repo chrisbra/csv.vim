@@ -234,10 +234,16 @@ aligning might slow down Vim and additionally, if the value is no decimal
 number it will be right aligned).
 
 Note, arranging the columns can be very slow on large files or many columns (see
-|csv-slow| on how to increase performance for this command). To prevent you
-from accidently changing your csv file, the buffer will be set 'readonly'
-afterwards. Note: this command does not work for fixed width columns
-|csv-fixedwidth|
+|csv-slow| on how to increase performance for this command). For large files,
+calculating the column width can take long and take a consierable amount of
+memory. Therefore, the csv plugin will at most check 10.000 lines for the
+width. Set the variable b:csv_arrange_use_all_rows to 1 to use all records: >
+
+    :let b:csv_arrange_use_all_rows = 1
+<
+(this could however in the worst case lead to a crash).
+
+Note: this command does not work for fixed width columns |csv-fixedwidth|
 
 See also |csv-arrange-autocmd| on how to have vim automaticaly arrange a CSV
 file upon entering it.
