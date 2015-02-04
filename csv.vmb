@@ -2,7 +2,7 @@
 UseVimball
 finish
 ftplugin/csv.vim	[[[1
-2626
+2630
 " Filetype plugin for editing CSV files. "{{{1
 " Author:  Christian Brabandt <cb@256bit.org>
 " Version: 0.31
@@ -343,6 +343,7 @@ fu! <sid>SearchColumn(arg) "{{{3
     endif
     let @/ = <sid>GetPat(colnr, maxcolnr, '\%('.pat. '\)')
     try
+        " force redraw, so that the search pattern isn't shown
         exe "norm! n\<c-l>"
     catch /^Vim\%((\a\+)\)\=:E486/
         " Pattern not found
@@ -737,8 +738,8 @@ fu! <sid>Columnize(field) "{{{3
     " let width=get(b:col_width,<SID>WColumn()-1,20)
     " is too slow, so we are using:
     let colnr = s:columnize_count % s:max_cols
-    let width=get(b:col_width, colnr, 20)
-    let align='r'
+    let width = get(b:col_width, colnr, 20)
+    let align = 'r'
     if exists('b:csv_arrange_align')
         let align_list=split(get(b:, 'csv_arrange_align', " "), '\zs')
         try
@@ -2236,6 +2237,10 @@ fu! <sid>NrColumns(bang) "{{{3
 endfu
 
 fu! <sid>Tabularize(bang, first, last) "{{{3
+    if match(split(&ft, '\.'),'csv') == -1
+        call <sid>Warn("No CSV filetype, aborting!")
+        return
+    endif
     let _c = winsaveview()
     " Table delimiter definition "{{{4
     if !exists("s:td")
@@ -2311,10 +2316,7 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
         call <sid>Warn('An error occured, aborting!')
         return
     endif
-    if get(b:, 'csv_arrange_leftalign', 0)
-        call map(b:col_width, 'v:val+1')
-    endif
-    if b:delimiter == "\t" && !get(b:, 'csv_arrange_leftalign',0)
+    if getline(a:first)[-1:] isnot? b:delimiter
         let b:col_width[-1] += 1
     endif
     let marginline = s:td.scol. join(map(copy(b:col_width), 'repeat(s:td.hbar, v:val)'), s:td.cros). s:td.ecol
@@ -2339,12 +2341,14 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
         call append(a:first + s:csv_fold_headerline, marginline)
         let adjust_last += 1
     endif
+    " Syntax will be turned off, so disable this part
+    "
     " Adjust headerline to header of new table
-    let b:csv_headerline = (exists('b:csv_headerline')?b:csv_headerline+2:3)
-    call <sid>CheckHeaderLine()
+    "let b:csv_headerline = (exists('b:csv_headerline')?b:csv_headerline+2:3)
+    "call <sid>CheckHeaderLine()
     " Adjust syntax highlighting
-    unlet! b:current_syntax
-    ru syntax/csv.vim
+    "unlet! b:current_syntax
+    "ru syntax/csv.vim
 
     if a:bang
         exe printf('sil %d,%ds/^%s\zs\n/&%s&/e', a:first + s:csv_fold_headerline, a:last + adjust_last,
@@ -2630,7 +2634,7 @@ unlet s:cpo_save
 " Vim Modeline " {{{2
 " vim: set foldmethod=marker et:
 doc/ft-csv.txt	[[[1
-1746
+1751
 *ft-csv.txt*	For Vim version 7.4	Last Change: Thu, 15 Jan 2015
 
 Author:		Christian Brabandt <cb@256bit.org>
@@ -4085,7 +4089,12 @@ Index;Value1;Value2~
   by Giorgio Robino, thanks!)
 - When using |VHeader_CSV| or |Header_CSV| command, check
   number/relativenumber and foldcolumn to make sure, header line is always
-  aligened with main window (suggested by Giorgio Robino, thanks)
+  aligened with main window (suggested by Giorgio Robino, thanks!)
+- hide search pattern, when calling |SearchInColumn_CSV| (suggested by Giorgio
+  Robino, thanks!)
+- compute correct width of marginline for |:CSVTable|
+- do not allow |:CSVTable| command for csv files, that's what the
+  |:CSVTabularize| command is for.
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop
@@ -4548,7 +4557,7 @@ ftdetect/csv.vim	[[[1
 au BufRead,BufNewFile *.csv,*.dat,*.tsv,*.tab set filetype=csv
 
 plugin/csv.vim	[[[1
-86
+93
 if exists('g:loaded_csv') && g:loaded_csv
   finish
 endif
@@ -4576,6 +4585,13 @@ endif
 com! -range -bang -nargs=? CSVTable call <sid>Table(<bang>0, <line1>, <line2>, <q-args>)
 
 fu! <sid>Table(bang, line1, line2, delim)
+    if match(split(&ft, '\.'), 'csv') > -1
+	" Use CSVTabularize command
+	echohl WarningMsg
+	echomsg "For CSV files, use the :CSVTabularize command!"
+	echohl None
+	return
+    endif
     " save and restore some options
     if has("conceal")
 	let _a = [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:cole, &l:cocu, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt, &l:ma, &l:ml]
