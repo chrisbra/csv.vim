@@ -733,8 +733,8 @@ fu! <sid>Columnize(field) "{{{3
     " let width=get(b:col_width,<SID>WColumn()-1,20)
     " is too slow, so we are using:
     let colnr = s:columnize_count % s:max_cols
-    let width=get(b:col_width, colnr, 20)
-    let align='r'
+    let width = get(b:col_width, colnr, 20)
+    let align = 'r'
     if exists('b:csv_arrange_align')
         let align_list=split(get(b:, 'csv_arrange_align', " "), '\zs')
         try
@@ -2311,10 +2311,7 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
         call <sid>Warn('An error occured, aborting!')
         return
     endif
-    if get(b:, 'csv_arrange_leftalign', 0)
-        call map(b:col_width, 'v:val+1')
-    endif
-    if b:delimiter == "\t" && !get(b:, 'csv_arrange_leftalign',0)
+    if getline(a:first)[-1:] isnot? b:delimiter
         let b:col_width[-1] += 1
     endif
     let marginline = s:td.scol. join(map(copy(b:col_width), 'repeat(s:td.hbar, v:val)'), s:td.cros). s:td.ecol
@@ -2339,12 +2336,14 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
         call append(a:first + s:csv_fold_headerline, marginline)
         let adjust_last += 1
     endif
+    " Syntax will be turned off, so disable this part
+    "
     " Adjust headerline to header of new table
-    let b:csv_headerline = (exists('b:csv_headerline')?b:csv_headerline+2:3)
-    call <sid>CheckHeaderLine()
+    "let b:csv_headerline = (exists('b:csv_headerline')?b:csv_headerline+2:3)
+    "call <sid>CheckHeaderLine()
     " Adjust syntax highlighting
-    unlet! b:current_syntax
-    ru syntax/csv.vim
+    "unlet! b:current_syntax
+    "ru syntax/csv.vim
 
     if a:bang
         exe printf('sil %d,%ds/^%s\zs\n/&%s&/e', a:first + s:csv_fold_headerline, a:last + adjust_last,
