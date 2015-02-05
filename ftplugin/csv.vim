@@ -673,6 +673,71 @@ fu! <sid>ArrangeCol(first, last, bang, limit) range "{{{3
     endtry
 endfu
 
+fu! <sid>ArrangeCol_new(first, last, bang, limit) range "{{{3
+    " explicitly give the range as argument to the function
+    if exists("b:csv_fixed_width_cols")
+        " Nothing to do
+        call <sid>Warn("ArrangeColumn does not work with fixed width column!")
+        return
+    endif
+    if a:bang
+        if a:bang
+            " Force recalculating the Column width
+            unlet! b:csv_list b:col_width
+        endif
+    elseif a:limit > -1 && a:limit < getfsize(fnamemodify(bufname(''), ':p'))
+        return
+    endif
+
+    if !exists("b:col_width")
+        " Force recalculation of Column width
+        call <sid>CalculateColumnWidth()
+    endif
+
+    let ro = &ro
+    let lz = &lz
+    if &ro
+       setl noro
+    endif
+    let s:count = 0
+    let _stl  = &stl
+    let s:max   = (a:last - a:first + 1) * len(b:col_width)
+    let s:temp  = 0
+    let i = a:first
+    try
+        while i <= a:last
+            let record = getline(i)
+            " filter comments
+            if record =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+                let i += 1
+                continue
+            endif
+            let fields = split(record, b:col.'\zs')
+            let indx  = 0
+            let new   = []
+            for field in fields
+                let w = get(b:col_width, indx, 20)
+                let align = <sid>GetAlign(indx)
+                let f = <sid>AlignField(field, align, w)
+                call add(new, f)
+                unlet! f
+                let indx += 1
+            endfor
+            unlet! fields record index
+            call <sid>ProgressBar(i, a:last - a:first + 1)
+            call setline(i, join(new, ''))
+            unlet! new
+            let i += 1
+        endw
+    finally
+        " Clean up variables, that were only needed for <sid>Columnize() function
+        unlet! s:columnize_count s:max_cols s:prev_line s:max s:count s:temp s:val
+        let &ro  = ro
+        let &stl = _stl
+        let &lz  = lz
+    endtry
+endfu
+
 fu! <sid>ProgressBar(cnt, max) "{{{3
     if get(g:, 'csv_no_progress', 0)
         return
@@ -683,8 +748,9 @@ fu! <sid>ProgressBar(cnt, max) "{{{3
     endif
     let s:val = a:cnt * width / a:max
     if (s:val > s:temp || a:cnt==1)
-        let &stl='%#DiffAdd#['.repeat('=', s:val).'>'. repeat(' ', width-s:val).']'.
-                \ (width < &columns  ? ' '.100*s:val/width. '%%' : '')
+        let &stl='[%#DiffAdd#'.repeat('=', s:val).'>%#Normal#'. repeat(' ', width-s:val).']'.
+                \ '%#Visual#'. (width < &columns  ? ' '.100*s:val/width. '%%' : '').
+                \ '%#Normal#'
         redrawstatus
         let s:temp = s:val
     endif
@@ -741,54 +807,33 @@ fu! <sid>CalculateColumnWidth() "{{{3
     " this was only necessary for calculating the max width
     unlet! b:csv_list s:columnize_count s:decimal_column
 endfu
-
-fu! <sid>Columnize(field) "{{{3
-    " Internal function, not called from external,
-    " does not work with fixed width columns
-    if !exists("s:columnize_count")
-        let s:columnize_count = 0
-    endif
-
-    if !exists("s:max_cols")
-        let s:max_cols = len(b:col_width)
-    endif
-
-    if exists("s:prev_line") && s:prev_line != line('.')
-        let s:columnize_count = 0
-    endif
-    let s:count+=1
-
-    let s:prev_line = line('.')
-    " convert zero based indexed list to 1 based indexed list,
-    " Default: 20 width, in case that column width isn't defined
-    " Careful: Keep this fast! Using
-    " let width=get(b:col_width,<SID>WColumn()-1,20)
-    " is too slow, so we are using:
-    let colnr = s:columnize_count % s:max_cols
-    let width = get(b:col_width, colnr, 20)
+fu! <sid>GetAlign(colnr) "{{{3
     let align = 'r'
     if exists('b:csv_arrange_align')
         let align_list=split(get(b:, 'csv_arrange_align', " "), '\zs')
         try
-            let align = align_list[colnr]
+            let align = align_list[a:colnr]
         catch
             let align = 'r'
         endtry
     endif
-    if ((align isnot? 'r' && align isnot? 'l' &&
-       \ align isnot? 'c' && align isnot? '.') || get(b:, 'csv_arrange_leftalign', 0))
+    if get(b:, 'csv_arrange_leftalign', 0)
+        let align = 'l'
+    endif
+    if (align isnot? 'r' && align isnot? 'l' && align isnot? 'c' && align isnot? '.')
        let align = 'r'
     endif
-    call <sid>ProgressBar(s:count,s:max)
-
-    let s:columnize_count += 1
+    return align
+endfu
+fu! <sid>AlignField(field, align, width) "{{{3
     let has_delimiter = (a:field[-1:] is? b:delimiter)
-    if align is? 'l'
-        " left-align content
+    let width = a:width
+    if a:align is? 'l'
+        " left-a:align content
         return printf("%-*S%s", width+1 , 
             \ (has_delimiter ? a:field[:-2] : a:field),
             \ (has_delimiter ? b:delimiter : ' '))
-    elseif align is? 'c'
+    elseif a:align is? 'c'
         " center the column
         let t = width - len(split(a:field, '\zs'))
         let leftwidth = t/2
@@ -796,7 +841,7 @@ fu! <sid>Columnize(field) "{{{3
         let rightwidth = (t%2 ? leftwidth+1 : leftwidth)
         let field = (has_delimiter ?  a:field[:-2] : a:field).  repeat(' ', rightwidth)
         return printf("%*S%s", width , field, (has_delimiter ? b:delimiter : ' '))
-    elseif align is? '.'
+    elseif a:align is? '.'
         if !exists("s:decimal_column")
             let s:decimal_column = {}
         endif
@@ -843,8 +888,34 @@ fu! <sid>Columnize(field) "{{{3
         " right align
         return printf("%*S", width+1 ,  a:field)
     endif
-endfun
+endfu
 
+fu! <sid>Columnize(field) "{{{3
+    " Internal function, not called from external,
+    " does not work with fixed width columns
+    if !exists("s:columnize_count")
+        let s:columnize_count = 0
+    endif
+    if !exists("s:max_cols")
+        let s:max_cols = len(b:col_width)
+    endif
+    if exists("s:prev_line") && s:prev_line != line('.')
+        let s:columnize_count = 0
+    endif
+    let s:count+=1
+    let s:prev_line = line('.')
+    " convert zero based indexed list to 1 based indexed list,
+    " Default: 20 width, in case that column width isn't defined
+    " Careful: Keep this fast! Using
+    " let width=get(b:col_width,<SID>WColumn()-1,20)
+    " is too slow, so we are using:
+    let colnr = s:columnize_count % s:max_cols
+    let width = get(b:col_width, colnr, 20)
+    let align = <sid>GetAlign(colnr)
+    let s:columnize_count += 1
+    call <sid>ProgressBar(s:count,s:max)
+    return <sid>AlignField(a:field, align, width)
+endfun
 fu! <sid>GetColPat(colnr, zs_flag) "{{{3
     " Return Pattern for given column
     if a:colnr > 1
@@ -1939,6 +2010,9 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-nargs=? -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("ArrangeColumn",
         \ ':call <sid>ArrangeCol(<line1>, <line2>, <bang>0, -1)',
+        \ '-range -bang')
+    call <sid>LocalCmd("Arrange2Column",
+        \ ':call <sid>ArrangeCol_new(<line1>, <line2>, <bang>0, -1)',
         \ '-range -bang')
     call <sid>LocalCmd("UnArrangeColumn",
         \':call <sid>PrepUnArrangeCol(<line1>, <line2>)',
