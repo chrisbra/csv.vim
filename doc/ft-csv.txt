@@ -209,7 +209,8 @@ If you would like all columns to be visually arranged, you can use the
 Beware, that this will change your file and depending on the size of
 your file may slow down Vim significantly. This is highly experimental.
 :ArrangeCommand will try to vertically align all columns by their maximum
-column size.
+column size. While the command is run, a progressbar in the statusline 'stl'
+will be shown.
 
 Use the bang attribute to force recalculating the column width. This is
 slower, but especially if you have modified the file, this will correctly
@@ -242,6 +243,13 @@ width. Set the variable b:csv_arrange_use_all_rows to 1 to use all records: >
     :let b:csv_arrange_use_all_rows = 1
 <
 (this could however in the worst case lead to a crash).
+
+To disable the statusline progressbar set the variable g:csv_no_progress: >
+
+    :let g:csv_no_progress = 1
+<
+This will disable the progressbar and slightly improve performance (since no
+additional redraws are needed).
 
 Note: this command does not work for fixed width columns |csv-fixedwidth|
 
@@ -1464,6 +1472,7 @@ Index;Value1;Value2~
 - compute correct width of marginline for |:CSVTable|
 - do not allow |:CSVTable| command for csv files, that's what the
   |:CSVTabularize| command is for.
+- add progressbar for the |:CSVArrangeCol| command. 
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop

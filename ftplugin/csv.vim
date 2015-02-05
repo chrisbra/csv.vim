@@ -654,15 +654,40 @@ fu! <sid>ArrangeCol(first, last, bang, limit) range "{{{3
     else
        let ro = 0
     endif
-    exe "sil". a:first . ',' . a:last .'s/' . (b:col) .
-    \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
-    " Clean up variables, that were only needed for <sid>Columnize() function
-    unlet! s:columnize_count s:max_cols s:prev_line
-    if ro
-        setl ro
-        unlet ro
+    let s:count = 0
+    let _stl  = &stl
+    let s:max   = (a:last - a:first + 1) * len(b:col_width)
+    let s:temp  = 0
+    try
+        exe "sil". a:first . ',' . a:last .'s/' . (b:col) .
+        \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
+    finally
+        " Clean up variables, that were only needed for <sid>Columnize() function
+        unlet! s:columnize_count s:max_cols s:prev_line s:max s:count s:temp s:val
+        if ro
+            setl ro
+            unlet ro
+        endif
+        let &stl = _stl
+        call winrestview(cur)
+    endtry
+endfu
+
+fu! <sid>ProgressBar(cnt, max) "{{{3
+    if get(g:, 'csv_no_progress', 0)
+        return
     endif
-    call winrestview(cur)
+    let width = 40 " max width of progressbar
+    if width > &columns
+        let width = &columns
+    endif
+    let s:val = a:cnt * width / a:max
+    if (s:val > s:temp || a:cnt==1)
+        let &stl='%#DiffAdd#['.repeat('=', s:val).'>'. repeat(' ', width-s:val).']'.
+                \ (width < &columns  ? ' '.100*s:val/width. '%%' : '')
+        redrawstatus
+        let s:temp = s:val
+    endif
 endfu
 
 fu! <sid>PrepUnArrangeCol(first, last) "{{{3
@@ -714,9 +739,7 @@ fu! <sid>CalculateColumnWidth() "{{{3
     endtry
     " delete buffer content in variable b:csv_list,
     " this was only necessary for calculating the max width
-    unlet! b:csv_list
-    unlet! s:columnize_count
-    unlet! s:decimal_column
+    unlet! b:csv_list s:columnize_count s:decimal_column
 endfu
 
 fu! <sid>Columnize(field) "{{{3
@@ -733,6 +756,7 @@ fu! <sid>Columnize(field) "{{{3
     if exists("s:prev_line") && s:prev_line != line('.')
         let s:columnize_count = 0
     endif
+    let s:count+=1
 
     let s:prev_line = line('.')
     " convert zero based indexed list to 1 based indexed list,
@@ -755,6 +779,7 @@ fu! <sid>Columnize(field) "{{{3
        \ align isnot? 'c' && align isnot? '.') || get(b:, 'csv_arrange_leftalign', 0))
        let align = 'r'
     endif
+    call <sid>ProgressBar(s:count,s:max)
 
     let s:columnize_count += 1
     let has_delimiter = (a:field[-1:] is? b:delimiter)
