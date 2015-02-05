@@ -757,7 +757,7 @@ fu! <sid>Columnize(field) "{{{3
     endif
 
     let s:columnize_count += 1
-    let has_delimiter = (a:field =~# b:delimiter.'$')
+    let has_delimiter = (a:field[-1:] is? b:delimiter)
     if align is? 'l'
         " left-align content
         return printf("%-*S%s", width+1 , 
