@@ -2,7 +2,7 @@
 UseVimball
 finish
 ftplugin/csv.vim	[[[1
-2630
+2663
 " Filetype plugin for editing CSV files. "{{{1
 " Author:  Christian Brabandt <cb@256bit.org>
 " Version: 0.31
@@ -584,7 +584,15 @@ fu! <sid>ColWidth(colnr) "{{{3
 
     if !exists("b:csv_fixed_width_cols")
         if !exists("b:csv_list")
-            let b:csv_list=getline(1,'$')
+            " only check first 10000 lines, to be faster
+            let last = line('$')
+            if !get(b:, 'csv_arrange_use_all_rows', 0)
+                if last > 10000
+                    let last = 10000
+                    call <sid>Warn('File too large, only checking the first 10000 rows for the width')
+                endif
+            endif
+            let b:csv_list=getline(1,last)
             let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
             call filter(b:csv_list, 'v:val !~ pat')
             call filter(b:csv_list, '!empty(v:val)')
@@ -651,15 +659,40 @@ fu! <sid>ArrangeCol(first, last, bang, limit) range "{{{3
     else
        let ro = 0
     endif
-    exe "sil". a:first . ',' . a:last .'s/' . (b:col) .
-    \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
-    " Clean up variables, that were only needed for <sid>Columnize() function
-    unlet! s:columnize_count s:max_cols s:prev_line
-    if ro
-        setl ro
-        unlet ro
+    let s:count = 0
+    let _stl  = &stl
+    let s:max   = (a:last - a:first + 1) * len(b:col_width)
+    let s:temp  = 0
+    try
+        exe "sil". a:first . ',' . a:last .'s/' . (b:col) .
+        \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
+    finally
+        " Clean up variables, that were only needed for <sid>Columnize() function
+        unlet! s:columnize_count s:max_cols s:prev_line s:max s:count s:temp s:val
+        if ro
+            setl ro
+            unlet ro
+        endif
+        let &stl = _stl
+        call winrestview(cur)
+    endtry
+endfu
+
+fu! <sid>ProgressBar(cnt, max) "{{{3
+    if get(g:, 'csv_no_progress', 0)
+        return
     endif
-    call winrestview(cur)
+    let width = 40 " max width of progressbar
+    if width > &columns
+        let width = &columns
+    endif
+    let s:val = a:cnt * width / a:max
+    if (s:val > s:temp || a:cnt==1)
+        let &stl='%#DiffAdd#['.repeat('=', s:val).'>'. repeat(' ', width-s:val).']'.
+                \ (width < &columns  ? ' '.100*s:val/width. '%%' : '')
+        redrawstatus
+        let s:temp = s:val
+    endif
 endfu
 
 fu! <sid>PrepUnArrangeCol(first, last) "{{{3
@@ -711,9 +744,7 @@ fu! <sid>CalculateColumnWidth() "{{{3
     endtry
     " delete buffer content in variable b:csv_list,
     " this was only necessary for calculating the max width
-    unlet! b:csv_list
-    unlet! s:columnize_count
-    unlet! s:decimal_column
+    unlet! b:csv_list s:columnize_count s:decimal_column
 endfu
 
 fu! <sid>Columnize(field) "{{{3
@@ -730,6 +761,7 @@ fu! <sid>Columnize(field) "{{{3
     if exists("s:prev_line") && s:prev_line != line('.')
         let s:columnize_count = 0
     endif
+    let s:count+=1
 
     let s:prev_line = line('.')
     " convert zero based indexed list to 1 based indexed list,
@@ -752,9 +784,10 @@ fu! <sid>Columnize(field) "{{{3
        \ align isnot? 'c' && align isnot? '.') || get(b:, 'csv_arrange_leftalign', 0))
        let align = 'r'
     endif
+    call <sid>ProgressBar(s:count,s:max)
 
     let s:columnize_count += 1
-    let has_delimiter = (a:field =~# b:delimiter.'$')
+    let has_delimiter = (a:field[-1:] is? b:delimiter)
     if align is? 'l'
         " left-align content
         return printf("%-*S%s", width+1 , 
@@ -2634,7 +2667,7 @@ unlet s:cpo_save
 " Vim Modeline " {{{2
 " vim: set foldmethod=marker et:
 doc/ft-csv.txt	[[[1
-1751
+1766
 *ft-csv.txt*	For Vim version 7.4	Last Change: Thu, 15 Jan 2015
 
 Author:		Christian Brabandt <cb@256bit.org>
@@ -2846,7 +2879,8 @@ If you would like all columns to be visually arranged, you can use the
 Beware, that this will change your file and depending on the size of
 your file may slow down Vim significantly. This is highly experimental.
 :ArrangeCommand will try to vertically align all columns by their maximum
-column size.
+column size. While the command is run, a progressbar in the statusline 'stl'
+will be shown.
 
 Use the bang attribute to force recalculating the column width. This is
 slower, but especially if you have modified the file, this will correctly
@@ -2871,10 +2905,23 @@ aligning might slow down Vim and additionally, if the value is no decimal
 number it will be right aligned).
 
 Note, arranging the columns can be very slow on large files or many columns (see
-|csv-slow| on how to increase performance for this command). To prevent you
-from accidently changing your csv file, the buffer will be set 'readonly'
-afterwards. Note: this command does not work for fixed width columns
-|csv-fixedwidth|
+|csv-slow| on how to increase performance for this command). For large files,
+calculating the column width can take long and take a consierable amount of
+memory. Therefore, the csv plugin will at most check 10.000 lines for the
+width. Set the variable b:csv_arrange_use_all_rows to 1 to use all records: >
+
+    :let b:csv_arrange_use_all_rows = 1
+<
+(this could however in the worst case lead to a crash).
+
+To disable the statusline progressbar set the variable g:csv_no_progress: >
+
+    :let g:csv_no_progress = 1
+<
+This will disable the progressbar and slightly improve performance (since no
+additional redraws are needed).
+
+Note: this command does not work for fixed width columns |csv-fixedwidth|
 
 See also |csv-arrange-autocmd| on how to have vim automaticaly arrange a CSV
 file upon entering it.
@@ -4095,6 +4142,7 @@ Index;Value1;Value2~
 - compute correct width of marginline for |:CSVTable|
 - do not allow |:CSVTable| command for csv files, that's what the
   |:CSVTabularize| command is for.
+- add progressbar for the |:CSVArrangeCol| command. 
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop
