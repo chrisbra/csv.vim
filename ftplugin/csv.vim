@@ -41,7 +41,9 @@ fu! <sid>Warn(mess) "{{{3
     echohl Normal
 endfu
 
-fu! <sid>Init(startline, endline) "{{{3
+fu! <sid>Init(startline, endline, ...) "{{{3
+    " if a:1 is set, keep the b:delimiter
+    let keep = exists("a:1") && a:1
     " Hilight Group for Columns
     if exists("g:csv_hiGroup")
         let s:hiGroup = g:csv_hiGroup
@@ -56,10 +58,12 @@ fu! <sid>Init(startline, endline) "{{{3
     exe "hi link CSVHeaderLine" s:hiHeader
 
     " Determine default Delimiter
-    if !exists("g:csv_delim")
-        let b:delimiter=<SID>GetDelimiter(a:startline, a:endline)
-    else
-        let b:delimiter=g:csv_delim
+    if !keep
+        if !exists("g:csv_delim")
+            let b:delimiter=<SID>GetDelimiter(a:startline, a:endline)
+        else
+            let b:delimiter=g:csv_delim
+        endif
     endif
 
     " Define custom commentstring
@@ -1943,7 +1947,8 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("UnArrangeColumn",
         \':call <sid>PrepUnArrangeCol(<line1>, <line2>)',
         \ '-range')
-    call <sid>LocalCmd("InitCSV", ':call <sid>Init(<line1>,<line2>)', '-range=%')
+    call <sid>LocalCmd("InitCSV", ':call <sid>Init(<line1>,<line2>,<bang>0)',
+        \ '-bang -range=%')
     call <sid>LocalCmd('Header',
         \ ':call <sid>SplitHeaderLine(<q-args>,<bang>0,1)',
         \ '-nargs=? -bang')
