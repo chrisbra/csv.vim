@@ -1503,35 +1503,7 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
         let col = <sid>WColumn()
         let max = <sid>MaxColumns()
         let a   = <sid>GetColumn(line('.'), col)
-
-        if !exists("b:csv_fixed_width")
-            try
-                " strip leading whitespace
-                if (a =~ '\s\+'. b:delimiter . '$')
-                    let b = split(a, '^\s\+\ze[^' . b:delimiter. ']\+')[0]
-                else
-                    let b = a
-                endif
-            catch /^Vim\%((\a\+)\)\=:E684/
-                " empty pattern - should match only empty columns
-                let b = a
-            endtry
-
-            " strip trailing delimiter
-            try
-                let a = split(b, b:delimiter . '$')[0]
-            catch /^Vim\%((\a\+)\)\=:E684/
-                let a = b
-            endtry
-
-            if a == b:delimiter
-                try
-                    let a=repeat(' ', <sid>ColWidth(col))
-                catch
-                    " no-op
-                endtry
-            endif
-        endif
+        let a   = <sid>ProcessFieldValue(a)
 
         " Make a column pattern
         let b= '\%(' .
@@ -1566,6 +1538,38 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
     call winrestview(cpos)
 endfu
 
+fu! <sid>ProcessFieldValue(field) "{{{3
+    let a = a:field
+    if !exists("b:csv_fixed_width")
+        try
+            " strip leading whitespace
+            if (a =~ '\s\+'. b:delimiter . '$')
+                let b = split(a, '^\s\+\ze[^' . b:delimiter. ']\+')[0]
+            else
+                let b = a
+            endif
+        catch /^Vim\%((\a\+)\)\=:E684/
+            " empty pattern - should match only empty columns
+            let b = a
+        endtry
+
+        " strip trailing delimiter
+        try
+            let a = split(b, b:delimiter . '$')[0]
+        catch /^Vim\%((\a\+)\)\=:E684/
+            let a = b
+        endtry
+
+        if a == b:delimiter
+            try
+                let a=repeat(' ', <sid>ColWidth(col))
+            catch
+                " no-op
+            endtry
+        endif
+    endif
+    return a
+endfu
 fu! <sid>OutputFilters(bang) "{{{3
     if !a:bang
         call <sid>CheckHeaderLine()
@@ -1919,6 +1923,8 @@ fu! <sid>CSVMappings() "{{{3
     call <sid>Map('xnoremap', 'af', ':<C-U>call <sid>MoveOver(1)<CR>')
     call <sid>Map('omap', 'af', ':norm vaf<cr>')
     call <sid>Map('omap', 'if', ':norm vif<cr>')
+    call <sid>Map('xnoremap', 'iL', ':<C-U>call <sid>SameFieldRegion()<CR>')
+    call <sid>Map('omap', 'iL', ':<C-U>call <sid>SameFieldRegion()<CR>')
     " Remap <CR> original values to a sane backup
     call <sid>Map('noremap', '<LocalLeader>J', 'J')
     call <sid>Map('noremap', '<LocalLeader>K', 'K')
@@ -2015,14 +2021,14 @@ fu! <sid>Map(map, name, definition, ...) "{{{3
             let unmap = 'ounmap'
         elseif a:map == 'imap'
             let unmap = 'iunmap'
+        elseif a:map == 'xnoremap'
+            let unmap = 'xunmap'
         endif
         let b:undo_ftplugin .= "| " . unmap . " <buffer> " . a:name
     endif
 endfu
 
 fu! <sid>LocalCmd(name, definition, args) "{{{3
-        elseif a:map == 'xnoremap'
-            let unmap = 'xunmap'
     if !exists(':'.a:name)
         exe "com! -buffer " a:args a:name a:definition
         let b:undo_ftplugin .= "| sil! delc " . a:name
@@ -2499,6 +2505,35 @@ fu! <sid>Timeout(start) "{{{3
     return localtime()-a:start < 2
 endfu
 
+fu! <sid>SameFieldRegion() "{{{3
+    " visually select the region, that has the same value in the cursor field
+    let col = <sid>WColumn()
+    let max = <sid>MaxColumns()
+    let field = <sid>GetColumn(line('.'), col)
+    let line = line('.')
+    
+    let limit = [line, line]
+    " Search upwards and downwards from the current position and find the
+    " limit of the current selection
+    while line > 1
+        let line -= 1
+        if <sid>GetColumn(line, col) ==# field
+            let limit[0] = line
+        else
+            break
+        endif
+    endw
+    let line = line('.')
+    while line > 1 && line < line('$')
+        let line += 1
+        if <sid>GetColumn(line, col) ==# field
+            let limit[1] = line
+        else
+            break
+        endif
+    endw
+    exe printf(':norm! %dGV%dG',limit[0],limit[1])
+endfu
 fu! CSV_CloseBuffer(buffer) "{{{3
     " Setup by SetupAutoCmd autocommand
     try

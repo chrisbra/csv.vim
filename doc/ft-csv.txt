@@ -544,12 +544,14 @@ and pressing  'E' again, it would move directly to
 
     |aaa,   bbbb,ccc `
 
+                                                            *csv-textobjects*
 Also, the csv plugin defines these text-object:
 
 if                      Inner Field (contains everything up to the delimiter)
-
 af                      Outer Field (contains everything up to and including
                         the delimiter)
+iL                      Inner Line (visually linewise select all lines, that
+                        has the same value at the cursor's column)
 
 Note, that the <BS>, <CR>, K and J overlap Vim's default mapping for |<CR>|,
 |<BS>|, |J| and |K| respectively. Therefore, this functionality has been
@@ -1478,6 +1480,9 @@ Index;Value1;Value2~
 - |InitCSV| accepts a '!' for keeping the b:delimiter (|csv-delimiter|) variable
   (https://github.com/chrisbra/csv.vim/issues/43 reported by Jeet Sukumaran,
   thanks!)
+- New text-object iL (Inner Line, to visually select the lines that have the
+  same value in the cursor column, as requested at
+  https://github.com/chrisbra/csv.vim/issues/44, thanks justmytwospence!)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop
