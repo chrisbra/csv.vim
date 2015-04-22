@@ -1915,15 +1915,15 @@ fu! <sid>CSVMappings() "{{{3
     call <sid>Map('nnoremap', '<BS>', ':<C-U>call <SID>PrepareFolding(0, 1)<CR>')
     call <sid>Map('imap', '<CR>', '<sid>ColumnMode()', 'expr')
     " Text object: Field
-    call <sid>Map('vnoremap', 'if', ':<C-U>call <sid>MoveOver(0)<CR>')
-    call <sid>Map('vnoremap', 'af', ':<C-U>call <sid>MoveOver(1)<CR>')
+    call <sid>Map('xnoremap', 'if', ':<C-U>call <sid>MoveOver(0)<CR>')
+    call <sid>Map('xnoremap', 'af', ':<C-U>call <sid>MoveOver(1)<CR>')
     call <sid>Map('omap', 'af', ':norm vaf<cr>')
     call <sid>Map('omap', 'if', ':norm vif<cr>')
     " Remap <CR> original values to a sane backup
     call <sid>Map('noremap', '<LocalLeader>J', 'J')
     call <sid>Map('noremap', '<LocalLeader>K', 'K')
-    call <sid>Map('vnoremap', '<LocalLeader>W', 'W')
-    call <sid>Map('vnoremap', '<LocalLeader>E', 'E')
+    call <sid>Map('xnoremap', '<LocalLeader>W', 'W')
+    call <sid>Map('xnoremap', '<LocalLeader>E', 'E')
     call <sid>Map('noremap', '<LocalLeader>H', 'H')
     call <sid>Map('noremap', '<LocalLeader>L', 'L')
     call <sid>Map('nnoremap', '<LocalLeader><CR>', '<CR>')
@@ -2021,6 +2021,8 @@ fu! <sid>Map(map, name, definition, ...) "{{{3
 endfu
 
 fu! <sid>LocalCmd(name, definition, args) "{{{3
+        elseif a:map == 'xnoremap'
+            let unmap = 'xunmap'
     if !exists(':'.a:name)
         exe "com! -buffer " a:args a:name a:definition
         let b:undo_ftplugin .= "| sil! delc " . a:name
