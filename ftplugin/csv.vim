@@ -2497,6 +2497,37 @@ fu! <sid>Timeout(start) "{{{3
     return localtime()-a:start < 2
 endfu
 
+fu! CSV_CloseBuffer(buffer) "{{{3
+    " Setup by SetupAutoCmd autocommand
+    try
+        if bufnr((a:buffer)+0) > -1
+            exe a:buffer. "bw"
+        endif
+    catch /^Vim\%((\a\+)\)\=:E517/	" buffer already wiped
+    " no-op
+    finally
+        augroup CSV_QuitPre
+            au!
+        augroup END
+        augroup! CSV_QuitPre
+    endtry
+endfu
+
+fu! CSV_SetSplitOptions(window) "{{{3
+    if exists("s:local_stl")
+        " local horizontal statusline
+        for opt in items({'&nu': &l:nu, '&rnu': &l:rnu, '&fdc': &fdc})
+            if opt[1] != getwinvar(a:window, opt[0])
+                call setwinvar(a:window, opt[0], opt[1])
+            endif
+        endfor
+        " Check statusline (airline might change it)
+        if getwinvar(a:window, '&l:stl') != s:local_stl
+            call setwinvar(a:window, '&stl', s:local_stl)
+        endif
+    endif
+endfun
+
 " Global functions "{{{2
 fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     " Make sure, the function is called for the correct filetype.
@@ -2602,49 +2633,6 @@ fu! CSVPat(colnr, ...) "{{{3
     return pat
 endfu
 
-fu! CSV_WCol(...) "{{{3
-    try
-        if exists("a:1") && (a:1 == 'Name' || a:1 == 1)
-            return printf("%s", <sid>WColumn(1))
-        else
-            return printf(" %d/%d", <SID>WColumn(), <SID>MaxColumns())
-        endif
-    catch
-        return ''
-    endtry
-endfun
-
-fu! CSV_SetSplitOptions(window) "{{{3
-    if exists("s:local_stl")
-        " local horizontal statusline
-        for opt in items({'&nu': &l:nu, '&rnu': &l:rnu, '&fdc': &fdc})
-            if opt[1] != getwinvar(a:window, opt[0])
-                call setwinvar(a:window, opt[0], opt[1])
-            endif
-        endfor
-        " Check statusline (airline might change it)
-        if getwinvar(a:window, '&l:stl') != s:local_stl
-            call setwinvar(a:window, '&stl', s:local_stl)
-        endif
-    endif
-endfun
-
-fu! CSV_CloseBuffer(buffer) "{{{3
-    " Setup by SetupAutoCmd autocommand
-    try
-        if bufnr((a:buffer)+0) > -1
-            exe a:buffer. "bw"
-        endif
-    catch /^Vim\%((\a\+)\)\=:E517/	" buffer already wiped
-    " no-op
-    finally
-        augroup CSV_QuitPre
-            au!
-        augroup END
-        augroup! CSV_QuitPre
-    endtry
-endfu
-
 fu! CSVSum(col, fmt, first, last) "{{{3
     let first = a:first
     let last  = a:last
@@ -2656,6 +2644,19 @@ fu! CSVSum(col, fmt, first, last) "{{{3
     endif
     return csv#EvalColumn(a:col, '<sid>SumColumn', first, last)
 endfu
+fu! CSV_WCol(...) "{{{3
+    " Needed for airline
+    try
+        if exists("a:1") && (a:1 == 'Name' || a:1 == 1)
+            return printf("%s", <sid>WColumn(1))
+        else
+            return printf(" %d/%d", <SID>WColumn(), <SID>MaxColumns())
+        endif
+    catch
+        return ''
+    endtry
+endfun
+
 " Initialize Plugin "{{{2
 let b:csv_start = exists("b:csv_start") ? b:csv_start : 1
 let b:csv_end   = exists("b:csv_end") ? b:csv_end : line('$')

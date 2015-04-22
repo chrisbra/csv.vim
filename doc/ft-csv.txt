@@ -294,6 +294,8 @@ will delete all columns where the pattern "foobar" matches.
 -----------
 Reinitialize the Plugin. Use this, if you have changed the configuration
 of the plugin (see |csv-configuration| ).
+If you use the bang (!) attribute, it will keep the b:delimiter configuration
+variable.
 
                                                                 *:CSVHeader*
 3.9 Header lines						 *Header_CSV*
@@ -1473,6 +1475,9 @@ Index;Value1;Value2~
 - do not allow |:CSVTable| command for csv files, that's what the
   |:CSVTabularize| command is for.
 - add progressbar for the |:CSVArrangeCol| command. 
+- |InitCSV| accepts a '!' for keeping the b:delimiter (|csv-delimiter|) variable
+  (https://github.com/chrisbra/csv.vim/issues/43 reported by Jeet Sukumaran,
+  thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop
