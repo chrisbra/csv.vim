@@ -575,7 +575,9 @@ fu! <sid>MaxColumns(...) "{{{3
     endif
 endfu
 
-fu! <sid>ColWidth(colnr) "{{{3
+fu! <sid>ColWidth(colnr, ...) "{{{3
+    " if a:1 is given, specifies the row, for which to calculate the width
+    "
     " Return the width of a column
     " Internal function
     let width=20 "Fallback (wild guess)
@@ -585,6 +587,9 @@ fu! <sid>ColWidth(colnr) "{{{3
         if !exists("b:csv_list")
             " only check first 10000 lines, to be faster
             let last = line('$')
+            if exists("a:1")
+                let last = a:1
+            endif
             if !get(b:, 'csv_arrange_use_all_rows', 0)
                 if last > 10000
                     let last = 10000
@@ -628,7 +633,9 @@ fu! <sid>ColWidth(colnr) "{{{3
     endif
 endfu
 
-fu! <sid>ArrangeCol(first, last, bang, limit) range "{{{3
+fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
+    " a:1, optional width parameter of line from which to take the width
+    "
     " explicitly give the range as argument to the function
     if exists("b:csv_fixed_width_cols")
         " Nothing to do
@@ -636,18 +643,17 @@ fu! <sid>ArrangeCol(first, last, bang, limit) range "{{{3
         return
     endif
     let cur=winsaveview()
-    if a:bang
-        if a:bang
-            " Force recalculating the Column width
-            unlet! b:csv_list b:col_width
-        endif
+    if a:bang || exists("a:1")
+        " Force recalculating the Column width
+        unlet! b:csv_list b:col_width
     elseif a:limit > -1 && a:limit < getfsize(fnamemodify(bufname(''), ':p'))
         return
     endif
 
     if !exists("b:col_width")
         " Force recalculation of Column width
-        call <sid>CalculateColumnWidth()
+        let row = exists("a:1") ? a:1 : ''
+        call <sid>CalculateColumnWidth(row)
     endif
 
     if &ro
@@ -727,14 +733,18 @@ fu! <sid>UnArrangeCol(match) "{{{3
     "return substitute(a:match, '^\s\+\ze\S', '', '')
 endfu
 
-fu! <sid>CalculateColumnWidth() "{{{3
+fu! <sid>CalculateColumnWidth(row) "{{{3
     " Internal function, not called from external,
     " does not work with fixed width columns
     let b:col_width=[]
     try
         let s:max_cols=<SID>MaxColumns(line('.'))
         for i in range(1,s:max_cols)
-            call add(b:col_width, <SID>ColWidth(i))
+            if empty(a:row)
+                call add(b:col_width, <SID>ColWidth(i))
+            else
+                call add(b:col_width, <SID>ColWidth(i,a:row))
+            endif
         endfor
     catch /csv:no_col/
         call <sid>Warn("Error: getting Column numbers, aborting!")
@@ -1948,8 +1958,8 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("DeleteColumn", ':call <sid>DeleteColumn(<q-args>)',
         \ '-nargs=? -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("ArrangeColumn",
-        \ ':call <sid>ArrangeCol(<line1>, <line2>, <bang>0, -1)',
-        \ '-range -bang')
+        \ ':call <sid>ArrangeCol(<line1>, <line2>, <bang>0, -1, <q-args>)',
+        \ '-range -bang -nargs=?')
     call <sid>LocalCmd("UnArrangeColumn",
         \':call <sid>PrepUnArrangeCol(<line1>, <line2>)',
         \ '-range')

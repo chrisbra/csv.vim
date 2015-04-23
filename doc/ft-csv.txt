@@ -204,7 +204,7 @@ If you want to automatically highlight a column, see |csv-hicol|
 If you would like all columns to be visually arranged, you can use the
 `:ArrangeColumn` or `:CSVArrangeColumn` command: >
 
-    :[range]ArrangeColumn[!]
+    :[range]ArrangeColumn[!] [<Row>]
 
 Beware, that this will change your file and depending on the size of
 your file may slow down Vim significantly. This is highly experimental.
@@ -217,6 +217,11 @@ slower, but especially if you have modified the file, this will correctly
 calculate the width of each column so that they can be correctly aligned. If
 no column width has been calculated before, the width will be calculated, even
 if the '!' has not been given.
+
+If <Row> is given, will use the Row, to calculate the width, else will
+calculate the maximum of at least the first 10,000 rows to calculate the
+width. The limit of 10,000 is set to speed up the processing and can be
+overriden by setting the "b:csv_arrange_use_all_rows" variable (see below).
 
 If [range] is not given, it defaults to the current line.
 
@@ -1483,6 +1488,9 @@ Index;Value1;Value2~
 - New text-object iL (Inner Line, to visually select the lines that have the
   same value in the cursor column, as requested at
   https://github.com/chrisbra/csv.vim/issues/44, thanks justmytwospence!)
+- |:CSVArrangeColumn| can be given an optional row number and the width will
+  be calculated using that row. (https://github.com/chrisbra/csv.vim/issues/45
+  reported by jchain, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop
