@@ -376,7 +376,9 @@ While this command >
 
 reverses the order based on column 3.
 
-Instead of a column, you can give the flag 'n' to have it sort numerically.
+Instead of a column, you can give the flag 'n' or 'x' to have it sort the
+current column via the numeric or hexadecimal value respectively.
+
 When no column number is given, it will sort by the column, on which the
 cursor is currently.
 
@@ -1491,6 +1493,9 @@ Index;Value1;Value2~
 - |:CSVArrangeColumn| can be given an optional row number and the width will
   be calculated using that row. (https://github.com/chrisbra/csv.vim/issues/45
   reported by jchain, thanks!)
+- Allow for hexadecimal |Sort_CSV|
+  (https://github.com/chrisbra/csv.vim/issues/46, reported by ThomsonTan,
+  thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop

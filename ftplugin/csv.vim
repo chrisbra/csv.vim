@@ -1139,11 +1139,14 @@ fu! <sid>SortList(a1, a2) "{{{3
 endfu
 
 fu! <sid>Sort(bang, line1, line2, colnr) range "{{{3
+" :Sort command
     let wsv=winsaveview()
+    let numeric = 0
+    let hex     = 0
     if a:colnr =~? 'n'
-        let numeric = 1
-    else
-        let numeric = 0
+      let numeric = 1
+    elseif  a:colnr =~? 'x'
+      let hex = 1
     endif
     let col = (empty(a:colnr) || a:colnr !~? '\d\+') ? <sid>WColumn() : a:colnr+0
     if col != 1
@@ -1156,7 +1159,7 @@ fu! <sid>Sort(bang, line1, line2, colnr) range "{{{3
         let pat= '^' . <SID>GetColPat(col,0)
     endif
     exe a:line1. ','. a:line2. "sort". (a:bang ? '!' : '') .
-        \' r ' . (numeric ? 'n' : '') . ' /' . pat . '/'
+        \' r ' . (numeric ? 'n' : '') . (hex ? 'x' : ''). ' /' . pat . '/'
     call winrestview(wsv)
 endfun
 
