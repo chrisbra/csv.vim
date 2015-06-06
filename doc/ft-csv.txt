@@ -376,8 +376,9 @@ While this command >
 
 reverses the order based on column 3.
 
-Instead of a column, you can give the flag 'n' or 'x' to have it sort the
-current column via the numeric or hexadecimal value respectively.
+The column number can be optionally followed by any of the flags [i], [n],
+[x] and [o] for [i]gnoring case, sorting by [n]umeric, he[x]adecimal
+or [o]ctal value.
 
 When no column number is given, it will sort by the column, on which the
 cursor is currently.
@@ -1496,6 +1497,8 @@ Index;Value1;Value2~
 - Allow for hexadecimal |Sort_CSV|
   (https://github.com/chrisbra/csv.vim/issues/46, reported by ThomsonTan,
   thanks!)
+- support all flags for |Sort_CSV| as for the builting |:sort| command (except
+  for "u" and "r")
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop
