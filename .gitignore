@@ -5,6 +5,7 @@ doc/tags
 .*.sw*
 # ignore csv files for tests
 *.csv
+*.txt
 # ignore vimballs
 *.vba
 *-*.vmb
