@@ -128,20 +128,26 @@ fu! <sid>DoHighlight() "{{{3
     hi def link CSVComment Comment
 endfun
 
+fu! <sid>HiLink(name, target) "{{{3
+    if !hlexists(a:name)
+	exe "hi def link" a:name a:target
+    endif
+endfu
+
 fu! <sid>DoSyntaxDefinitions() "{{{3
     syn spell toplevel
 
     " Not really needed
     syn case ignore
 
-    hi def link CSVColumnHeaderOdd  WarningMsg
-    hi def link CSVColumnHeaderEven WarningMsg
+    call <sid>HiLink("CSVColumnHeaderOdd", "WarningMsg")
+    call <sid>HiLink("CSVColumnHeaderEven", "WarningMsg")
     if get(g:, 'csv_no_column_highlight', 0)
-	hi def link CSVColumnOdd	    Normal
-	hi def link CSVColumnEven	    Normal
+	call <sid>HiLink("CSVColumnOdd", "Normal")
+	call <sid>HiLink("CSVColumnEven", "Normal")
     else
-	hi def link CSVColumnOdd	    DiffAdd
-	hi def link CSVColumnEven	    DiffChange
+	call <sid>HiLink("CSVColumnOdd", "DiffAdd")
+	call <sid>HiLink("CSVColumnEven","DiffChange")
     endif
 endfun
 
