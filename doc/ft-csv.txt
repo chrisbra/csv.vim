@@ -1436,6 +1436,10 @@ slow down Vim considerably.
 
 6.5 Syntax error when opening a CSV file               *csv-syntax-error*
 ----------------------------------------
+If you see this error: >
+
+   CSV Syntax:Invalid column pattern, using default pattern \%([^,]*,\|$\)
+<
 This happens usually, when the syntax script is read before the filetype
 plugin, so the plugin did not have a chance to setup the column delimiter
 correctly.
