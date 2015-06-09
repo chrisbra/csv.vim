@@ -1444,8 +1444,9 @@ This happens usually, when the syntax script is read before the filetype
 plugin, so the plugin did not have a chance to setup the column delimiter
 correctly.
 
-The easy way to fix it, is to reverse the order of the :syntax on (|:syn-on|)
-and :filetype plugin (|:filetype-plugin-on|) statements in your |.vimrc|
+The easy way to fix it, is to make sure the :syntax on (|:syn-on|) statement
+comes after the :filetype plugin (|:filetype-plugin-on|) statement in your
+|.vimrc|
 
 Alternatively, you can simply call |InitCSV| and ignore the error.
 
