@@ -1506,6 +1506,9 @@ Index;Value1;Value2~
   for "u" and "r")
 - prevent mapping of <Up> and <Down> in visual mode (reported by naught101 at
   https://github.com/chrisbra/csv.vim/issues/50, thanks!)
+- prevent increasing column width on subsequent call of |:ArrangeColumn_CSV|
+  (reported by naught101 at https://github.com/chrisbra/csv.vim/issues/51,
+  thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop

@@ -611,6 +611,8 @@ fu! <sid>ColWidth(colnr, ...) "{{{3
             " and then return the maximum strlen
             " That could be done in 1 line, but that would look ugly
             "call map(list, 'split(v:val, b:col."\\zs")[a:colnr-1]')
+            " strip leading whitespace
+            call map(tlist, 'substitute(v:val, ''^\s*'', "", "g")')
             call map(tlist, 'substitute(v:val, ".", "x", "g")')
             call map(tlist, 'strlen(v:val)')
             return max(tlist)
@@ -643,7 +645,7 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
         return
     endif
     let cur=winsaveview()
-    if a:bang || exists("a:1")
+    if a:bang || (exists("a:1") && !empty(a:1))
         " Force recalculating the Column width
         unlet! b:csv_list b:col_width
     elseif a:limit > -1 && a:limit < getfsize(fnamemodify(bufname(''), ':p'))
