@@ -1504,6 +1504,8 @@ Index;Value1;Value2~
   thanks!)
 - support all flags for |Sort_CSV| as for the builting |:sort| command (except
   for "u" and "r")
+- prevent mapping of <Up> and <Down> in visual mode (reported by naught101 at
+  https://github.com/chrisbra/csv.vim/issues/50, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop
