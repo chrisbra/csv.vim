@@ -35,6 +35,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.23 Transforming into a table..............|csv-tabularize|
     3.24 Add new empty columns..................|AddColumn_CSV|
     3.25 Substitute in columns..................|Substitute_CSV|
+    3.26 Count values inside a column...........|Count_CSV|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -887,6 +888,19 @@ for every match ('g' flag) and asks for confirmation ('c' flag).
 
 Substitutes in each column starting from the third each number and appends the
 EURO suffix to it.
+
+3.26 Count Values inside a Column      				 *CountCol_CSV*
+---------------------------------
+You can let Vim output the number of values inside a column using the `:CSVCountCol` 
+command >
+
+    :[range]CountCol [nr] [distinct]
+
+This outputs the number of [distinct] values visible in the column [nr]
+If [distinct] is not given, count's all values. Note, header rows and folded
+rows won't be counted.
+
+See also |csv-aggregate-functions|
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
 
@@ -1260,6 +1274,11 @@ Returns the sum for column col. Uses fmt to parse number format (see
 |:CSVSumCol|) startline and endline specify the lines to consider, if empty,
 will be first and last line.
 
+5.5 CSVCount(col, fmt, startline, endline[, distinct])            *CSVCount()*
+------------------------------------------------------
+Returns the count of values for column col. If the optional parameter
+[distinct] is given, only returns the distinct number of values.
+
 ==============================================================================
 6. CSV Tips and Tricks						*csv-tips*
 
@@ -1509,6 +1528,8 @@ Index;Value1;Value2~
 - prevent increasing column width on subsequent call of |:ArrangeColumn_CSV|
   (reported by naught101 at https://github.com/chrisbra/csv.vim/issues/51,
   thanks!)
+- New Count function |CSVCount()| (reported by jungle-booke at
+  https://github.com/chrisbra/csv.vim/issues/49, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop

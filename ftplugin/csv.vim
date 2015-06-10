@@ -1373,6 +1373,16 @@ fu! <sid>SumColumn(list) "{{{3
     endif
 endfu
 
+fu! <sid>CountColumn(list) "{{{3
+    if empty(a:list)
+        return 0
+    elseif has_key(get(s:, 'additional', {}), 'distinct') && s:additional['distinct']
+        return len(uniq(a:list))
+    else
+        return len(a:list)
+    endif
+endfu
+
 fu! <sid>DoForEachColumn(start, stop, bang) range "{{{3
     " Do something for each column,
     " e.g. generate SQL-Statements, convert to HTML,
@@ -1985,6 +1995,9 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("SumCol",
         \ ':echo csv#EvalColumn(<q-args>, "<sid>SumColumn", <line1>,<line2>)',
+        \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd("CountCol",
+        \ ':echo csv#EvalColumn(<q-args>, "<sid>CountColumn", <line1>,<line2>)',
         \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("ConvertData",
         \ ':call <sid>PrepareDoForEachColumn(<line1>,<line2>,<bang>0)',
@@ -2606,6 +2619,7 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
 
     " parse the optional number format
     let format = matchstr(a:nr, '/[^/]*/')
+    let s:additional={}
     call <sid>NumberFormat()
     if !empty(format)
         try
@@ -2625,6 +2639,10 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
                 let s:nr_format[1] = s[1]
             endif
         endtry
+    endif
+    let distinct = matchstr(a:nr, '\<distinct\>')
+    if !empty(distinct)
+      let s:additional.distinct=1
     endif
     try
         let result=call(function(a:func), [column])
@@ -2689,6 +2707,26 @@ fu! CSVSum(col, fmt, first, last) "{{{3
         let last = line('$')
     endif
     return csv#EvalColumn(a:col, '<sid>SumColumn', first, last)
+endfu
+fu! CSVCount(col, fmt, first, last, ...) "{{{3
+    let first = a:first
+    let last  = a:last
+    let distinct = 0
+    if empty(first)
+        let first = 1
+    endif
+    if empty(last)
+        let last = line('$')
+    endif
+    if !exists('s:additional')
+      let s:additional = {}
+    endif
+    if exists("a:1") &&  !empty(a:1)
+      let s:additional['distinct'] = 1
+    endif
+    let result=csv#EvalColumn(a:col, '<sid>CountColumn', first, last, distinct)
+    unlet! s:additional['distinct']
+    return (empty(result) ? 0 : result)
 endfu
 fu! CSV_WCol(...) "{{{3
     " Needed for airline
