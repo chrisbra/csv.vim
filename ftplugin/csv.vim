@@ -16,6 +16,12 @@ fu! <sid>DetermineSID()
 endfu
 call s:DetermineSID()
 delf s:DetermineSID
+let s:numeric_sort = v:version > 704 || v:version == 704 && has("patch341")
+if !s:numeric_sort
+    fu! <sid>MySortValues(i1, i2) "{{{3
+        return (a:i1+0) == (a:i2+0) ? 0 : (a:i1+0) > (a:i2+0) ? 1 : -1
+    endfu
+endif
 
 fu! CSVArrangeCol(first, last, bang, limit) range "{{{2
     if &ft =~? 'csv'
@@ -1725,10 +1731,12 @@ fu! <sid>AnalyzeColumn(...) "{{{3
         let res[item]+=1
     endfor
 
-    let max_items = reverse(sort(values(res)))
+    let max_items = reverse(sort(values(res), s:numeric_sort ? 'n' : 's:MySortValues'))
+    " What about the minimum 5 items?
     let count_items = keys(res)
     if len(max_items) > 5
         call remove(max_items, 5, -1)
+        call map(max_items, 'printf(''\V%s\m'', escape(v:val, ''\\''))')
         call filter(res, 'v:val =~ ''^''.join(max_items, ''\|'').''$''')
     endif
 
@@ -1745,7 +1753,7 @@ fu! <sid>AnalyzeColumn(...) "{{{3
     let i=1
     for val in max_items
         for key in keys(res)
-            if res[key] == val && i <= len(max_items)
+            if res[key] =~ val && i <= len(max_items)
                 if !empty(b:delimiter)
                     let k = substitute(key, b:delimiter . '\?$', '', '')
                 else
