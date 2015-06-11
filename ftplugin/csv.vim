@@ -283,7 +283,7 @@ fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
                 \ '\zs' . a:pat . '\ze$'
         else
             return '\%' . b:csv_fixed_width_cols[-1] .
-                \ 'c\zs' . a:pat . '\ze'
+                \ 'c\zs' . a:pat . '\ze$'
         endif
     else " colnr = 1
         if !exists("b:csv_fixed_width_cols")
@@ -1376,7 +1376,15 @@ fu! <sid>CountColumn(list) "{{{3
     if empty(a:list)
         return 0
     elseif has_key(get(s:, 'additional', {}), 'distinct') && s:additional['distinct']
+      if exists("*uniq")
         return len(uniq(sort(a:list)))
+      else
+        let l = {}
+        for item in a:list
+          let l[item] =  get(l, 'item', 0) + 1
+        endfor
+        return len(keys(l))
+      endif
     else
         return len(a:list)
     endif
