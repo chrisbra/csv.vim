@@ -280,8 +280,7 @@ fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
     elseif a:colnr == a:maxcolnr
         if !exists("b:csv_fixed_width_cols")
             return '^' . <SID>GetColPat(a:colnr - 1,0) .
-                \ '\%([^' . b:delimiter .
-                \ ']\{-}\)\?\zs' . a:pat . '\ze'
+                \ '\zs' . a:pat . '\ze$'
         else
             return '\%' . b:csv_fixed_width_cols[-1] .
                 \ 'c\zs' . a:pat . '\ze'
@@ -1529,6 +1528,7 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
             \ (exists("b:csv_fixed_width") ? '.*' : '') .
             \ <sid>GetPat(col, max, <sid>EscapeValue(a) . '\m') .
             \ '\)'
+"            \ (max == col ? '$' : '') . '\)'
 
         let s:filter_count += 1
         let b:csv_filter[s:filter_count] = { 'pat': b, 'id': s:filter_count,

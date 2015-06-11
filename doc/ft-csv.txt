@@ -1530,6 +1530,7 @@ Index;Value1;Value2~
   thanks!)
 - New Count function |CSVCount()| (reported by jungle-booke at
   https://github.com/chrisbra/csv.vim/issues/49, thanks!)
+- fix pattern generation for last column
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop
