@@ -1377,7 +1377,7 @@ fu! <sid>CountColumn(list) "{{{3
     if empty(a:list)
         return 0
     elseif has_key(get(s:, 'additional', {}), 'distinct') && s:additional['distinct']
-        return len(uniq(a:list))
+        return len(uniq(sort(a:list)))
     else
         return len(a:list)
     endif
