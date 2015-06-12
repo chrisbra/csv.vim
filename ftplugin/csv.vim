@@ -1418,6 +1418,10 @@ fu! <sid>DoForEachColumn(start, stop, bang) range "{{{3
     endif
 
     for item in range(a:start, a:stop, 1)
+        if foldlevel(line)
+          " Filter out folded lines (from dynamic filter)
+          continue
+        endif
         let t = g:csv_convert
         let line = getline(item)
         if line =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
