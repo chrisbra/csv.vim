@@ -1533,6 +1533,10 @@ Index;Value1;Value2~
 - fix pattern generation for last column
 - |ConvertData_CSV| should filter out folded lines (reported by jungle-booke
   at https://github.com/chrisbra/csv.vim/issues/53, thanks!)
+- Make |:CSVTable| ignore folded lines (reported by jungle-booke at 
+  https://github.com/chrisbra/csv.vim/issues/56, thanks!)
+- Better filtering for dynamic filters (reported by jungle-booke at 
+  https://github.com/chrisbra/csv.vim/issues/57, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop
