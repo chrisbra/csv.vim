@@ -2361,6 +2361,10 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
     endif
     let newlines=[]
     while line <= a:last
+        if foldclosed(line) != -1
+            let line = foldclosedend(line)
+            continue
+        endif
         let curline = getline(line)
         if empty(split(curline, b:delimiter))
             " only empty delimiters, add one empty delimiter
