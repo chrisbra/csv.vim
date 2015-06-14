@@ -270,14 +270,14 @@ fu! <sid>DoAutoCommands() "{{{3
     endif
 endfu
 
-fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
+fu! <sid>GetPat(colnr, maxcolnr, pat, allowmore) "{{{3
+    " if a:allowmmore, allows more to match after the pattern
     if a:colnr > 1 && a:colnr < a:maxcolnr
         if !exists("b:csv_fixed_width_cols")
             return '^' . <SID>GetColPat(a:colnr-1,0) . '\%([^' .
                 \ b:delimiter . ']\{-}\)\?\zs' . a:pat . '\ze' .
-                \ '\%([^' . b:delimiter .']\{-}\)\?' .
-                \ b:delimiter . <SID>GetColPat(a:maxcolnr - a:colnr, 0) .
-                \ '$'
+                \ (a:allowmore ? ('\%([^' . b:delimiter .']\{-}\)\?' .
+                \ b:delimiter . <SID>GetColPat(a:maxcolnr - a:colnr, 0). '$') : '')
         else
             return '\%' . b:csv_fixed_width_cols[(a:colnr - 1)] . 'c\zs'
                 \ . a:pat . '.\{-}\ze\%'
@@ -294,8 +294,8 @@ fu! <sid>GetPat(colnr, maxcolnr, pat) "{{{3
     else " colnr = 1
         if !exists("b:csv_fixed_width_cols")
             return '^' . '\%([^' . b:delimiter . ']\{-}\)\?\zs' . a:pat .
-            \ '\ze\%([^' . b:delimiter . ']*\)\?' . b:delimiter .
-            \ <SID>GetColPat(a:maxcolnr -1 , 0) . '$'
+            \ (a:allowmore ? ('\ze\%([^' . b:delimiter . ']*\)\?' . b:delimiter .
+            \ <SID>GetColPat(a:maxcolnr -1 , 0) . '$') : '')
         else
             return a:pat . '\ze.\{-}\%' . b:csv_fixed_width_cols[1] . 'c'
         endif
@@ -345,7 +345,7 @@ fu! <sid>SearchColumn(arg) "{{{3
         call <SID>Warn("There exists no column " . colnr)
         return 1
     endif
-    let @/ = <sid>GetPat(colnr, maxcolnr, '\%('.pat. '\)')
+    let @/ = <sid>GetPat(colnr, maxcolnr, '\%('.pat. '\)', 1)
     try
         " force redraw, so that the search pattern isn't shown
         exe "norm! n\<c-l>"
@@ -1543,13 +1543,13 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
         let max = <sid>MaxColumns()
         let a   = <sid>GetColumn(line('.'), col)
         let a   = <sid>ProcessFieldValue(a)
+        let pat = '\%(^\|'.b:delimiter. '\)\@<='.<sid>EscapeValue(a).
+                 \ '\m\ze\%('.b:delimiter.'\|$\)'
 
         " Make a column pattern
         let b= '\%(' .
             \ (exists("b:csv_fixed_width") ? '.*' : '') .
-            \ <sid>GetPat(col, max, <sid>EscapeValue(a) . '\m') .
-            \ '\)'
-"            \ (max == col ? '$' : '') . '\)'
+            \ <sid>GetPat(col, max, pat, 0) . '\)'
 
         let s:filter_count += 1
         let b:csv_filter[s:filter_count] = { 'pat': b, 'id': s:filter_count,
@@ -1802,7 +1802,7 @@ fu! <sid>Vertfold(bang, col) "{{{3
     else
         let colnr=a:col
     endif
-    let pat=<sid>GetPat(colnr, <sid>MaxColumns(), '.*')
+    let pat=<sid>GetPat(colnr, <sid>MaxColumns(), '.*', 1)
     if exists("b:csv_fixed_width_cols") &&
         \ pat !~ '^\^\.\*'
         " Make the pattern implicitly start at line start,
@@ -2505,7 +2505,7 @@ fu! <sid>SubstituteInColumn(command, line1, line2) range "{{{3
             endw
         else
             for colnr in columns
-                let @/ = <sid>GetPat(colnr, maxcolnr, cmd[1])
+                let @/ = <sid>GetPat(colnr, maxcolnr, cmd[1], 1)
                 while search(@/)
                     exe printf("%d,%ds//%s%s", a:line1, a:line2, cmd[2], (has_flags ? '/'. cmd[3] : ''))
                     if !has_flags || (has_flags && cmd[3] !~# 'g')
@@ -2712,7 +2712,7 @@ fu! CSVPat(colnr, ...) "{{{3
     endif
     " encapsulates GetPat(), that returns the search pattern for a
     " given column and tries to set the cursor at the specific position
-    let pat = <sid>GetPat(a:colnr, <SID>MaxColumns(), a:0 ? a:1 : '.*')
+    let pat = <sid>GetPat(a:colnr, <SID>MaxColumns(), a:0 ? a:1 : '.*', 1)
     "let pos = match(pat, '.*\\ze') + 1
     " Try to set the cursor at the beginning of the pattern
     " does not work
