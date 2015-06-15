@@ -36,6 +36,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.24 Add new empty columns..................|AddColumn_CSV|
     3.25 Substitute in columns..................|Substitute_CSV|
     3.26 Count values inside a column...........|Count_CSV|
+    3.27 Maximum/Minimum values ................|Max_CSV|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -55,7 +56,9 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     5.1 CSVPat()................................|CSVPat()|
     5.2 CSVField()..............................|CSVField()|
     5.3 CSVCol()................................|CSVCol()|
-    5.4 CSVSum()................................|CSVSum()|
+    5.4 CSVCount()..............................|CSVCount()|
+    5.4 CSVMax()................................|CSVMax()|
+    5.4 CSVMin()................................|CSVMin()|
 6. CSV Tips and Tricks..........................|csv-tips|
     6.1 Statusline..............................|csv-stl|
     6.2 Slow CSV plugin.........................|csv-slow|
@@ -434,7 +437,7 @@ given, this calculates the sum for the column the cursor is on. Note, that the
 delimiter will be stripped away from each value and also empty values won't be
 considered.
 
-By default, Vim uses the a numerica format that uses the '.' as decimal
+By default, Vim uses the a numerical format that uses the '.' as decimal
 separator while there is no thousands separator. If youre file contains
 the numbers in a different format, you can use the /format/ option to specify
 a different thousands separator or a different decimal separator. The format
@@ -901,6 +904,45 @@ If [distinct] is not given, count's all values. Note, header rows and folded
 rows won't be counted.
 
 See also |csv-aggregate-functions|
+
+
+                                                                *MinCol_CSV*
+3.27 Maximum/Minimum value of a Column 				*MaxCol_CSV*
+---------------------------------------
+You can let Vim output the 10 maximum/minimum values of a column using the
+`:CSVMaxCol` command >
+
+    :[range]MaxCol [nr] [/format/]
+    :[range]MinCol [nr] [/format/]
+
+This outputs the result of the column <nr> within the range given. If no range
+is given, this will calculate the max value of the whole column. If <nr> is not
+given, this calculates the sum for the column the cursor is on. Note, that the
+delimiter will be stripped away from each value and also empty values won't be
+considered.
+
+By default, Vim uses the a numerical format that uses the '.' as decimal
+separator while there is no thousands separator. If youre file contains
+the numbers in a different format, you can use the /format/ option to specify
+a different thousands separator or a different decimal separator. The format
+needs to be specified like this:
+    /x:y/
+where 'x' defines the thousands separator and y defines the decimal
+separator and each one is optional. This means, that >
+
+    :MaxCol 1 /:,/
+
+uses the default thousands separator and ',' as the decimal separator and >
+
+    :MaxCol 2 / :./
+
+uses the Space as thousands separator and the '.' as decimal separator.
+
+Note, if you Vim is compiled without floating point number format (|+float|),
+Vim will only aggregate the integer part and therefore won't use the 'y'
+argument in the /format/ specifier.
+
+See also |csv-aggregate-functions|
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
 
@@ -1278,6 +1320,14 @@ will be first and last line.
 ------------------------------------------------------
 Returns the count of values for column col. If the optional parameter
 [distinct] is given, only returns the distinct number of values.
+
+5.6 CSVMax(col, fmt, startline, endline)                         *CSVMax()*
+------------------------------------------------------
+Returns the 10 largest values for column col. 
+
+5.7 CSVMin(col, fmt, startline, endline)                         *CSVMin()*
+------------------------------------------------------
+Returns the 10 smallest values for column col. 
 
 ==============================================================================
 6. CSV Tips and Tricks						*csv-tips*

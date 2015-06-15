@@ -18,7 +18,7 @@ call s:DetermineSID()
 delf s:DetermineSID
 let s:numeric_sort = v:version > 704 || v:version == 704 && has("patch341")
 if !s:numeric_sort
-    fu! <sid>MySortValues(i1, i2) "{{{3
+    fu! <sid>CSVSortValues(i1, i2) "{{{3
         return (a:i1+0) == (a:i2+0) ? 0 : (a:i1+0) > (a:i2+0) ? 1 : -1
     endfu
 endif
@@ -504,7 +504,7 @@ fu! <sid>WColumn(...) "{{{3
         let temp=getpos('.')[2]
         let j=1
         let ret = 1
-        for i in sort(b:csv_fixed_width_cols, s:numeric_sort ? 'n' : 's:MySortValues')
+        for i in sort(b:csv_fixed_width_cols, s:numeric_sort ? 'n' : 's:CSVSortValues')
             if temp >= i
                 let ret = j
             endif
@@ -1349,6 +1349,37 @@ fu! <sid>SumColumn(list) "{{{3
         return sum
     endif
 endfu
+fu! <sid>MaxColumn(list) "{{{3
+    " Sum a list of values, but only consider the digits within each value
+    " parses the digits according to the given format (if none has been
+    " specified, assume POSIX format (without thousand separator) If Vim has
+    " does not support floats, simply sum up only the integer part
+    if empty(a:list)
+        return 0
+    else
+        let result = []
+        for item in a:list
+            if empty(item)
+                continue
+            endif
+            let nr = matchstr(item, '-\?\d\(.*\d\)\?$')
+            let format1 = '^-\?\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
+            let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
+            try
+                let nr = substitute(nr, format1, '', '')
+                if has("float") && s:nr_format[1] != '.'
+                    let nr = substitute(nr, format2, '.', '')
+                endif
+            catch
+                let nr = 0
+            endtry
+            call add(result, has("float") ? str2float(nr) : nr+0)
+        endfor
+        let result = sort(result, 's:CSVSortValuesFloat')
+        let ind = len(result) > 9 ? 9 : len(result)
+        return s:additional.ismax ? reverse(result)[:ind] : result[:ind]
+    endif
+endfu
 
 fu! <sid>CountColumn(list) "{{{3
     if empty(a:list)
@@ -1625,6 +1656,11 @@ fu! <sid>SortFilter(a, b) "{{{3
         \ a:a.id > a:b.id ? 1 : -1
 endfu
 
+fu! <sid>CSVSortValuesFloat(i1, i2) "{{{3
+  " only works with +float!
+  return (a:i1+0.0) == (a:i2+0.0) ? 0 : (a:i1+0.0) > (a:i2+0.0) ? 1 : -1
+endfu
+
 fu! <sid>GetColumn(line, col) "{{{3
     " Return Column content at a:line, a:col
     let a=getline(a:line)
@@ -1707,7 +1743,7 @@ fu! <sid>AnalyzeColumn(...) "{{{3
         let res[item]+=1
     endfor
 
-    let max_items = reverse(sort(values(res), s:numeric_sort ? 'n' : 's:MySortValues'))
+    let max_items = reverse(sort(values(res), s:numeric_sort ? 'n' : 's:CSVSortValues'))
     " What about the minimum 5 items?
     let count_items = keys(res)
     if len(max_items) > 5
@@ -1835,8 +1871,8 @@ fu! <sid>InitCSVFixedWidth() "{{{3
     endw
     let b:csv_fixed_width_cols=[]
     let tcc=0
-    let b:csv_fixed_width_cols = sort(keys(Dict), s:numeric_sort ? 'n' : 's:MySortValues')
-    let b:csv_fixed_width = join(sort(keys(Dict), s:numeric_sort ? 'n' : 's:MySortValues'), ',')
+    let b:csv_fixed_width_cols = sort(keys(Dict), s:numeric_sort ? 'n' : 's:CSVSortValues')
+    let b:csv_fixed_width = join(sort(keys(Dict), s:numeric_sort ? 'n' : 's:CSVSortValues'), ',')
     call <sid>Init(1, line('$'))
 
     let &l:cc=_cc
@@ -1987,6 +2023,12 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("SumCol",
         \ ':echo csv#EvalColumn(<q-args>, "<sid>SumColumn", <line1>,<line2>)',
+        \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd("MaxCol",
+        \ ':echo csv#EvalColumn(<q-args>, "<sid>MaxColumn", <line1>,<line2>, 1)',
+        \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd("MinCol",
+        \ ':echo csv#EvalColumn(<q-args>, "<sid>MaxColumn", <line1>,<line2>, 0)',
         \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("CountCol",
         \ ':echo csv#EvalColumn(<q-args>, "<sid>CountColumn", <line1>,<line2>)',
@@ -2591,7 +2633,7 @@ fu! CSV_SetSplitOptions(window) "{{{3
 endfun
 
 " Global functions "{{{2
-fu! csv#EvalColumn(nr, func, first, last) range "{{{3
+fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
     " Make sure, the function is called for the correct filetype.
     if match(split(&ft, '\.'), 'csv') == -1
         call <sid>Warn("File is no CSV file!")
@@ -2646,6 +2688,9 @@ fu! csv#EvalColumn(nr, func, first, last) range "{{{3
     let distinct = matchstr(a:nr, '\<distinct\>')
     if !empty(distinct)
       let s:additional.distinct=1
+    endif
+    if function(a:func) is# function("\<snr>".s:SID."_MaxColumn")
+      let s:additional.ismax = a:1
     endif
     try
         let result=call(function(a:func), [column])
@@ -2710,6 +2755,28 @@ fu! CSVSum(col, fmt, first, last) "{{{3
         let last = line('$')
     endif
     return csv#EvalColumn(a:col, '<sid>SumColumn', first, last)
+endfu
+fu! CSVMax(col, fmt, first, last) "{{{3
+    let first = a:first
+    let last  = a:last
+    if empty(first)
+        let first = 1
+    endif
+    if empty(last)
+        let last = line('$')
+    endif
+    return csv#EvalColumn(a:col, '<sid>MaxColumn', first, last, 1)
+endfu
+fu! CSVMin(col, fmt, first, last) "{{{3
+    let first = a:first
+    let last  = a:last
+    if empty(first)
+        let first = 1
+    endif
+    if empty(last)
+        let last = line('$')
+    endif
+    return csv#EvalColumn(a:col, '<sid>MaxColumn', first, last, 0)
 endfu
 fu! CSVCount(col, fmt, first, last, ...) "{{{3
     let first = a:first
