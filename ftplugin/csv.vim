@@ -1053,7 +1053,7 @@ fu! <sid>MoveCol(forward, line, ...) "{{{3
         let line=line('$')
     endif
     if foldclosed(line) != -1
-        let line = line > line('.') ? foldclosedend(line) : foldclosed(line)
+        let line = line > line('.') ? foldclosedend(line) + 1 : foldclosed(line)
     endif
 
     " Generate search pattern
@@ -2360,12 +2360,14 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
         let b:csv_arrange_leftalign = 1
     endif
     let newlines=[]
+    let content=[]
     while line <= a:last
         if foldclosed(line) != -1
-            let line = foldclosedend(line)
+            let line = foldclosedend(line) + 1
             continue
         endif
         let curline = getline(line)
+        call add(content, curline)
         if empty(split(curline, b:delimiter))
             " only empty delimiters, add one empty delimiter
             " (:NewDelimiter strips trailing delimiter
@@ -2376,6 +2378,11 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
         let line+=1
     endw
     unlet! line
+    let delim=b:delimiter
+    new
+    call setline(1,content)
+    let b:delimiter=delim
+    call <sid>Init(1,line('$'), 1)
     if exists("b:csv_fixed_width_cols")
         let cols=copy(b:csv_fixed_width_cols)
         let pat = join(map(cols, ' ''\(\%''. v:val. ''c\)'' '), '\|')
@@ -2391,7 +2398,7 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
     else
         " don't clear column width variable, might have been set in the
         " plugin!
-        sil call <sid>ArrangeCol(a:first, a:last, 0, -1)
+        sil call <sid>ArrangeCol(1, line('$'), 0, -1)
         if !get(b:, 'csv_arrange_leftalign',0)
             for line in newlines
                 let cline = getline(line)
@@ -2411,24 +2418,24 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
     endif
     let marginline = s:td.scol. join(map(copy(b:col_width), 'repeat(s:td.hbar, v:val)'), s:td.cros). s:td.ecol
 
-    call <sid>NewDelimiter(s:td.vbar, a:first, a:last+adjust_last)
+    call <sid>NewDelimiter(s:td.vbar, 1, line('$'))
     "exe printf('sil %d,%ds/%s/%s/ge', a:first, (a:last+adjust_last),
     "    \ (exists("b:csv_fixed_width_cols") ? pat : b:delimiter ), s:td.vbar)
     " Add vertical bar in first column, if there isn't already one
-    exe printf('sil %d,%ds/%s/%s/e', a:first, a:last+adjust_last,
+    exe printf('sil %d,%ds/%s/%s/e', 1, line('$'),
         \ '^[^'. s:td.vbar. s:td.scol. ']', s:td.vbar.'&')
     " And add a final vertical bar, if there isn't one already
-    exe printf('sil %d,%ds/%s/%s/e', a:first, a:last+adjust_last,
+    exe printf('sil %d,%ds/%s/%s/e', 1, line('$'),
         \ '[^'. s:td.vbar. s:td.ecol. ']$', '&'. s:td.vbar)
     " Make nice intersection graphs
-    let line = split(getline(a:first), s:td.vbar)
+    let line = split(getline(1), s:td.vbar)
     call map(line, 'substitute(v:val, ''[^''.s:td.vbar. '']'', s:td.hbar, ''g'')')
     " Set top and bottom margins
-    call append(a:first-1, s:td.ltop. join(line, s:td.dhor). s:td.rtop)
-    call append(a:last+adjust_last+1, s:td.lbot. join(line, s:td.uhor). s:td.rbot)
+    call append(0, s:td.ltop. join(line, s:td.dhor). s:td.rtop)
+    call append(line('$'), s:td.lbot. join(line, s:td.uhor). s:td.rbot)
 
     if s:csv_fold_headerline > 0
-        call append(a:first + s:csv_fold_headerline, marginline)
+        call append(1 + s:csv_fold_headerline, marginline)
         let adjust_last += 1
     endif
     " Syntax will be turned off, so disable this part
@@ -2441,7 +2448,7 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
     "ru syntax/csv.vim
 
     if a:bang
-        exe printf('sil %d,%ds/^%s\zs\n/&%s&/e', a:first + s:csv_fold_headerline, a:last + adjust_last,
+        exe printf('sil %d,%ds/^%s\zs\n/&%s&/e', 1 + s:csv_fold_headerline, line('$') + adjust_last,
                     \ '[^'.s:td.scol. '][^'.s:td.hbar.'].*', marginline)
     endif
 
