@@ -531,7 +531,7 @@ fu! <sid>WColumn(...) "{{{3
         let temp=getpos('.')[2]
         let j=1
         let ret = 1
-        for i in sort(b:csv_fixed_width_cols, "<sid>SortList")
+        for i in sort(b:csv_fixed_width_cols, s:numeric_sort ? 'n' : 's:MySortValues')
             if temp >= i
                 let ret = j
             endif
@@ -1143,10 +1143,6 @@ endfun
 fu! <sid>SortComplete(A,L,P) "{{{3
     return join(range(1,<sid>MaxColumns()),"\n")
 endfun
-
-fu! <sid>SortList(a1, a2) "{{{3
-    return a:a1+0 == a:a2+0 ? 0 : a:a1+0 > a:a2+0 ? 1 : -1
-endfu
 
 fu! <sid>Sort(bang, line1, line2, colnr) range "{{{3
 " :Sort command
@@ -1866,8 +1862,8 @@ fu! <sid>InitCSVFixedWidth() "{{{3
     endw
     let b:csv_fixed_width_cols=[]
     let tcc=0
-    let b:csv_fixed_width_cols = sort(keys(Dict), "<sid>SortList")
-    let b:csv_fixed_width = join(sort(keys(Dict), "<sid>SortList"), ',')
+    let b:csv_fixed_width_cols = sort(keys(Dict), s:numeric_sort ? 'n' : 's:MySortValues')
+    let b:csv_fixed_width = join(sort(keys(Dict), s:numeric_sort ? 'n' : 's:MySortValues'), ',')
     call <sid>Init(1, line('$'))
 
     let &l:cc=_cc
