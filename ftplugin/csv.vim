@@ -166,33 +166,6 @@ fu! <sid>Init(startline, endline, ...) "{{{3
  " disabled currently, because otherwise when switching ft
  "          I think, all functions need to be read in again and this
  "          costs time.
- "
- " let b:undo_ftplugin .= "| delf <sid>Warn | delf <sid>Init |
- " \ delf <sid>GetPat | delf <sid>SearchColumn | delf <sid>DelColumn |
- " \ delf <sid>HiCol | delf <sid>GetDelimiter | delf <sid>WColumn |
- " \ delf <sid>MaxColumns | delf <sid>ColWidth | delf <sid>ArCol |
- " \ delf <sid>PrepUnArCol | delf <sid>UnArCol |
- " \ delf <sid>CalculateColumnWidth | delf <sid>Columnize |
- " \ delf <sid>GetColPat | delf <sid>SplitHeaderLine |
- " \ delf <sid>SplitHeaderToggle | delf <sid>MoveCol |
- " \ delf <sid>SortComplete | delf <sid>SortList | delf <sid>Sort |
- " \ delf CSV_WCol | delf <sid>CopyCol | delf <sid>MoveColumn |
- " \ delf <sid>SumColumn csv#EvalColumn | delf <sid>DoForEachColumn |
- " \ delf <sid>PrepareDoForEachColumn | delf <sid>CSVMappings |
- " \ delf <sid>Map | delf <sid>EscapeValue | delf <sid>FoldValue |
- " \ delf <sid>PrepareFolding | delf <sid>OutputFilters |
- " \ delf <sid>SortFilter | delf <sid>GetColumn |
- " \ delf <sid>RemoveLastItem | delf <sid>DisableFolding |
- " \ delf <sid>CheckHeaderLine |
- " \ delf <sid>AnalyzeColumn | delf <sid>Vertfold |
- " \ delf <sid>InitCSVFixedWidth | delf <sid>LocalCmd |
- " \ delf <sid>CommandDefinitions | delf <sid>NumberFormat |
- " \ delf <sid>NewRecord | delf <sid>MoveOver | delf <sid>Menu |
- " \ delf <sid>NewDelimiter | delf <sid>DuplicateRows | delf <sid>IN |
- " \ delf <sid>SaveOptions | delf <sid>CheckDuplicates |
- " \ delf <sid>CompleteColumnNr | delf <sid>CSVPat | delf <sid>Transpose |
- " \ delf <sid>LocalSettings() | delf <sid>AddColumn | delf <sid>SubstituteInColumn
- " \ delf <sid>SetupAutoCmd() | delf CSV_CloseBuffer
 endfu
 
 fu! <sid>LocalSettings(type) "{{{3
