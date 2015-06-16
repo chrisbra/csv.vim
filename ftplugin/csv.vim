@@ -1375,7 +1375,7 @@ fu! <sid>MaxColumn(list) "{{{3
             endtry
             call add(result, has("float") ? str2float(nr) : nr+0)
         endfor
-        let result = sort(result, 's:CSVSortValuesFloat')
+        let result = sort(result, s:numeric_sort ? 'n' : 's:CSVSortValues')
         let ind = len(result) > 9 ? 9 : len(result)
         return s:additional.ismax ? reverse(result)[:ind] : result[:ind]
     endif
@@ -1654,11 +1654,6 @@ endfu
 fu! <sid>SortFilter(a, b) "{{{3
     return a:a.id == a:b.id ? 0 :
         \ a:a.id > a:b.id ? 1 : -1
-endfu
-
-fu! <sid>CSVSortValuesFloat(i1, i2) "{{{3
-  " only works with +float!
-  return (a:i1+0.0) == (a:i2+0.0) ? 0 : (a:i1+0.0) > (a:i2+0.0) ? 1 : -1
 endfu
 
 fu! <sid>GetColumn(line, col) "{{{3
