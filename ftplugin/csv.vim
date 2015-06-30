@@ -707,11 +707,12 @@ endfu
 
 fu! <sid>UnArrangeCol(match) "{{{3
     " Strip leading white space, also trims empty records:
-    if get(b:, 'csv_arrange_leftalign',0)
-        return substitute(a:match, '\s\+\ze'. b:delimiter. '\?$', '', '')
-    else
-        return substitute(a:match, '^\s\+', '', '')
-    endif
+    "if get(b:, 'csv_arrange_leftalign',0)
+    "    return substitute(a:match, '\s\+\ze'. b:delimiter. '\?$', '', '')
+    "else
+    "    return substitute(a:match, '^\s\+', '', '')
+    "endif
+    return substitute(a:match, '\%(^\s\+\)\|\%(\s\+\ze'.b:delimiter. '\?$\)', '', 'g')
     " only strip leading white space, if a non-white space follows:
     "return substitute(a:match, '^\s\+\ze\S', '', '')
 endfu

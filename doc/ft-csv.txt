@@ -36,7 +36,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.24 Add new empty columns..................|AddColumn_CSV|
     3.25 Substitute in columns..................|Substitute_CSV|
     3.26 Count values inside a column...........|Count_CSV|
-    3.27 Maximum/Minimum values ................|Max_CSV|
+    3.27 Maximum/Minimum values ................|MaxCol_CSV|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -1587,6 +1587,10 @@ Index;Value1;Value2~
   https://github.com/chrisbra/csv.vim/issues/56, thanks!)
 - Better filtering for dynamic filters (reported by jungle-booke at 
   https://github.com/chrisbra/csv.vim/issues/57, thanks!)
+- Implement a |MaxCol_CSV| and |MinCol_CSV| command (reported by jungle-booke at 
+  https://github.com/chrisbra/csv.vim/issues/60, thanks!)
+- Make |UnArrangeColumn_CSV| strip leading and trailing whitespace (reported
+  by SuperFluffy at https://github.com/chrisbra/csv.vim/issues/62, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - fix that H on the very first cell, results in an endless loop
