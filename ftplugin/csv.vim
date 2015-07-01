@@ -587,13 +587,7 @@ fu! <sid>ColWidth(colnr, ...) "{{{3
             for item in b:csv_list
                 call add(tlist, item[a:colnr-1])
             endfor
-            " we have a list of the first 10 rows
-            " Now transform it to a list of field a:colnr
-            " and then return the maximum strlen
-            " That could be done in 1 line, but that would look ugly
-            "call map(list, 'split(v:val, b:col."\\zs")[a:colnr-1]')
             " do not strip leading whitespace
-            " call map(tlist, 'substitute(v:val, ''^\s*'', "", "g")')
             call map(tlist, 'substitute(v:val, ".", "x", "g")')
             call map(tlist, 'strlen(v:val)')
             return max(tlist)
@@ -707,14 +701,7 @@ endfu
 
 fu! <sid>UnArrangeCol(match) "{{{3
     " Strip leading white space, also trims empty records:
-    "if get(b:, 'csv_arrange_leftalign',0)
-    "    return substitute(a:match, '\s\+\ze'. b:delimiter. '\?$', '', '')
-    "else
-    "    return substitute(a:match, '^\s\+', '', '')
-    "endif
     return substitute(a:match, '\%(^\s\+\)\|\%(\s\+\ze'.b:delimiter. '\?$\)', '', 'g')
-    " only strip leading white space, if a non-white space follows:
-    "return substitute(a:match, '^\s\+\ze\S', '', '')
 endfu
 
 fu! <sid>CalculateColumnWidth(row) "{{{3
