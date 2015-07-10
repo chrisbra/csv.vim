@@ -585,7 +585,7 @@ fu! <sid>ColWidth(colnr, ...) "{{{3
         endif
         try
             for item in b:csv_list
-                call add(tlist, item[a:colnr-1])
+                call add(tlist, get(item, a:colnr-1, ''))
             endfor
             " do not strip leading whitespace
             call map(tlist, 'substitute(v:val, ".", "x", "g")')
