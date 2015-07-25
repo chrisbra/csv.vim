@@ -1591,8 +1591,13 @@ Index;Value1;Value2~
   https://github.com/chrisbra/csv.vim/issues/60, thanks!)
 - Make |UnArrangeColumn_CSV| strip leading and trailing whitespace (reported
   by SuperFluffy at https://github.com/chrisbra/csv.vim/issues/62, thanks!)
+- Do not sort headerlines (reported by jungle-booke at https://github.com/chrisbra/csv.vim/issues/63,
+  thanks!)
+- Do not error out in |:ArrangeCol| command, if line does not have that many
+  columns (reported by SuperFluffy at https://github.com/chrisbra/csv.vim/issues/64, thanks)
 
 0.31 Jan 15, 2015 {{{1
+- supports for Vim 7.3 dropped
 - fix that H on the very first cell, results in an endless loop
   (https://github.com/chrisbra/csv.vim/issues/31, reported by lahvak, thanks!)
 - fix that count for |AddColumn| did not work (according to the documentation)
