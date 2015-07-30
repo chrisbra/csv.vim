@@ -10,7 +10,14 @@
 " Some ideas are taken from the wiki http://vim.wikia.com/wiki/VimTip667
 " though, implementation differs.
 
-" Plugin folklore "{{{2
+" Plugin folklore "{{{1
+if v:version < 700 || exists('b:did_ftplugin')
+  finish
+endif
+let b:did_ftplugin = 1
+
+let s:cpo_save = &cpo
+set cpo&vim
 fu! <sid>DetermineSID()
     let s:SID = matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_DetermineSID$')
 endfu
@@ -22,7 +29,6 @@ if !s:csv_numeric_sort "{{{2
     return (a:i1+0) == (a:i2+0) ? 0 : (a:i1+0) > (a:i2+0) ? 1 : -1
   endfu
 endif
-
 if !exists("##OptionSet") "{{{2
   " No OptionSet autocommands
   fu! CSV_SetSplitOptions(window) "{{{3
@@ -40,7 +46,7 @@ if !exists("##OptionSet") "{{{2
       endif
   endfun
 endif
-
+" Function definitions: "{{{1
 fu! CSVArrangeCol(first, last, bang, limit) range "{{{2
     if &ft =~? 'csv'
         call <sid>ArrangeCol(a:first, a:last, a:bang, a:limit)
@@ -49,15 +55,6 @@ fu! CSVArrangeCol(first, last, bang, limit) range "{{{2
     endif
 endfu
 
-if v:version < 700 || exists('b:did_ftplugin')
-  finish
-endif
-let b:did_ftplugin = 1
-
-let s:cpo_save = &cpo
-set cpo&vim
-
-" Function definitions: "{{{2
 " Script specific functions "{{{2
 fu! <sid>Warn(mess) "{{{3
     echohl WarningMsg
