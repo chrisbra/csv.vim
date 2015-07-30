@@ -871,7 +871,8 @@ fu! <sid>SetupAutoCmd(window,bufnr) "{{{3
     aug END
 endfu
 fu! <sid>CSV_SetOption(csvfile, header, option, value) "{{{3
-  if getbufvar(a:csvfile, 'csv_SplitWindow')
+  " only trigger if the option is called in the correct buffer
+  if getbufvar(a:csvfile, 'csv_SplitWindow') && bufnr('') == a:csvfile
     call setbufvar(a:header, '&'.a:option, a:value)
   endif
 endfu
@@ -959,15 +960,20 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
         if !exists("b:csv_SplitWindow")
             return
         endif
-        exe b:csv_SplitWindow . "wincmd w"
-        if exists("_stl")
-            let &l:stl = _stl
-        endif
-        if exists("_sbo")
-            let &sbo = _sbo
-        endif
-        setl noscrollbind nocursorbind
         try
+          let winnr = winnr()
+          if winnr == b:csv_SplitWindow || winbufnr(b:csv_SplitWindow) == bufnr('')
+            " window already closed
+            return
+          endif
+          exe b:csv_SplitWindow . "wincmd w"
+          if exists("_stl")
+              let &l:stl = _stl
+          endif
+          if exists("_sbo")
+              let &sbo = _sbo
+          endif
+          setl noscrollbind nocursorbind
           call CSV_CloseBuffer(bufnr('%'))
         catch /^Vim\%((\a\+)\)\=:E444/	" cannot close last window
         catch /^Vim\%((\a\+)\)\=:E517/	" buffer already wiped
