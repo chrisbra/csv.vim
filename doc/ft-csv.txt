@@ -1595,6 +1595,7 @@ Index;Value1;Value2~
   thanks!)
 - Do not error out in |:ArrangeCol| command, if line does not have that many
   columns (reported by SuperFluffy at https://github.com/chrisbra/csv.vim/issues/64, thanks)
+- Use |OptionSet|autocommand to adjust window for |CSV_Header| command
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped

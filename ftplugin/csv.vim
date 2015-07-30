@@ -16,11 +16,29 @@ fu! <sid>DetermineSID()
 endfu
 call s:DetermineSID()
 delf s:DetermineSID
-let s:numeric_sort = v:version > 704 || v:version == 704 && has("patch341")
-if !s:numeric_sort
-    fu! <sid>CSVSortValues(i1, i2) "{{{3
-        return (a:i1+0) == (a:i2+0) ? 0 : (a:i1+0) > (a:i2+0) ? 1 : -1
-    endfu
+let s:csv_numeric_sort = v:version > 704 || v:version == 704 && has("patch341")
+if !s:csv_numeric_sort "{{{2
+  fu! <sid>CSVSortValues(i1, i2) "{{{3
+    return (a:i1+0) == (a:i2+0) ? 0 : (a:i1+0) > (a:i2+0) ? 1 : -1
+  endfu
+endif
+
+if !exists("##OptionSet") "{{{2
+  " No OptionSet autocommands
+  fu! CSV_SetSplitOptions(window) "{{{3
+      if exists("s:local_stl")
+          " local horizontal statusline
+          for opt in items({'&nu': &l:nu, '&rnu': &l:rnu, '&fdc': &fdc})
+              if opt[1] != getwinvar(a:window, opt[0])
+                  call setwinvar(a:window, opt[0], opt[1])
+              endif
+          endfor
+          " Check statusline (airline might change it)
+          if getwinvar(a:window, '&l:stl') != s:local_stl
+              call setwinvar(a:window, '&stl', s:local_stl)
+          endif
+      endif
+  endfun
 endif
 
 fu! CSVArrangeCol(first, last, bang, limit) range "{{{2
@@ -504,7 +522,7 @@ fu! <sid>WColumn(...) "{{{3
         let temp=getpos('.')[2]
         let j=1
         let ret = 1
-        for i in sort(b:csv_fixed_width_cols, s:numeric_sort ? 'n' : 's:CSVSortValues')
+        for i in sort(b:csv_fixed_width_cols, s:csv_numeric_sort ? 'n' : 's:CSVSortValues')
             if temp >= i
                 let ret = j
             endif
@@ -860,8 +878,18 @@ fu! <sid>SetupAutoCmd(window,bufnr) "{{{3
     aug CSV_QuitPre
         au!
         exe "au QuitPre * call CSV_CloseBuffer(".winbufnr(a:window).")"
-        exe "au CursorHold <buffer=".a:bufnr."> call CSV_SetSplitOptions(".a:window.")"
+        if !exists("##OptionSet")
+          exe "au CursorHold <buffer=".a:bufnr."> call CSV_SetSplitOptions(".a:window.")"
+        else
+          exe "au OptionSet foldcolumn,number,relativenumber call <sid>CSV_SetOption(".a:bufnr.
+            \ ", ".bufnr('%').", expand('<amatch>'), v:option_new)"
+        endif
     aug END
+endfu
+fu! <sid>CSV_SetOption(csvfile, header, option, value) "{{{3
+  if getbufvar(a:csvfile, 'csv_SplitWindow')
+    call setbufvar(a:header, '&'.a:option, a:value)
+  endif
 endfu
 
 fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
@@ -957,17 +985,17 @@ fu! <sid>SplitHeaderLine(lines, bang, hor) "{{{3
         endif
         setl noscrollbind nocursorbind
         try
-            noa wincmd c
+          call CSV_CloseBuffer(bufnr('%'))
         catch /^Vim\%((\a\+)\)\=:E444/	" cannot close last window
         catch /^Vim\%((\a\+)\)\=:E517/	" buffer already wiped
             " no-op
+        finally
+          unlet! b:csv_SplitWindow
+          aug CSV_Preview
+              au!
+          aug END
+          aug! CSV_Preview
         endtry
-        "pclose!
-        unlet! b:csv_SplitWindow
-        aug CSV_Preview
-            au!
-        aug END
-        aug! CSV_Preview
     endif
 endfu
 
@@ -1372,7 +1400,7 @@ fu! <sid>MaxColumn(list) "{{{3
             endtry
             call add(result, has("float") ? str2float(nr) : nr+0)
         endfor
-        let result = sort(result, s:numeric_sort ? 'n' : 's:CSVSortValues')
+        let result = sort(result, s:csv_numeric_sort ? 'n' : 's:CSVSortValues')
         let ind = len(result) > 9 ? 9 : len(result)
         return s:additional.ismax ? reverse(result)[:ind] : result[:ind]
     endif
@@ -1735,7 +1763,7 @@ fu! <sid>AnalyzeColumn(...) "{{{3
         let res[item]+=1
     endfor
 
-    let max_items = reverse(sort(values(res), s:numeric_sort ? 'n' : 's:CSVSortValues'))
+    let max_items = reverse(sort(values(res), s:csv_numeric_sort ? 'n' : 's:CSVSortValues'))
     " What about the minimum 5 items?
     let count_items = keys(res)
     if len(max_items) > 5
@@ -1863,8 +1891,8 @@ fu! <sid>InitCSVFixedWidth() "{{{3
     endw
     let b:csv_fixed_width_cols=[]
     let tcc=0
-    let b:csv_fixed_width_cols = sort(keys(Dict), s:numeric_sort ? 'n' : 's:CSVSortValues')
-    let b:csv_fixed_width = join(sort(keys(Dict), s:numeric_sort ? 'n' : 's:CSVSortValues'), ',')
+    let b:csv_fixed_width_cols = sort(keys(Dict), s:csv_numeric_sort ? 'n' : 's:CSVSortValues')
+    let b:csv_fixed_width = join(sort(keys(Dict), s:csv_numeric_sort ? 'n' : 's:CSVSortValues'), ',')
     call <sid>Init(1, line('$'))
 
     let &l:cc=_cc
@@ -2608,21 +2636,6 @@ fu! CSV_CloseBuffer(buffer) "{{{3
         augroup! CSV_QuitPre
     endtry
 endfu
-
-fu! CSV_SetSplitOptions(window) "{{{3
-    if exists("s:local_stl")
-        " local horizontal statusline
-        for opt in items({'&nu': &l:nu, '&rnu': &l:rnu, '&fdc': &fdc})
-            if opt[1] != getwinvar(a:window, opt[0])
-                call setwinvar(a:window, opt[0], opt[1])
-            endif
-        endfor
-        " Check statusline (airline might change it)
-        if getwinvar(a:window, '&l:stl') != s:local_stl
-            call setwinvar(a:window, '&stl', s:local_stl)
-        endif
-    endif
-endfun
 
 " Global functions "{{{2
 fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
