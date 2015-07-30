@@ -242,6 +242,9 @@ Will left-align the first column, center align the second column, decimal
 align the third column and all following columns right align. (Note: decimal
 aligning might slow down Vim and additionally, if the value is no decimal
 number it will be right aligned).
+If you change the alignment parameter, you need to use the "!" attribute, the
+next time you run the |:ArrangeCol| command, otherwise for performance
+reasons, it won't be considered.
 
 Note, arranging the columns can be very slow on large files or many columns (see
 |csv-slow| on how to increase performance for this command). For large files,
@@ -1596,6 +1599,8 @@ Index;Value1;Value2~
 - Do not error out in |:ArrangeCol| command, if line does not have that many
   columns (reported by SuperFluffy at https://github.com/chrisbra/csv.vim/issues/64, thanks)
 - Use |OptionSet|autocommand to adjust window for |CSV_Header| command
+- when doing |:ArrangeCol| with bang attribute, unarrange first, so that if
+  the alignment changed, it will be adjusted accordingly
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped

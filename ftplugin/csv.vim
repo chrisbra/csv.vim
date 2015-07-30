@@ -625,6 +625,11 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
     endif
     let cur=winsaveview()
     if a:bang || (exists("a:1") && !empty(a:1))
+        if a:bang && exists("b:col_width")
+          " Unarrange, so that if csv_arrange_align has changed
+          " it will be adjusted automaticaly
+          call <sid>PrepUnArrangeCol(a:first, a:last)
+        endif
         " Force recalculating the Column width
         unlet! b:csv_list b:col_width
     elseif a:limit > -1 && a:limit < getfsize(fnamemodify(bufname(''), ':p'))
