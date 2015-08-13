@@ -915,8 +915,8 @@ See also |csv-aggregate-functions|
 You can let Vim output the 10 maximum/minimum values of a column using the
 `:CSVMaxCol` command >
 
-    :[range]MaxCol [nr] [/format/]
-    :[range]MinCol [nr] [/format/]
+    :[range]MaxCol [nr][distinct] [/format/]
+    :[range]MinCol [nr][distinct] [/format/]
 
 This outputs the result of the column <nr> within the range given. If no range
 is given, this will calculate the max value of the whole column. If <nr> is not
@@ -940,6 +940,8 @@ uses the default thousands separator and ',' as the decimal separator and >
     :MaxCol 2 / :./
 
 uses the Space as thousands separator and the '.' as decimal separator.
+
+If [distinct] is given, only returns the number of distinct values.
 
 Note, if you Vim is compiled without floating point number format (|+float|),
 Vim will only aggregate the integer part and therefore won't use the 'y'
@@ -1601,6 +1603,8 @@ Index;Value1;Value2~
 - Use |OptionSet|autocommand to adjust window for |CSV_Header| command
 - when doing |:ArrangeCol| with bang attribute, unarrange first, so that if
   the alignment changed, it will be adjusted accordingly
+- Allow distinct keyword for |MaxCol_CSV| and |MinCol_CSV| command (reported
+  by jungle-boogie at https://github.com/chrisbra/csv.vim/issues/67, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped

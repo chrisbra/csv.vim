@@ -1380,6 +1380,17 @@ fu! <sid>MaxColumn(list) "{{{3
         endfor
         let result = sort(result, s:csv_numeric_sort ? 'n' : 's:CSVSortValues')
         let ind = len(result) > 9 ? 9 : len(result)
+        if has_key(get(s:, 'additional', {}), 'distinct') && s:additional['distinct']
+          if exists("*uniq")
+            let result=uniq(result)
+          else
+            let l = {}
+            for item in result
+              let l[item] = get(l, 'item', 0)
+            endfor
+            let result = keys(l)
+          endif
+        endif
         return s:additional.ismax ? reverse(result)[:ind] : result[:ind]
     endif
 endfu
