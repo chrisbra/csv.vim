@@ -522,20 +522,12 @@ fu! <sid>WColumn(...) "{{{3
     return ret
 endfu
 fu! <sid>MaxColumns(...) "{{{3
-    if exists("a:0") && a:0 == 1
-        let this_col = 1
-    else
-        let this_col = 0
-    endif
+    let this_col = exists("a:1")
     "return maximum number of columns in first 10 lines
     if !exists("b:csv_fixed_width_cols")
-        if this_col
-            let i = a:1
-        else
-            let i = 1
-        endif
+      let i = this_col ? a:1 : 1
         while 1
-            let l = getline(i, i+10)
+            let l = getline(i, (this_col ? i : i+10))
 
             " Filter comments out
             let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
@@ -2298,16 +2290,12 @@ fu! <sid>Transpose(line1, line2) "{{{3
     call winrestview(_wsv)
 endfu
 fu! <sid>NrColumns(bang) "{{{3
-    if !empty(a:bang)
-        try
-            let cols = <sid>MaxColumns(line('.'))
-        catch
-            " No column or comment line
-            call <sid>Warn("No valid CSV Column!")
-        endtry
-    else
-        let cols = <sid>MaxColumns()
-    endif
+      try
+          let cols = empty(a:bang) ? <sid>MaxColumns() : <sid>MaxColumns(line('.'))
+      catch
+          " No column or comment line
+          call <sid>Warn("No valid CSV Column!")
+      endtry
     echo cols
 endfu
 fu! <sid>Tabularize(bang, first, last) "{{{3
