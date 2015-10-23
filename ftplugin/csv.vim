@@ -766,7 +766,7 @@ fu! <sid>Columnize(field) "{{{3
     let has_delimiter = (a:field[-1:] is? b:delimiter)
     if align is? 'l'
         " left-align content
-        return printf("%-*S%s", width+1 , 
+        return printf("%-*S%s", width-1,
             \ (has_delimiter ? a:field[:-2] : a:field),
             \ (has_delimiter ? b:delimiter : ' '))
     elseif align is? 'c'
