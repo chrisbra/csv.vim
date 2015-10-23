@@ -5,6 +5,7 @@
   use csvkit for aligning columns?
   Should work more efficient/faster for larger csv files
   (huge csv files can cause OOM on :ArrangeCol)
+  -> Better use python and let it do the arrange column command
 - ArrangeColumn collapse command,
  This should collapse (conceal) overly wide columns so that the columns
  won't be too wide.
