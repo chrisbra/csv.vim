@@ -238,7 +238,7 @@ fu! <sid>DoAutoCommands() "{{{3
         exe "aug CSV_HI".bufnr('')
             exe "au! CursorMoved <buffer=".bufnr('').">"
         aug end
-        aug! CSV_HI
+        exe "aug! CSV_HI".bufnr('')
         " Remove any existing highlighting
         HiColumn!
     endif
