@@ -226,16 +226,15 @@ fu! <sid>LocalSettings(type) "{{{3
 endfu
 
 fu! <sid>DoAutoCommands() "{{{3
-    " Highlight column, on which the cursor is?
-    if exists("g:csv_highlight_column") && g:csv_highlight_column =~? 'y' &&
-        \ !exists("#CSV_HI#CursorMoved")
+    " Highlight column, on which the cursor is
+    if exists("g:csv_highlight_column") && g:csv_highlight_column =~? 'y'
         aug CSV_HI
             au!
             au CursorMoved <buffer> HiColumn
         aug end
         " Set highlighting for column, on which the cursor is currently
         HiColumn
-    elseif exists("#CSV_HI#CursorMoved")
+    else
         aug CSV_HI
             au! CursorMoved <buffer>
         aug end
