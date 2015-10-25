@@ -1980,7 +1980,7 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("UnArrangeColumn",
         \':call <sid>PrepUnArrangeCol(<line1>, <line2>)',
         \ '-range')
-    call <sid>LocalCmd("InitCSV", ':call <sid>Init(<line1>,<line2>,<bang>0)',
+    call <sid>LocalCmd("CSVInit", ':call <sid>Init(<line1>,<line2>,<bang>0)',
         \ '-bang -range=%')
     call <sid>LocalCmd('Header',
         \ ':call <sid>SplitHeaderLine(<q-args>,<bang>0,1)',
@@ -2075,7 +2075,7 @@ endfu
 fu! <sid>Menu(enable) "{{{3
     if a:enable
         " Make a menu for the graphical vim
-        amenu CSV.&Init\ Plugin             :InitCSV<cr>
+        amenu CSV.&Init\ Plugin             :CSVInit<cr>
         amenu CSV.SetUp\ &fixedwidth\ Cols  :CSVFixed<cr>
         amenu CSV.-sep1-                    <nul>
         amenu &CSV.&Column.&Number          :WhatColumn<cr>

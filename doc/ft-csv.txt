@@ -301,8 +301,8 @@ will then delete all columns that match the pattern: >
 <
 will delete all columns where the pattern "foobar" matches.
 
-                                                                *:CSVInitCSV*
-3.8 InitCSV							*InitCSV*
+                                                                *:CSVInit*
+3.8 CSVInit
 -----------
 Reinitialize the Plugin. Use this, if you have changed the configuration
 of the plugin (see |csv-configuration| ).
