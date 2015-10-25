@@ -2357,6 +2357,8 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
     new
     call setline(1,content)
     let b:delimiter=delim
+    let csv_highlight_column = get(g:, 'csv_highlight_column', '')
+    unlet! g:csv_highlight_column
     call <sid>Init(1,line('$'), 1)
     if exists("b:csv_fixed_width_cols")
         let cols=copy(b:csv_fixed_width_cols)
@@ -2429,6 +2431,9 @@ fu! <sid>Tabularize(bang, first, last) "{{{3
 
     syn clear
     let &l:ma = _ma
+    if !empty(csv_highlight_column)
+      let g:csv_highlight_column = csv_highlight_column
+    endif
     call winrestview(_c)
 endfu
 fu! <sid>SubstituteInColumn(command, line1, line2) range "{{{3
