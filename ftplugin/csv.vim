@@ -228,15 +228,15 @@ endfu
 fu! <sid>DoAutoCommands() "{{{3
     " Highlight column, on which the cursor is
     if exists("g:csv_highlight_column") && g:csv_highlight_column =~? 'y'
-        aug CSV_HI
+        exe "aug CSV_HI".bufnr('')
             au!
-            au CursorMoved <buffer> HiColumn
+            exe "au CursorMoved <buffer=".bufnr('')."> HiColumn"
         aug end
         " Set highlighting for column, on which the cursor is currently
         HiColumn
     else
-        aug CSV_HI
-            au! CursorMoved <buffer>
+        exe "aug CSV_HI".bufnr('')
+            exe "au! CursorMoved <buffer=".bufnr('').">"
         aug end
         aug! CSV_HI
         " Remove any existing highlighting

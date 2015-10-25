@@ -1607,6 +1607,8 @@ Index;Value1;Value2~
   by jungle-boogie at https://github.com/chrisbra/csv.vim/issues/67, thanks!)
 - When left-aligning columns, don't add trailing whitespace (reported by
   jjaderberg at https://github.com/chrisbra/csv.vim/issues/66, thanks!)
+- Do not remove highlighting when calling ":CSVTabularize" (reported by
+   hyiltiz at https://github.com/chrisbra/csv.vim/issues/70, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped
