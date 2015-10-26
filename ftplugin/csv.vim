@@ -2503,7 +2503,7 @@ fu! <sid>SubstituteInColumn(command, line1, line2) range "{{{3
                     if (<sid>WColumn() != colnr)
                       break
                     endif
-                    if  len(split(getline('.'), '\zs')) > curpos[2] && <sid>GetCursorChar() == b:delimiter
+                    if  len(split(getline('.'), '\zs')) > curpos[2] && <sid>GetCursorChar() is# b:delimiter
                       " Cursor is on delimiter and next char belongs to the
                       " next field, skip this match
                       norm! l
@@ -2555,10 +2555,13 @@ fu! <sid>Timeout(start) "{{{3
 endfu
 fu! <sid>GetCursorChar() "{{{3
     let register = ['a', getreg('a'), getregtype('a')]
-    norm! v"ay
-    let s=getreg('a')
-    call call('setreg', register)
-    return s
+    try
+      norm! v"ay
+      let s=getreg('a')
+      return s
+    finally
+      call call('setreg', register)
+    endtry
 endfu
 
 fu! <sid>SameFieldRegion() "{{{3
