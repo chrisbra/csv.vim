@@ -273,10 +273,10 @@ fu! <sid>GetPat(colnr, maxcolnr, pat, allowmore) "{{{3
     elseif a:colnr == a:maxcolnr
         if !exists("b:csv_fixed_width_cols")
             return '^' . <SID>GetColPat(a:colnr - 1,0) .
-                \ '\zs' . a:pat . '\ze$'
+                \ '\zs' . a:pat . '\ze' . (a:allowmore ? '' : '$')
         else
             return '\%' . b:csv_fixed_width_cols[-1] .
-                \ 'c\zs' . a:pat . '\ze$'
+                \ 'c\zs' . a:pat . '\ze' . (a:allowmore ? '' : '$')
         endif
     else " colnr = 1
         if !exists("b:csv_fixed_width_cols")
