@@ -66,6 +66,14 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     let s:cmts = exists("b:csv_cmt") ? b:csv_cmt[0] : split(&cms, '&s')[0]
     let s:cmte = exists("b:csv_cmt") && len(b:csv_cmt) == 2 ? b:csv_cmt[1]
 		\ : ''
+    " Make the file start at the first actual CSV record (issue #71)
+    if !exists("b:csv_headerline") && exists('b:csv_cmt')
+	let pattern = '\%^\(\%('.s:cmts.'.*\n\)\|\%(\s*\n\)\)\+'
+	let start = search(pattern, 'nWe', 10)
+	if start > 0
+	    let b:csv_headerline = start+1
+	endif
+    endif
 
     if line('$') > 1 && (!exists("b:col") || empty(b:col))
     " check for invalid pattern, ftplugin hasn't been loaded yet
