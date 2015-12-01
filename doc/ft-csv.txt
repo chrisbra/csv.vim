@@ -1609,6 +1609,7 @@ Index;Value1;Value2~
   jjaderberg at https://github.com/chrisbra/csv.vim/issues/66, thanks!)
 - Do not remove highlighting when calling ":CSVTabularize" (reported by
    hyiltiz at https://github.com/chrisbra/csv.vim/issues/70, thanks!)
+- Make |:ArrangeCol| respect given headerlines
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped

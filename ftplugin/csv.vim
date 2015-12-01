@@ -642,12 +642,18 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
     else
        let ro = 0
     endif
+    call <sid>CheckHeaderLine()
     let s:count = 0
     let _stl  = &stl
-    let s:max   = (a:last - a:first + 1) * len(b:col_width)
+    if a:first < b:csv_headerline
+      let first = b:csv_headerline
+    else
+      let first = a:first
+    endif
+    let s:max   = (a:last - first + 1) * len(b:col_width)
     let s:temp  = 0
     try
-        exe "sil". a:first . ',' . a:last .'s/' . (b:col) .
+        exe "sil". first . ',' . a:last .'s/' . (b:col) .
         \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
     finally
         " Clean up variables, that were only needed for <sid>Columnize() function
