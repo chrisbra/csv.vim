@@ -2,7 +2,7 @@
 UseVimball
 finish
 ftplugin/csv.vim	[[[1
-2797
+2803
 " Filetype plugin for editing CSV files. "{{{1
 " Author:  Christian Brabandt <cb@256bit.org>
 " Version: 0.31
@@ -647,12 +647,18 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
     else
        let ro = 0
     endif
+    call <sid>CheckHeaderLine()
     let s:count = 0
     let _stl  = &stl
-    let s:max   = (a:last - a:first + 1) * len(b:col_width)
+    if a:first < b:csv_headerline
+      let first = b:csv_headerline
+    else
+      let first = a:first
+    endif
+    let s:max   = (a:last - first + 1) * len(b:col_width)
     let s:temp  = 0
     try
-        exe "sil". a:first . ',' . a:last .'s/' . (b:col) .
+        exe "sil". first . ',' . a:last .'s/' . (b:col) .
         \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
     finally
         " Clean up variables, that were only needed for <sid>Columnize() function
@@ -2801,7 +2807,7 @@ unlet s:cpo_save
 " Vim Modeline " {{{2
 " vim: set foldmethod=marker et:
 doc/ft-csv.txt	[[[1
-1903
+1904
 *ft-csv.txt*	For Vim version 7.4	Last Change: Thu, 15 Jan 2015
 
 Author:		Christian Brabandt <cb@256bit.org>
@@ -4413,6 +4419,7 @@ Index;Value1;Value2~
   jjaderberg at https://github.com/chrisbra/csv.vim/issues/66, thanks!)
 - Do not remove highlighting when calling ":CSVTabularize" (reported by
    hyiltiz at https://github.com/chrisbra/csv.vim/issues/70, thanks!)
+- Make |:ArrangeCol| respect given headerlines
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped
