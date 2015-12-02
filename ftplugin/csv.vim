@@ -717,7 +717,10 @@ fu! <sid>CalculateColumnWidth(row) "{{{3
     let b:col_width=[]
     try
         let s:max_cols=<SID>MaxColumns(line('.'))
-        for i in range(1,s:max_cols)
+        if !exists("b:csv_headerline")
+          call <sid>CheckHeaderLine()
+        endif
+        for i in range(b:csv_headerline,s:max_cols)
             if empty(a:row)
                 call add(b:col_width, <SID>ColWidth(i))
             else
