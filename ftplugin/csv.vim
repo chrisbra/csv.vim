@@ -671,7 +671,7 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
     endtry
 endfu
 fu! <sid>ProgressBar(cnt, max) "{{{3
-    if get(g:, 'csv_no_progress', 0)
+    if get(g:, 'csv_no_progress', 0) || a:max == 0
         return
     endif
     let width = 40 " max width of progressbar
