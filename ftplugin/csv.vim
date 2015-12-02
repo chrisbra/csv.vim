@@ -642,17 +642,17 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
     else
        let ro = 0
     endif
-    call <sid>CheckHeaderLine()
     let s:count = 0
     let _stl  = &stl
-    if a:first < b:csv_headerline
-      let first = b:csv_headerline
-    else
-      let first = a:first
-    endif
-    let last = a:last
-    if a:last < b:csv_headerline
-      let last = b:csv_headerline
+    let first = a:first
+    let last  = a:last
+    if exists("b:csv_headerline")
+      if a:first < b:csv_headerline
+        let first = b:csv_headerline
+      endif
+      if a:last < b:csv_headerline
+        let last = b:csv_headerline
+      endif
     endif
     let s:max   = (last - first + 1) * len(b:col_width)
     let s:temp  = 0
@@ -717,10 +717,7 @@ fu! <sid>CalculateColumnWidth(row) "{{{3
     let b:col_width=[]
     try
         let s:max_cols=<SID>MaxColumns(line('.'))
-        if !exists("b:csv_headerline")
-          call <sid>CheckHeaderLine()
-        endif
-        if line('.') < b:csv_headerline
+        if exists("b:csv_headerline") && line('.') < b:csv_headerline
           call cursor(b:csv_headerline,1)
         endif
         for i in range(1,s:max_cols)
