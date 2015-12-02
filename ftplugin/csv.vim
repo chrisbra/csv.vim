@@ -650,10 +650,14 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
     else
       let first = a:first
     endif
-    let s:max   = (a:last - first + 1) * len(b:col_width)
+    let last = a:last
+    if a:last < b:csv_headerline
+      let last = b:csv_headerline
+    endif
+    let s:max   = (last - first + 1) * len(b:col_width)
     let s:temp  = 0
     try
-        exe "sil". first . ',' . a:last .'s/' . (b:col) .
+        exe "sil". first . ',' . last .'s/' . (b:col) .
         \ '/\=<SID>Columnize(submatch(0))/' . (&gd ? '' : 'g')
     finally
         " Clean up variables, that were only needed for <sid>Columnize() function
