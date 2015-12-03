@@ -654,6 +654,9 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
         let last = b:csv_headerline
       endif
     endif
+    if &vbs
+      echomsg printf("ArrangeCol Start: %d, End: %d", first, last)
+    endif
     let s:max   = (last - first + 1) * len(b:col_width)
     let s:temp  = 0
     try
