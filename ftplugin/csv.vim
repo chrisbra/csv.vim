@@ -628,6 +628,20 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
         return
     endif
 
+    let first = a:first
+    let last  = a:last
+    if exists("b:csv_headerline")
+      if a:first < b:csv_headerline
+        let first = b:csv_headerline
+      endif
+      if a:last < b:csv_headerline
+        let last = b:csv_headerline
+      endif
+    endif
+    if &vbs
+      echomsg printf("ArrangeCol Start: %d, End: %d", first, last)
+    endif
+
     if !exists("b:col_width")
         " Force recalculation of Column width
         let row = exists("a:1") ? a:1 : ''
@@ -644,19 +658,6 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
     endif
     let s:count = 0
     let _stl  = &stl
-    let first = a:first
-    let last  = a:last
-    if exists("b:csv_headerline")
-      if a:first < b:csv_headerline
-        let first = b:csv_headerline
-      endif
-      if a:last < b:csv_headerline
-        let last = b:csv_headerline
-      endif
-    endif
-    if &vbs
-      echomsg printf("ArrangeCol Start: %d, End: %d", first, last)
-    endif
     let s:max   = (last - first + 1) * len(b:col_width)
     let s:temp  = 0
     try
