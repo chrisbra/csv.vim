@@ -68,6 +68,7 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
 		\ : ''
     " Make the file start at the first actual CSV record (issue #71)
     if !exists("b:csv_headerline") && exists('b:csv_cmt')
+	let s:cmts='\V'.escape(s:cmts, '\\'). '\m'
 	let pattern = '\%^\(\%('.s:cmts.'.*\n\)\|\%(\s*\n\)\)\+'
 	let start = search(pattern, 'nWe', 10)
 	if start > 0
