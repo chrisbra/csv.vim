@@ -165,7 +165,9 @@ fu! <sid>Init(startline, endline, ...) "{{{3
     " enable CSV Menu
     call <sid>Menu(1)
     call <sid>DisableFolding()
-    silent do Syntax
+    if !exists("b:current_syntax")
+      silent do Syntax
+    endif
     unlet! b:csv_start b:csv_end
 
     " Remove configuration variables
