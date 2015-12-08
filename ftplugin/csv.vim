@@ -406,6 +406,10 @@ fu! <sid>DelColumn(colnr) "{{{3
 endfu
 fu! <sid>HiCol(colnr, bang) "{{{3
     if a:colnr > <SID>MaxColumns() && !a:bang
+        if a:colnr > <SID>MaxColumns() && !a:bang
+            call <SID>Warn("There exists no column " . a:colnr)
+            return
+        endif
         call <SID>Warn("There exists no column " . a:colnr)
         return
     endif
