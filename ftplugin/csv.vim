@@ -405,15 +405,11 @@ fu! <sid>DelColumn(colnr) "{{{3
     endif
 endfu
 fu! <sid>HiCol(colnr, bang) "{{{3
-    if a:colnr > <SID>MaxColumns() && !a:bang
-        if a:colnr > <SID>MaxColumns() && !a:bang
+    if !a:bang
+        if a:colnr > <SID>MaxColumns()
             call <SID>Warn("There exists no column " . a:colnr)
             return
         endif
-        call <SID>Warn("There exists no column " . a:colnr)
-        return
-    endif
-    if !a:bang
         if empty(a:colnr)
             let colnr=<SID>WColumn()
         else
