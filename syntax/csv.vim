@@ -21,7 +21,7 @@ fu! <sid>Warning(msg) "{{{3
     echohl Normal
 endfu
 
-fu! <sid>Esc(val, char) "{{2
+fu! <sid>Esc(val, char) "{{3 
     return '\V'.escape(a:val, '\\'.a:char).'\m'
 endfu
 
@@ -68,13 +68,16 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
 		\ : ''
     " Make the file start at the first actual CSV record (issue #71)
     if !exists("b:csv_headerline") && exists('b:csv_cmt')
-	let s:cmts='\V'.escape(s:cmts, '\\'). '\m'
-	let pattern = '\%^\(\%('.s:cmts.'.*\n\)\|\%(\s*\n\)\)\+'
+	let cmts    = <sid>Esc(s:cmts, '')
+	let pattern = '\%^\(\%('.cmts.'.*\n\)\|\%(\s*\n\)\)\+'
 	let start = search(pattern, 'nWe', 10)
 	if start > 0
 	    let b:csv_headerline = start+1
 	endif
     endif
+    " escape '/' for syn match command
+    let s:cmts=<sid>Esc(s:cmts, '/')
+    let s:cmte=<sid>Esc(s:cmte, '/')
 
     if line('$') > 1 && (!exists("b:col") || empty(b:col))
     " check for invalid pattern, ftplugin hasn't been loaded yet
@@ -131,8 +134,8 @@ fu! <sid>DoHighlight() "{{{3
 	endfor
     endif
     " Comment regions
-    exe 'syn match CSVComment /'. <sid>Esc(s:cmts, '/'). '.*'.
-		\ (!empty(s:cmte) ? '\%('. <sid>Esc(s:cmte, '/'). '\)\?'
+    exe 'syn match CSVComment /'. s:cmts. '.*'.
+		\ (!empty(s:cmte) ? '\%('. s:cmte. '\)\?'
 		\: '').  '/'
     hi def link CSVComment Comment
 endfun
