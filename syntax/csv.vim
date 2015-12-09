@@ -77,7 +77,7 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     endif
     " escape '/' for syn match command
     let s:cmts=<sid>Esc(s:cmts, '/')
-    let s:cmte=<sid>Esc(s:cmte, '/')
+    let s:cmte=empty(s:cmte) ? '' : <sid>Esc(s:cmte, '/')
 
     if line('$') > 1 && (!exists("b:col") || empty(b:col))
     " check for invalid pattern, ftplugin hasn't been loaded yet
