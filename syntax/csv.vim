@@ -21,7 +21,10 @@ fu! <sid>Warning(msg) "{{{3
     echohl Normal
 endfu
 
-fu! <sid>Esc(val, char) "{{3 
+fu! <sid>Esc(val, char) "{{{3 
+    if empty(a:val)
+	return a:val
+    endif
     return '\V'.escape(a:val, '\\'.a:char).'\m'
 endfu
 
@@ -43,8 +46,10 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     " Check Comment setting
     if !exists("g:csv_comment")
         let b:csv_cmt = split(&cms, '%s')
-    else
+    elseif match(g:csv_comment, '%s') >= 0
         let b:csv_cmt = split(g:csv_comment, '%s')
+    else
+	let b:csv_cmt = [g:csv_comment]
     endif
 
 
@@ -57,17 +62,15 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
 
     " Try a simple highlighting, if the defaults from the ftplugin
     " don't exist
-    let s:col  = exists("b:col") && !empty(b:col) ? b:col
-		\ : s:col_def
+    let s:col  = exists("b:col") && !empty(b:col) ? b:col  : s:col_def
     let s:col_end  = exists("b:col_end") && !empty(b:col_end) ? b:col_end
 		\ : s:col_def_end
     let s:del  = exists("b:delimiter") && !empty(b:delimiter) ? b:delimiter
 		\ : s:del_def
-    let s:cmts = exists("b:csv_cmt") ? b:csv_cmt[0] : split(&cms, '&s')[0]
-    let s:cmte = exists("b:csv_cmt") && len(b:csv_cmt) == 2 ? b:csv_cmt[1]
-		\ : ''
+    let s:cmts = b:csv_cmt[0]
+    let s:cmte = len(b:csv_cmt) == 2 ? b:csv_cmt[1] : ''
     " Make the file start at the first actual CSV record (issue #71)
-    if !exists("b:csv_headerline") && exists('b:csv_cmt')
+    if !exists("b:csv_headerline")
 	let cmts    = <sid>Esc(s:cmts, '')
 	let pattern = '\%^\(\%('.cmts.'.*\n\)\|\%(\s*\n\)\)\+'
 	let start = search(pattern, 'nWe', 10)
@@ -77,7 +80,7 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     endif
     " escape '/' for syn match command
     let s:cmts=<sid>Esc(s:cmts, '/')
-    let s:cmte=empty(s:cmte) ? '' : <sid>Esc(s:cmte, '/')
+    let s:cmte=<sid>Esc(s:cmte, '/')
 
     if line('$') > 1 && (!exists("b:col") || empty(b:col))
     " check for invalid pattern, ftplugin hasn't been loaded yet
