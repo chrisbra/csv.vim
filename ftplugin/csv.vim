@@ -29,23 +29,6 @@ if !s:csv_numeric_sort "{{{2
     return (a:i1+0) == (a:i2+0) ? 0 : (a:i1+0) > (a:i2+0) ? 1 : -1
   endfu
 endif
-if !exists("##OptionSet") "{{{2
-  " No OptionSet autocommands
-  fu! CSV_SetSplitOptions(window) "{{{3
-      if exists("s:local_stl")
-          " local horizontal statusline
-          for opt in items({'&nu': &l:nu, '&rnu': &l:rnu, '&fdc': &fdc})
-              if opt[1] != getwinvar(a:window, opt[0])
-                  call setwinvar(a:window, opt[0], opt[1])
-              endif
-          endfor
-          " Check statusline (airline might change it)
-          if getwinvar(a:window, '&l:stl') != s:local_stl
-              call setwinvar(a:window, '&stl', s:local_stl)
-          endif
-      endif
-  endfun
-endif
 " Function definitions: "{{{1
 fu! CSVArrangeCol(first, last, bang, limit) range "{{{2
     if &ft =~? 'csv'
@@ -878,6 +861,7 @@ fu! <sid>SetupAutoCmd(window,bufnr) "{{{3
           exe "au OptionSet foldcolumn,number,relativenumber call <sid>CSV_SetOption(".a:bufnr.
             \ ", ".bufnr('%').", expand('<amatch>'), v:option_new)"
         endif
+        exe "au VimResized,FocusLost,FocusGained <buffer=".a:bufnr."> call CSV_SetSplitOptions(".a:window.")"
     aug END
 endfu
 fu! <sid>CSV_SetOption(csvfile, header, option, value) "{{{3
@@ -2626,6 +2610,20 @@ fu! CSV_CloseBuffer(buffer) "{{{3
         augroup! CSV_QuitPre
     endtry
 endfu
+fu! CSV_SetSplitOptions(window) "{{{3
+    if exists("s:local_stl")
+        " local horizontal statusline
+        for opt in items({'&nu': &l:nu, '&rnu': &l:rnu, '&fdc': &fdc})
+            if opt[1] != getwinvar(a:window, opt[0])
+                call setwinvar(a:window, opt[0], opt[1])
+            endif
+        endfor
+        " Check statusline (airline might change it)
+        if getwinvar(a:window, '&l:stl') != s:local_stl
+            call setwinvar(a:window, '&stl', s:local_stl)
+        endif
+    endif
+endfun
 " Global functions "{{{2
 fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
     " Make sure, the function is called for the correct filetype.
