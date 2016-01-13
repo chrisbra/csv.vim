@@ -1809,9 +1809,7 @@ fu! <sid>Vertfold(bang, col) "{{{3
 endfu
 fu! <sid>InitCSVFixedWidth() "{{{3
     if !exists("+cc")
-        " TODO: make this work with a custom matchadd() command for older
-        " Vims, that don't have 'colorcolumn'
-        call <sid>Warn("'colorcolumn' option not available")
+        call <sid>Warn("Command disabled: 'colorcolumn' option not available")
         return
     endif
     " Turn off syntax highlighting
