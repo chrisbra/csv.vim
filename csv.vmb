@@ -2,7 +2,7 @@
 UseVimball
 finish
 ftplugin/csv.vim	[[[1
-2815
+2830
 " Filetype plugin for editing CSV files. "{{{1
 " Author:  Christian Brabandt <cb@256bit.org>
 " Version: 0.31
@@ -33,23 +33,6 @@ if !s:csv_numeric_sort "{{{2
   fu! <sid>CSVSortValues(i1, i2) "{{{3
     return (a:i1+0) == (a:i2+0) ? 0 : (a:i1+0) > (a:i2+0) ? 1 : -1
   endfu
-endif
-if !exists("##OptionSet") "{{{2
-  " No OptionSet autocommands
-  fu! CSV_SetSplitOptions(window) "{{{3
-      if exists("s:local_stl")
-          " local horizontal statusline
-          for opt in items({'&nu': &l:nu, '&rnu': &l:rnu, '&fdc': &fdc})
-              if opt[1] != getwinvar(a:window, opt[0])
-                  call setwinvar(a:window, opt[0], opt[1])
-              endif
-          endfor
-          " Check statusline (airline might change it)
-          if getwinvar(a:window, '&l:stl') != s:local_stl
-              call setwinvar(a:window, '&stl', s:local_stl)
-          endif
-      endif
-  endfun
 endif
 " Function definitions: "{{{1
 fu! CSVArrangeCol(first, last, bang, limit) range "{{{2
@@ -883,6 +866,7 @@ fu! <sid>SetupAutoCmd(window,bufnr) "{{{3
           exe "au OptionSet foldcolumn,number,relativenumber call <sid>CSV_SetOption(".a:bufnr.
             \ ", ".bufnr('%').", expand('<amatch>'), v:option_new)"
         endif
+        exe "au VimResized,FocusLost,FocusGained <buffer=".a:bufnr."> call CSV_SetSplitOptions(".a:window.")"
     aug END
 endfu
 fu! <sid>CSV_SetOption(csvfile, header, option, value) "{{{3
@@ -1830,23 +1814,24 @@ fu! <sid>Vertfold(bang, col) "{{{3
 endfu
 fu! <sid>InitCSVFixedWidth() "{{{3
     if !exists("+cc")
-        " TODO: make this work with a custom matchadd() command for older
-        " Vims, that don't have 'colorcolumn'
-        call <sid>Warn("'colorcolumn' option not available")
+        call <sid>Warn("Command disabled: 'colorcolumn' option not available")
         return
     endif
     " Turn off syntax highlighting
     syn clear
-    let max_len = len(split(getline(1), '\zs'))
+    let max_line = line('$') > 10 ? 10 : line('$')
+    let t = getline(1, max_line)
+    let max_len = max(map(t, 'len(split(v:val, ''\zs''))'))
     let _cc  = &l:cc
     let &l:cc = 1
     redraw!
     let Dict = {'1': 1} " first column is always the start of a new column
     let tcc  = &l:cc
     let &l:cc = 1
-    echo "<Cursor>, <Space>, <ESC>, <BS>, <CR>..."
+    echo "<Cursor>, <Space>, <ESC>, <BS>, <CR>, ?"
     let char=getchar()
     while 1
+        let skip_mess = 0
         if char == "\<Left>" || char == "\<Right>"
             let tcc = eval('tcc'.(char=="\<Left>" ? '-' : '+').'1')
             if tcc < 0
@@ -1869,12 +1854,28 @@ fu! <sid>InitCSVFixedWidth() "{{{3
         elseif char == "\<CR>" || char == "\n" || char == "\r"  " Enter
             let Dict[tcc] = 1
             break
+        elseif char == char2nr('?')
+            redraw!
+            echohl Title
+            echo    "Key\tFunction"
+            echo    "=================="
+            echohl Normal
+            echo    "<cr>\tDefine new column"
+            echo    "<left>\tMove left"
+            echo    "<right>\tMove right"
+            echo    "<esc>\tAbort"
+            echo    "<bs>\tDelete last column definition"
+            echo    "?\tShow this help\n"
+            let skip_mess = 1
         else
+            let Dict={}
             break
         endif
         let &l:cc=tcc . (!empty(keys(Dict))? ',' . join(keys(Dict), ','):'')
-        redraw!
-        echo "<Cursor>, <Space>, <ESC>, <BS>, <CR>..."
+        if !skip_mess
+          redraw!
+          echo "<Cursor>, <Space>, <ESC>, <BS>, <CR>..."
+        endif
         let char=getchar()
     endw
     let b:csv_fixed_width_cols=[]
@@ -2631,6 +2632,20 @@ fu! CSV_CloseBuffer(buffer) "{{{3
         augroup! CSV_QuitPre
     endtry
 endfu
+fu! CSV_SetSplitOptions(window) "{{{3
+    if exists("s:local_stl")
+        " local horizontal statusline
+        for opt in items({'&nu': &l:nu, '&rnu': &l:rnu, '&fdc': &fdc})
+            if opt[1] != getwinvar(a:window, opt[0])
+                call setwinvar(a:window, opt[0], opt[1])
+            endif
+        endfor
+        " Check statusline (airline might change it)
+        if getwinvar(a:window, '&l:stl') != s:local_stl
+            call setwinvar(a:window, '&stl', s:local_stl)
+        endif
+    endif
+endfun
 " Global functions "{{{2
 fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
     " Make sure, the function is called for the correct filetype.
@@ -4727,7 +4742,7 @@ Index;Value1;Value2~
 
 vim:tw=78:ts=8:ft=help:norl:et:fdm=marker:fdl=0
 syntax/csv.vim	[[[1
-181
+184
 " A simple syntax highlighting, simply alternate colors between two
 " adjacent columns
 " Init {{{2
@@ -4751,7 +4766,10 @@ fu! <sid>Warning(msg) "{{{3
     echohl Normal
 endfu
 
-fu! <sid>Esc(val, char) "{{3 
+fu! <sid>Esc(val, char) "{{{3 
+    if empty(a:val)
+	return a:val
+    endif
     return '\V'.escape(a:val, '\\'.a:char).'\m'
 endfu
 
@@ -4773,8 +4791,10 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     " Check Comment setting
     if !exists("g:csv_comment")
         let b:csv_cmt = split(&cms, '%s')
-    else
+    elseif match(g:csv_comment, '%s') >= 0
         let b:csv_cmt = split(g:csv_comment, '%s')
+    else
+	let b:csv_cmt = [g:csv_comment]
     endif
 
 
@@ -4787,17 +4807,15 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
 
     " Try a simple highlighting, if the defaults from the ftplugin
     " don't exist
-    let s:col  = exists("b:col") && !empty(b:col) ? b:col
-		\ : s:col_def
+    let s:col  = exists("b:col") && !empty(b:col) ? b:col  : s:col_def
     let s:col_end  = exists("b:col_end") && !empty(b:col_end) ? b:col_end
 		\ : s:col_def_end
     let s:del  = exists("b:delimiter") && !empty(b:delimiter) ? b:delimiter
 		\ : s:del_def
-    let s:cmts = exists("b:csv_cmt") ? b:csv_cmt[0] : split(&cms, '&s')[0]
-    let s:cmte = exists("b:csv_cmt") && len(b:csv_cmt) == 2 ? b:csv_cmt[1]
-		\ : ''
+    let s:cmts = b:csv_cmt[0]
+    let s:cmte = len(b:csv_cmt) == 2 ? b:csv_cmt[1] : ''
     " Make the file start at the first actual CSV record (issue #71)
-    if !exists("b:csv_headerline") && exists('b:csv_cmt')
+    if !exists("b:csv_headerline")
 	let cmts    = <sid>Esc(s:cmts, '')
 	let pattern = '\%^\(\%('.cmts.'.*\n\)\|\%(\s*\n\)\)\+'
 	let start = search(pattern, 'nWe', 10)
@@ -4807,7 +4825,7 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     endif
     " escape '/' for syn match command
     let s:cmts=<sid>Esc(s:cmts, '/')
-    let s:cmte=empty(s:cmte) ? '' : <sid>Esc(s:cmte, '/')
+    let s:cmte=<sid>Esc(s:cmte, '/')
 
     if line('$') > 1 && (!exists("b:col") || empty(b:col))
     " check for invalid pattern, ftplugin hasn't been loaded yet
