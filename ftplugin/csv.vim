@@ -1823,9 +1823,9 @@ fu! <sid>InitCSVFixedWidth() "{{{3
     let Dict = {'1': 1} " first column is always the start of a new column
     let tcc  = &l:cc
     let &l:cc = 1
+    echo "<Cursor>, <Space>, <ESC>, <BS>, <CR>..."
     let char=getchar()
     while 1
-        echo "<Cursor>, <Space>, <ESC>, <BS>, <CR>..."
         if char == "\<Left>" || char == "\<Right>"
             let tcc = eval('tcc'.(char=="\<Left>" ? '-' : '+').'1')
             if tcc < 0
@@ -1853,6 +1853,7 @@ fu! <sid>InitCSVFixedWidth() "{{{3
         endif
         let &l:cc=tcc . (!empty(keys(Dict))? ',' . join(keys(Dict), ','):'')
         redraw!
+        echo "<Cursor>, <Space>, <ESC>, <BS>, <CR>..."
         let char=getchar()
     endw
     let b:csv_fixed_width_cols=[]
