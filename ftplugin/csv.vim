@@ -620,6 +620,12 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
         let last = b:csv_headerline
       endif
     endif
+    if first > line('$')
+        let first=line('$')
+    endif
+    if last > line('$')
+        let last=line('$')
+    endif
     if &vbs
       echomsg printf("ArrangeCol Start: %d, End: %d", first, last)
     endif
