@@ -469,7 +469,7 @@ fu! <sid>WColumn(...) "{{{3
             " line is empty
             let line = getline(line('.')-1)
         else
-            let line=getline('.')
+            let line = getline('.')
         endif
         " move cursor to end of field
         "call search(b:col, 'ec', line('.'))
@@ -479,7 +479,7 @@ fu! <sid>WColumn(...) "{{{3
         let ret=len(fields)
         if exists("a:1") && a:1 > 0
             " bang attribute: Try to get the column name
-            let head  = split(get(b:, 'csv_headerline', 1),b:col.'\zs')
+            let head  = split(getline(get(b:, 'csv_headerline', 1)),b:col.'\zs')
             " remove preceeding whitespace
             if len(head) < ret
                 call <sid>Warn("Header has no field ". ret)
