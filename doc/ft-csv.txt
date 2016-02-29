@@ -1617,6 +1617,8 @@ Index;Value1;Value2~
   thanks!)
 - Statusline function could cause a hang in an empty file (reported by Jeet
   Sukumaran in issue https://github.com/chrisbra/csv.vim/issues/80, thanks!)
+- Wrong headerline highlighting when creating a new file (reported by Jeet
+  Sukumaran in issue https://github.com/chrisbra/csv.vim/issues/79, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped

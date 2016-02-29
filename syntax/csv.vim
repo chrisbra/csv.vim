@@ -74,7 +74,8 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
 	let cmts    = <sid>Esc(s:cmts, '')
 	let pattern = '\%^\(\%('.cmts.'.*\n\)\|\%(\s*\n\)\)\+'
 	let start = search(pattern, 'nWe', 10)
-	if start > 0
+	" don't do it, on an empty file
+	if start > 0 && !empty(getline(start))
 	    let b:csv_headerline = start+1
 	endif
     endif
