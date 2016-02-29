@@ -1615,6 +1615,8 @@ Index;Value1;Value2~
 - use b:csv_headerline variable for checking column name and column numbers
   (reported by Werner Freund at https://github.com/chrisbra/csv.vim/issues/78,
   thanks!)
+- Statusline function could cause a hang in an empty file (reported by Jeet
+  Sukumaran in issue https://github.com/chrisbra/csv.vim/issues/80, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped
