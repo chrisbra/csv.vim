@@ -639,6 +639,11 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
         call <sid>CalculateColumnWidth(row)
     endif
 
+    " abort on empty file
+    if !len(b:col_width)
+        call <sid>Warn("No column data detected, aborting ArrangeCol command!")
+        return
+    endif
     if &ro
        " Just in case, to prevent the Warning
        " Warning: W10: Changing read-only file
