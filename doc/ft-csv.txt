@@ -1334,6 +1334,10 @@ Returns the 10 largest values for column col.
 ------------------------------------------------------
 Returns the 10 smallest values for column col. 
 
+5.8 CSVAvg(col, fmt, startline, endline)                         *CSVAvg()*
+------------------------------------------------------
+Returns the average value for column col. 
+
 ==============================================================================
 6. CSV Tips and Tricks						*csv-tips*
 
@@ -1475,6 +1479,8 @@ function and let the plugin call it for a column like this:
 <
     This will evaluate the average of column seven (assuming, line 1 is the
     header line, which should not be taken into account).
+
+    Note: this plugin already defines an average function.
 
 6.4 Autocommand on opening/closing files                *csv-arrange-autocmd*
 ----------------------------------------
@@ -1619,6 +1625,8 @@ Index;Value1;Value2~
   Sukumaran in issue https://github.com/chrisbra/csv.vim/issues/80, thanks!)
 - Wrong headerline highlighting when creating a new file (reported by Jeet
   Sukumaran in issue https://github.com/chrisbra/csv.vim/issues/79, thanks!)
+- Do not strip leading whitespace, when applying filters (reported by
+  blubb123muh in https://github.com/chrisbra/csv.vim/issues/87, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped

@@ -1557,7 +1557,7 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
 
         let col = <sid>WColumn()
         let max = <sid>MaxColumns()
-        let a   = <sid>GetColumn(line('.'), col)
+        let a   = <sid>GetColumn(line('.'), col, 0)
         let a   = <sid>ProcessFieldValue(a)
         let pat = '\%(^\|'.b:delimiter. '\)\@<='.<sid>EscapeValue(a).
                  \ '\m\ze\%('.b:delimiter.'\|$\)'
@@ -1646,7 +1646,7 @@ fu! <sid>OutputFilters(bang) "{{{3
                 if s:csv_fold_headerline
                     echo printf("%02d\t% 2s\t%02d\t%10.10s\t%s",
                         \ item.id, (item.match ? '+' : '-'), item.col,
-                        \ substitute(<sid>GetColumn(1, item.col),
+                        \ substitute(<sid>GetColumn(1, item.col, 0),
                         \ b:col.'$', '', ''), item.orig)
                 else
                     echo printf("%02d\t% 2s\t%02d\t%s",
@@ -1669,7 +1669,7 @@ fu! <sid>SortFilter(a, b) "{{{3
     return a:a.id == a:b.id ? 0 :
         \ a:a.id > a:b.id ? 1 : -1
 endfu
-fu! <sid>GetColumn(line, col) "{{{3
+fu! <sid>GetColumn(line, col, strip) "{{{3
     " Return Column content at a:line, a:col
     let a=getline(a:line)
     " Filter comments out
@@ -1687,7 +1687,11 @@ fu! <sid>GetColumn(line, col) "{{{3
     else
         let a = matchstr(a, <sid>GetColPat(a:col, 0))
     endif
-    return substitute(a, '^\s\+\|\s\+$', '', 'g')
+    if a:strip
+        return substitute(a, '^\s\+\|\s\+$', '', 'g')
+    else
+        return a
+    endif
 endfu
 fu! <sid>RemoveLastItem(count) "{{{3
     for [key,value] in items(b:csv_filter)
@@ -2276,7 +2280,7 @@ fu! <sid>Transpose(line1, line2) "{{{3
         endif
         let r   = []
         for row in range(1,columns)
-            let field = <sid>GetColumn(line, row)
+            let field = <sid>GetColumn(line, row, 0)
             call add(r, field)
         endfor
         call add(matrix, r)
@@ -2601,7 +2605,7 @@ fu! <sid>SameFieldRegion() "{{{3
     " visually select the region, that has the same value in the cursor field
     let col = <sid>WColumn()
     let max = <sid>MaxColumns()
-    let field = <sid>GetColumn(line('.'), col)
+    let field = <sid>GetColumn(line('.'), col, 0)
     let line = line('.')
 
     let limit = [line, line]
@@ -2609,7 +2613,7 @@ fu! <sid>SameFieldRegion() "{{{3
     " limit of the current selection
     while line > 1
         let line -= 1
-        if <sid>GetColumn(line, col) ==# field
+        if <sid>GetColumn(line, col, 0) ==# field
             let limit[0] = line
         else
             break
@@ -2618,7 +2622,7 @@ fu! <sid>SameFieldRegion() "{{{3
     let line = line('.')
     while line > 1 && line < line('$')
         let line += 1
-        if <sid>GetColumn(line, col) ==# field
+        if <sid>GetColumn(line, col, 0) ==# field
             let limit[1] = line
         else
             break
@@ -2626,6 +2630,8 @@ fu! <sid>SameFieldRegion() "{{{3
     endw
     exe printf(':norm! %dGV%dG',limit[0],limit[1])
 endfu
+
+
 fu! CSV_CloseBuffer(buffer) "{{{3
     " Setup by SetupAutoCmd autocommand
     try
