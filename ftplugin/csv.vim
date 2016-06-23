@@ -1419,6 +1419,13 @@ fu! <sid>CountColumn(list) "{{{3
         return len(a:list)
     endif
 endfu
+fu! <sid>AvgColumn(list) "{{{3
+    if empty(a:list)
+        return 0
+    else
+        return <sid>SumColumn(a:list)/(len(a:list) * (has("float") ? 1.0 : 1))
+    endif
+endfu
 fu! <sid>DoForEachColumn(start, stop, bang) range "{{{3
     " Do something for each column,
     " e.g. generate SQL-Statements, convert to HTML,
@@ -2051,6 +2058,9 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("CountCol",
         \ ':echo csv#EvalColumn(<q-args>, "<sid>CountColumn", <line1>,<line2>)',
         \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd("AvgCol",
+        \ ':echo csv#EvalColumn(<q-args>, "<sid>AvgColumn", <line1>,<line2>)',
+        \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("ConvertData",
         \ ':call <sid>PrepareDoForEachColumn(<line1>,<line2>,<bang>0)',
         \ '-bang -nargs=? -range=%')
@@ -2631,6 +2641,18 @@ fu! <sid>SameFieldRegion() "{{{3
     exe printf(':norm! %dGV%dG',limit[0],limit[1])
 endfu
 
+fu! <sid>CSV_EvalDo(col, func, first, last, ...) "{{{3
+    let first = a:first
+    let last  = a:last
+    if empty(first)
+        let first = 1
+    endif
+    if empty(last)
+        let last = line('$')
+    endif
+    let arg = a:0 ? a:1 : ''
+    return csv#EvalColumn, a:col, a:func, first, last, arg)
+endfu
 
 fu! CSV_CloseBuffer(buffer) "{{{3
     " Setup by SetupAutoCmd autocommand
@@ -2773,55 +2795,25 @@ fu! CSVPat(colnr, ...) "{{{3
     return pat
 endfu
 fu! CSVSum(col, fmt, first, last) "{{{3
-    let first = a:first
-    let last  = a:last
-    if empty(first)
-        let first = 1
-    endif
-    if empty(last)
-        let last = line('$')
-    endif
-    return csv#EvalColumn(a:col, '<sid>SumColumn', first, last)
+    return <sid>CSV_EvalDo(a:col. ' '. a:fmt, '<sid>SumColumn', a:first, a:last)
 endfu
 fu! CSVMax(col, fmt, first, last) "{{{3
-    let first = a:first
-    let last  = a:last
-    if empty(first)
-        let first = 1
-    endif
-    if empty(last)
-        let last = line('$')
-    endif
-    return csv#EvalColumn(a:col, '<sid>MaxColumn', first, last, 1)
+    return <sid>CSV_EvalDo(a:col. ' '.a:fmt, '<sid>MaxColumn', a:first, a:last, 1)
 endfu
 fu! CSVMin(col, fmt, first, last) "{{{3
-    let first = a:first
-    let last  = a:last
-    if empty(first)
-        let first = 1
-    endif
-    if empty(last)
-        let last = line('$')
-    endif
-    return csv#EvalColumn(a:col, '<sid>MaxColumn', first, last, 0)
+    return <sid>EvalColumn(a:col. ' '.a:fmt, '<sid>MaxColumn', a:first, a:last, 0)
+endfu
+fu! CSVAvg(col, fmt, first, last) "{{{3
+    return <sid>EvalColumn(a:col. ' '.a:fmt, '<sid>AvgColumn', a:first, a:last)
 endfu
 fu! CSVCount(col, fmt, first, last, ...) "{{{3
-    let first = a:first
-    let last  = a:last
-    let distinct = 0
-    if empty(first)
-        let first = 1
-    endif
-    if empty(last)
-        let last = line('$')
-    endif
     if !exists('s:additional')
       let s:additional = {}
     endif
     if exists("a:1") &&  !empty(a:1)
       let s:additional['distinct'] = 1
     endif
-    let result=csv#EvalColumn(a:col, '<sid>CountColumn', first, last, distinct)
+    let result=<sid>EvalColumn(a:col. ' '.a:fmt, '<sid>CountColumn', first, last, distinct)
     unlet! s:additional['distinct']
     return (empty(result) ? 0 : result)
 endfu
