@@ -1,8 +1,8 @@
-" Vimball Archiver by Charles E. Campbell, Jr., Ph.D.
+" Vimball Archiver by Charles E. Campbell
 UseVimball
 finish
 ftplugin/csv.vim	[[[1
-2830
+2857
 " Filetype plugin for editing CSV files. "{{{1
 " Author:  Christian Brabandt <cb@256bit.org>
 " Version: 0.31
@@ -474,7 +474,7 @@ fu! <sid>WColumn(...) "{{{3
             " line is empty
             let line = getline(line('.')-1)
         else
-            let line=getline('.')
+            let line = getline('.')
         endif
         " move cursor to end of field
         "call search(b:col, 'ec', line('.'))
@@ -484,7 +484,7 @@ fu! <sid>WColumn(...) "{{{3
         let ret=len(fields)
         if exists("a:1") && a:1 > 0
             " bang attribute: Try to get the column name
-            let head  = split(getline(1),b:col.'\zs')
+            let head  = split(getline(get(b:, 'csv_headerline', 1)),b:col.'\zs')
             " remove preceeding whitespace
             if len(head) < ret
                 call <sid>Warn("Header has no field ". ret)
@@ -512,9 +512,12 @@ fu! <sid>MaxColumns(...) "{{{3
     let this_col = exists("a:1")
     "return maximum number of columns in first 10 lines
     if !exists("b:csv_fixed_width_cols")
-      let i = this_col ? a:1 : 1
+      let i = this_col ? a:1 : get(b:, 'csv_headerline', 1)
         while 1
             let l = getline(i, (this_col ? i : i+10))
+            if empty(l) && i >= line('$')
+                break
+            endif
 
             " Filter comments out
             let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
@@ -625,6 +628,12 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
         let last = b:csv_headerline
       endif
     endif
+    if first > line('$')
+        let first=line('$')
+    endif
+    if last > line('$')
+        let last=line('$')
+    endif
     if &vbs
       echomsg printf("ArrangeCol Start: %d, End: %d", first, last)
     endif
@@ -635,6 +644,11 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
         call <sid>CalculateColumnWidth(row)
     endif
 
+    " abort on empty file
+    if !len(b:col_width)
+        call <sid>Warn("No column data detected, aborting ArrangeCol command!")
+        return
+    endif
     if &ro
        " Just in case, to prevent the Warning
        " Warning: W10: Changing read-only file
@@ -1548,7 +1562,7 @@ fu! <sid>PrepareFolding(add, match)  "{{{3
 
         let col = <sid>WColumn()
         let max = <sid>MaxColumns()
-        let a   = <sid>GetColumn(line('.'), col)
+        let a   = <sid>GetColumn(line('.'), col, 0)
         let a   = <sid>ProcessFieldValue(a)
         let pat = '\%(^\|'.b:delimiter. '\)\@<='.<sid>EscapeValue(a).
                  \ '\m\ze\%('.b:delimiter.'\|$\)'
@@ -1637,7 +1651,7 @@ fu! <sid>OutputFilters(bang) "{{{3
                 if s:csv_fold_headerline
                     echo printf("%02d\t% 2s\t%02d\t%10.10s\t%s",
                         \ item.id, (item.match ? '+' : '-'), item.col,
-                        \ substitute(<sid>GetColumn(1, item.col),
+                        \ substitute(<sid>GetColumn(1, item.col, 0),
                         \ b:col.'$', '', ''), item.orig)
                 else
                     echo printf("%02d\t% 2s\t%02d\t%s",
@@ -1660,7 +1674,7 @@ fu! <sid>SortFilter(a, b) "{{{3
     return a:a.id == a:b.id ? 0 :
         \ a:a.id > a:b.id ? 1 : -1
 endfu
-fu! <sid>GetColumn(line, col) "{{{3
+fu! <sid>GetColumn(line, col, strip) "{{{3
     " Return Column content at a:line, a:col
     let a=getline(a:line)
     " Filter comments out
@@ -1678,7 +1692,11 @@ fu! <sid>GetColumn(line, col) "{{{3
     else
         let a = matchstr(a, <sid>GetColPat(a:col, 0))
     endif
-    return substitute(a, '^\s\+\|\s\+$', '', 'g')
+    if a:strip
+        return substitute(a, '^\s\+\|\s\+$', '', 'g')
+    else
+        return a
+    endif
 endfu
 fu! <sid>RemoveLastItem(count) "{{{3
     for [key,value] in items(b:csv_filter)
@@ -1779,7 +1797,11 @@ fu! <sid>AnalyzeColumn(...) "{{{3
         endfor
     endfor
     echo printf("%s", repeat('=', strdisplaywidth(title)))
-    echo printf("different values: %d", len(count_items))
+    if &columns > 40
+        echo printf("different values in column %d: %d", colnr, len(count_items))
+    else
+        echo printf("different values: %d", len(count_items))
+    endif
     unlet max_items
 endfunc
 fu! <sid>Vertfold(bang, col) "{{{3
@@ -2267,7 +2289,7 @@ fu! <sid>Transpose(line1, line2) "{{{3
         endif
         let r   = []
         for row in range(1,columns)
-            let field = <sid>GetColumn(line, row)
+            let field = <sid>GetColumn(line, row, 0)
             call add(r, field)
         endfor
         call add(matrix, r)
@@ -2592,15 +2614,15 @@ fu! <sid>SameFieldRegion() "{{{3
     " visually select the region, that has the same value in the cursor field
     let col = <sid>WColumn()
     let max = <sid>MaxColumns()
-    let field = <sid>GetColumn(line('.'), col)
+    let field = <sid>GetColumn(line('.'), col, 0)
     let line = line('.')
-    
+
     let limit = [line, line]
     " Search upwards and downwards from the current position and find the
     " limit of the current selection
     while line > 1
         let line -= 1
-        if <sid>GetColumn(line, col) ==# field
+        if <sid>GetColumn(line, col, 0) ==# field
             let limit[0] = line
         else
             break
@@ -2609,7 +2631,7 @@ fu! <sid>SameFieldRegion() "{{{3
     let line = line('.')
     while line > 1 && line < line('$')
         let line += 1
-        if <sid>GetColumn(line, col) ==# field
+        if <sid>GetColumn(line, col, 0) ==# field
             let limit[1] = line
         else
             break
@@ -2617,6 +2639,8 @@ fu! <sid>SameFieldRegion() "{{{3
     endw
     exe printf(':norm! %dGV%dG',limit[0],limit[1])
 endfu
+
+
 fu! CSV_CloseBuffer(buffer) "{{{3
     " Setup by SetupAutoCmd autocommand
     try
@@ -2813,7 +2837,10 @@ endfu
 fu! CSV_WCol(...) "{{{3
     " Needed for airline
     try
-        if exists("a:1") && (a:1 == 'Name' || a:1 == 1)
+        if line('$') == 1 && empty(getline(1))
+            " Empty file
+            return ''
+        elseif exists("a:1") && (a:1 == 'Name' || a:1 == 1)
             return printf("%s", <sid>WColumn(1))
         else
             return printf(" %d/%d", <SID>WColumn(), <SID>MaxColumns())
@@ -2834,7 +2861,7 @@ unlet s:cpo_save
 " Vim Modeline " {{{2
 " vim: set foldmethod=marker et:
 doc/ft-csv.txt	[[[1
-1906
+1923
 *ft-csv.txt*	For Vim version 7.4	Last Change: Thu, 15 Jan 2015
 
 Author:		Christian Brabandt <cb@256bit.org>
@@ -4171,6 +4198,10 @@ Returns the 10 largest values for column col.
 ------------------------------------------------------
 Returns the 10 smallest values for column col. 
 
+5.8 CSVAvg(col, fmt, startline, endline)                         *CSVAvg()*
+------------------------------------------------------
+Returns the average value for column col. 
+
 ==============================================================================
 6. CSV Tips and Tricks						*csv-tips*
 
@@ -4313,6 +4344,8 @@ function and let the plugin call it for a column like this:
     This will evaluate the average of column seven (assuming, line 1 is the
     header line, which should not be taken into account).
 
+    Note: this plugin already defines an average function.
+
 6.4 Autocommand on opening/closing files                *csv-arrange-autocmd*
 ----------------------------------------
 If you want your CSV files to always be displayed like a table, you can
@@ -4449,6 +4482,17 @@ Index;Value1;Value2~
 - Make |:ArrangeCol| respect given headerlines
 - when checking Header/comment lines at beginning of file, make sure to escape
   the comment pattern correctly.
+- use b:csv_headerline variable for checking column name and column numbers
+  (reported by Werner Freund at https://github.com/chrisbra/csv.vim/issues/78,
+  thanks!)
+- Statusline function could cause a hang in an empty file (reported by Jeet
+  Sukumaran in issue https://github.com/chrisbra/csv.vim/issues/80, thanks!)
+- Wrong headerline highlighting when creating a new file (reported by Jeet
+  Sukumaran in issue https://github.com/chrisbra/csv.vim/issues/79, thanks!)
+- Do not strip leading whitespace, when applying filters (reported by
+  blubb123muh in https://github.com/chrisbra/csv.vim/issues/87, thanks!)
+- display column name on |:Analyze_CSV| command (suggested by indera in
+  https://github.com/chrisbra/csv.vim/issues/88, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped
@@ -4742,7 +4786,7 @@ Index;Value1;Value2~
 
 vim:tw=78:ts=8:ft=help:norl:et:fdm=marker:fdl=0
 syntax/csv.vim	[[[1
-184
+185
 " A simple syntax highlighting, simply alternate colors between two
 " adjacent columns
 " Init {{{2
@@ -4819,7 +4863,8 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
 	let cmts    = <sid>Esc(s:cmts, '')
 	let pattern = '\%^\(\%('.cmts.'.*\n\)\|\%(\s*\n\)\)\+'
 	let start = search(pattern, 'nWe', 10)
-	if start > 0
+	" don't do it, on an empty file
+	if start > 0 && !empty(getline(start))
 	    let b:csv_headerline = start+1
 	endif
     endif
@@ -4933,7 +4978,7 @@ ftdetect/csv.vim	[[[1
 au BufRead,BufNewFile *.csv,*.dat,*.tsv,*.tab set filetype=csv
 
 plugin/csv.vim	[[[1
-93
+94
 if exists('g:loaded_csv') && g:loaded_csv
   finish
 endif
@@ -5009,10 +5054,11 @@ fu! <sid>Table(bang, line1, line2, delim)
 	unlet! b:col_width b:csv_list
     catch
     finally
+	" move back to previous window
+	noa wincmd p
 	if !empty(indent)
-	    " Added one line above a:line1 and several lines below, so need to
-	    " correct the range
-	    exe printf(':sil %d,%ds/^/%s/e', (line1 - 1), (line2 + line('$') - last), indent)
+	    " undo removing the indent
+	    u
 	endif
 	if has("conceal")
 	    let [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:cole, &l:cocu, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt, &l:ma, &l:ml] = _a
