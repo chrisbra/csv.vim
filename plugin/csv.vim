@@ -73,10 +73,11 @@ fu! <sid>Table(bang, line1, line2, delim)
 	unlet! b:col_width b:csv_list
     catch
     finally
+	" move back to previous window
+	noa wincmd p
 	if !empty(indent)
-	    " Added one line above a:line1 and several lines below, so need to
-	    " correct the range
-	    exe printf(':sil %d,%ds/^/%s/e', (line1 - 1), (line2 + line('$') - last), indent)
+	    " undo removing the indent
+	    u
 	endif
 	if has("conceal")
 	    let [ &l:lz, &l:syntax, &l:ft, &l:sol, &l:tw, &l:wrap, &l:cole, &l:cocu, &l:fen, &l:fdm, &l:fdl, &l:fdc, &l:fml, &l:fdt, &l:ma, &l:ml] = _a
