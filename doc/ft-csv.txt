@@ -1627,6 +1627,8 @@ Index;Value1;Value2~
   Sukumaran in issue https://github.com/chrisbra/csv.vim/issues/79, thanks!)
 - Do not strip leading whitespace, when applying filters (reported by
   blubb123muh in https://github.com/chrisbra/csv.vim/issues/87, thanks!)
+- display column name on |:Analyze_CSV| command (suggested by indera in
+  https://github.com/chrisbra/csv.vim/issues/88, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped

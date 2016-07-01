@@ -1792,7 +1792,11 @@ fu! <sid>AnalyzeColumn(...) "{{{3
         endfor
     endfor
     echo printf("%s", repeat('=', strdisplaywidth(title)))
-    echo printf("different values: %d", len(count_items))
+    if &columns > 40
+        echo printf("different values in column %d: %d", colnr, len(count_items))
+    else
+        echo printf("different values: %d", len(count_items))
+    endif
     unlet max_items
 endfunc
 fu! <sid>Vertfold(bang, col) "{{{3
