@@ -12,10 +12,10 @@ if exists("g:csv_autocmd_arrange")
 	    " Visually arrange columns when opening a csv file
 	    aug CSV_Edit
 		au!
-		au BufReadPost,BufWritePost *.csv,*.dat,*.tsv,*.tab :exe
+		au BufReadPost,BufWritePost *.csv,*.tsv,*.tab :exe
 			    \ printf(":call CSVArrangeCol(1, %d, 0, %d)",
 			    \ line('$'), get(g:, 'csv_autocmd_arrange_size', -1))
-		au BufWritePre *.csv,*.dat,*.tsv,*.tab :sil %UnArrangeColumn
+		au BufWritePre *.csv,*.tsv,*.tab :sil %UnArrangeColumn
 	    aug end
 	endfu
 	call CSVDoBufLoadAutocmd()
