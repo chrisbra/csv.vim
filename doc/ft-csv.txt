@@ -1629,6 +1629,8 @@ Index;Value1;Value2~
   blubb123muh in https://github.com/chrisbra/csv.vim/issues/87, thanks!)
 - display column name on |:Analyze_CSV| command (suggested by indera in
   https://github.com/chrisbra/csv.vim/issues/88, thanks!)
+- use :sil for BufWinLeave autocommand (to not display error messages)
+  (by Hans-Guenter, https://github.com/chrisbra/csv.vim/pull/90, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped

@@ -216,7 +216,7 @@ fu! <sid>DoAutoCommands() "{{{3
         exe "aug CSV_HI".bufnr('')
             au!
             exe "au CursorMoved <buffer=".bufnr('')."> HiColumn"
-            exe "au BufWinLeave <buffer=".bufnr('')."> HiColumn!"
+            exe "au BufWinLeave <buffer=".bufnr('')."> sil! HiColumn!"
         aug end
         " Set highlighting for column, on which the cursor is currently
         HiColumn
