@@ -177,7 +177,7 @@ fu! <sid>LocalSettings(type) "{{{3
         let b:undo_ftplugin = "setlocal sol& tw< wrap<"
 
         " Set browsefilter
-        let b:browsefilter="CSV Files (*.csv, *.dat)\t*.csv;*.dat\n".
+        let b:browsefilter="CSV Files (*.csv)\t*.csv\n".
                  \ "All Files\t*.*\n"
 
         if has("conceal")
