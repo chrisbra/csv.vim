@@ -333,7 +333,7 @@ Note, this won't work with linebreaks in the column.
 
 Note also, that if you already have a horizontal header window (|VHeader_CSV|),
 this command will close the horizontal Header window. This is because of a
-limitation of Vim itsself, which doesn't allow to sync the scrolling between
+limitation of Vim itself, which doesn't allow to sync the scrolling between
 two windows horizontally and at the same time have another window only sync
 its scrolling vertically.
 
@@ -970,7 +970,7 @@ variable b:delimiter.
 If your file does not consist of delimited columns, but rather is a fixed
 width csv file, see |csv-fixedwidth| for configuring the plugin appropriately.
 
-If you changed the delimiter, you should reinitiliaze the plugin using
+If you changed the delimiter, you should reinitialize the plugin using
 |InitCSV|
 
 Note: the delimiter will be used to generate a regular expression that matches
