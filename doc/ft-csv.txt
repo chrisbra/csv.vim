@@ -37,6 +37,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.25 Substitute in columns..................|Substitute_CSV|
     3.26 Count values inside a column...........|Count_CSV|
     3.27 Maximum/Minimum values ................|MaxCol_CSV|
+    3.28 Average values.........................|AvgCol_CSV|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -947,6 +948,20 @@ Note, if you Vim is compiled without floating point number format (|+float|),
 Vim will only aggregate the integer part and therefore won't use the 'y'
 argument in the /format/ specifier.
 
+3.28 Average value of a Column 				*AvgCol_CSV*
+------------------------------
+You can let Vim output the value of a column using the `:CSVAvgCol` command >
+
+    :[range]AvgCol [nr] [/format/]
+
+This outputs the result of the column <nr> within the range given. If no range
+is given, this will calculate the average value of the whole column. If <nr> is not
+given, this calculates the sum for the column the cursor is on. Note, that the
+delimiter will be stripped away from each value and also empty values won't be
+considered.
+
+For the [/format/] part, see |MaxCol_CSV|.
+
 See also |csv-aggregate-functions|
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
@@ -1631,6 +1646,8 @@ Index;Value1;Value2~
   https://github.com/chrisbra/csv.vim/issues/88, thanks!)
 - use :sil for BufWinLeave autocommand (to not display error messages)
   (by Hans-Guenter, https://github.com/chrisbra/csv.vim/pull/90, thanks!)
+- add |:AvgCol_CSV| command (suggested by jungle-boogie
+  https://github.com/chrisbra/csv.vim/issues/85, thanks!)
 
 0.31 Jan 15, 2015 {{{1
 - supports for Vim 7.3 dropped
