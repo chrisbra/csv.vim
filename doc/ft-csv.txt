@@ -38,6 +38,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.26 Count values inside a column...........|Count_CSV|
     3.27 Maximum/Minimum values ................|MaxCol_CSV|
     3.28 Average values.........................|AvgCol_CSV|
+    3.29 Duplicate columns......................|DupColumn_CSV|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -865,7 +866,7 @@ however add as first argument the column number after which the new column
 needs to be added.
 
 Additionally, you can also add a count number to add several columns at once
-after the specified column number. You 0 for the column number, if you want to
+after the specified column number. Use 0 for the column number, if you want to
 add several columns after the current column.
 
                                                             *:CSVSubstitute*
@@ -963,6 +964,20 @@ considered.
 For the [/format/] part, see |MaxCol_CSV|.
 
 See also |csv-aggregate-functions|
+
+                                                            *:CSVDupColumn*
+3.29 Duplicate columns                                       *DupColumn_CSV*
+----------------------
+If you want to add duplicate an existing column you can use the
+`:CSVDupColumn` or `:DupColumn` command: >
+
+    :[range]DupColumn [column] [count]
+
+By default, this works for the whole file, but you can give a different range
+to which the command applies. By default it will duplicate the column on which
+the cursor is, but you can add as first argument which column will be duplicated.
+
+Additionally, you can also provide a count to copy several columns at once.
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
 

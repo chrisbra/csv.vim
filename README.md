@@ -42,6 +42,7 @@ works differently.
   * [Count Values inside a Column](#count-values-inside-a-column)
   * [Maximum/Minimum value of a Column](#maximumminimum-value-of-a-column)
   * [Average value of a Column](#average-value-of-a-column)
+  * [Duplicate columns](#duplicate-columns)
 - [CSV Configuration](#csv-configuration)
   * [Delimiter](#delimiter)
   * [Column](#column)
@@ -1026,6 +1027,21 @@ considered.
 For the `[/format/]` part, see `MaxCol_CSV`.
 
 See also `csv-aggregate-functions`
+
+## Duplicate columns
+
+If you want to add duplicate an existing column you can use the
+`:CSVDupColumn` or `:DupColumn` command:
+
+```vim
+:[range]DupColumn [column] [count]
+```
+
+By default, this works for the whole file, but you can give a different range
+to which the command applies. By default it will duplicate the column on which
+the cursor is, but you can add as first argument `<column>` which column will be duplicated.
+
+Additionally, you can also provide a `<count>` to copy several columns at once.
 
 # CSV Configuration
 

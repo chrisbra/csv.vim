@@ -1256,6 +1256,64 @@ fu! <sid>MoveColumn(start, stop, ...) range "{{{3
     endfor
     call winrestview(wsv)
 endfu
+fu! <sid>DupColumn(start, stop, ...) range "{{{3
+    " Add new empty column
+    " Explicitly give the range as argument,
+    " cause otherwise, Vim would move the cursor
+    if exists("b:csv_fixed_width_cols")
+        call <sid>Warn("Duplicating Columns only works for delimited files")
+        return
+    endif
+
+    let wsv = winsaveview()
+
+    " translate 1 based columns into zero based list index
+    let col = <sid>WColumn() - 1
+    let max = <sid>MaxColumns()
+    let add_delim = 0
+
+    " If no argument is given, add column after current column
+    if exists("a:1")
+        if a:1 == '$' || a:1 >= max
+            let pos = max - 1
+        elseif a:1 < 0
+            let pos = col
+        else
+            let pos = a:1 - 1
+        endif
+    else
+        let pos = col
+    endif
+    if pos == max - 1
+        let add_delim = 1
+    endif
+    let cnt=(exists("a:2") && a:2 > 0 ? a:2 : 1)
+
+    " if the data contains comments, substitute one line after another
+    " skipping comment lines (we could do it with a single :s statement,
+    " but that would fail for the first and last column.
+
+    let commentpat = '\%(\%>'.(a:start-1).'l\V'.
+                \ escape(b:csv_cmt[0], '\\').'\m\)'. '\&\%(\%<'.
+                \ (a:stop+1). 'l\V'. escape(b:csv_cmt[0], '\\'). '\m\)'
+
+    for i in range(a:start, a:stop)
+        let content = getline(i)
+        if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+            " skip comments
+            continue
+        endif
+        let fields = split(getline(i), b:col.'\zs')
+        if add_delim && fields[-1][:-1] isnot b:delimiter
+            " Need to add a delimiter
+            let fields[pos] .= b:delimiter
+        endif
+        let fields = fields[0:pos] + repeat([fields[pos]], cnt) + fields[pos+1:-1]
+        call setline(i, join(fields, ''))
+    endfor
+    call winrestview(wsv)
+endfu
+
 fu! <sid>AddColumn(start, stop, ...) range "{{{3
     " Add new empty column
     " Explicitly give the range as argument,
@@ -1285,7 +1343,6 @@ fu! <sid>AddColumn(start, stop, ...) range "{{{3
     let cnt=(exists("a:2") && a:2 > 0 ? a:2 : 1)
 
     " translate 1 based columns into zero based list index
-    "let pos -= 1
     let col -= 1
 
     if pos == 0
@@ -2111,6 +2168,9 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-bang -range=%')
     call <sid>LocalCmd("AddColumn",
         \ ':call <sid>AddColumn(<line1>,<line2>,<f-args>)',
+        \ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd("DupColumn",
+        \ ':call <sid>DupColumn(<line1>,<line2>,<f-args>)',
         \ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd('Substitute', ':call <sid>SubstituteInColumn(<q-args>,<line1>,<line2>)',
         \ '-nargs=1 -range=%')
