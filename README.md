@@ -27,7 +27,7 @@ CSV filetype plugin is loaded correctly, vim needs to be enabled to load
 `.vimrc`:
 
 ```vim
-    :filetype plugin on
+:filetype plugin on
 ```
 (see also `filetype-plugin-on`).
 
@@ -36,44 +36,44 @@ In case this did not work, you need to setup vim like this:
 To have Vim automatically detect csv files, you need to do the following.
 
    1. Create your user runtime directory if you do not have one yet. This
-      directory needs to be in your 'runtime' path. In Unix this would
-      typically the ~/.vim directory, while in Windows this is usually your
-      ~/vimfiles directory. Use :echo expand("~") to find out, what Vim thinks
-      your user directory is.
-      To create this directory, you can do:
+	  directory needs to be in your 'runtime' path. In Unix this would
+	  typically the ~/.vim directory, while in Windows this is usually your
+	  ~/vimfiles directory. Use :echo expand("~") to find out, what Vim thinks
+	  your user directory is.
+	  To create this directory, you can do:
 
-      ```vim
-      :!mkdir ~/.vim
-      ```
-      for Unix and
+	  ```vim
+	:!mkdir ~/.vim
+	  ```
+	  for Unix and
 
-      ```vim
-      :!mkdir ~/vimfiles
-      ```
-      for Windows.
+	  ```vim
+	:!mkdir ~/vimfiles
+	  ```
+	  for Windows.
 
    2. In that directory you create a file that will detect csv files.
 
-    ```vim
+	```vim
 
-    if exists("did_load_csvfiletype")
-      finish
-    endif
-    let did_load_csvfiletype=1
+	if exists("did_load_csvfiletype")
+	  finish
+	endif
+	let did_load_csvfiletype=1
 
-    augroup filetypedetect
-      au! BufRead,BufNewFile *.csv,*.dat	setfiletype csv
-    augroup END
+	augroup filetypedetect
+	  au! BufRead,BufNewFile *.csv,*.dat	setfiletype csv
+	augroup END
 
-    ```
-    You save this file as "filetype.vim" in your user runtime diretory:
+	```
+	You save this file as "filetype.vim" in your user runtime diretory:
 
-    ```vim
-    :w ~/.vim/filetype.vim
-    ```
+	```vim
+	:w ~/.vim/filetype.vim
+	```
    3. To be able to use your new filetype.vim detection, you need to restart
-      Vim. Vim will then  load the csv filetype plugin for all files whose
-      names end with .csv.
+	  Vim. Vim will then  load the csv filetype plugin for all files whose
+	  names end with .csv.
 
 # Commands
 
@@ -85,18 +85,18 @@ with the prefix :CSV (e.g. `:CSVNrColumns`)
 If you would like to know, on which column the cursor is, use 
 
 ```vim
-    :WhatColumn
+:WhatColumn
 ```
 or 
 
 ```vim
-    :CSVWhatColumn
+:CSVWhatColumn
 ```
 Use the bang attribute, if you have a heading in the first line and you want
 to know the name of the column in which the cursor is: 
 
 ```vim
-    :WhatColumn!
+:WhatColumn!
 ```
 ## NrColumns
 
@@ -111,13 +111,13 @@ Use `:SearchInColumn` or `:CSVSearchInColumn` to search for a pattern within a
 specific column. The usage is: 
 
 ```vim
-    :SearchInColumn [<nr>] /{pat}/
+:SearchInColumn [<nr>] /{pat}/
 ```
 
 So if you would like to search in Column 1 for the word foobar, you enter 
 
 ```vim
-    :SearchInColumn 1 /foobar/
+:SearchInColumn 1 /foobar/
 ```
 
 Instead of / as delimiter, you can use any other delimiter you like. If you
@@ -133,7 +133,7 @@ If you do not specify a <nr>, HiColumn will highlight the column on which the
 cursor is. Use 
 
 ```vim
-    :HiColumn!
+:HiColumn!
 ```
 
 to remove any highlighting.
@@ -146,7 +146,7 @@ If you would like all columns to be visually arranged, you can use the
 `:ArrangeColumn` or `:CSVArrangeColumn` command: 
 
 ```vim
-    :[range]ArrangeColumn[!] [<Row>]
+:[range]ArrangeColumn[!] [<Row>]
 ```
 
 Beware, that this will change your file and depending on the size of
@@ -176,7 +176,7 @@ a particular column (starting from left). Missing columns will be right aligned.
 So this: 
 
 ```vim
-    :let b:csv_arrange_align = 'lc.'
+:let b:csv_arrange_align = 'lc.'
 ```
 Will left-align the first column, center align the second column, decimal
 align the third column and all following columns right align. (Note: decimal
@@ -193,14 +193,14 @@ memory. Therefore, the csv plugin will at most check 10.000 lines for the
 width. Set the variable b:csv_arrange_use_all_rows to 1 to use all records: 
 
 ```vim
-    :let b:csv_arrange_use_all_rows = 1
+:let b:csv_arrange_use_all_rows = 1
 ```
 (this could however in the worst case lead to a crash).
 
 To disable the statusline progressbar set the variable g:csv_no_progress: 
 
 ```vim
-    :let g:csv_no_progress = 1
+:let g:csv_no_progress = 1
 ```
 This will disable the progressbar and slightly improve performance (since no
 additional redraws are needed).
@@ -216,7 +216,7 @@ If you would like to undo a previous :ArrangeColumn command, you can use this
 `:UnArrangeColumn` or `:CSVUnArrangeColumn` command: 
 
 ```vim
-    :[range]UnArrangeColumn
+:[range]UnArrangeColumn
 ```
 
 Beware, that is no exact undo of the :ArrangeColumn command, since it strips
@@ -225,12 +225,12 @@ only some blanks, this command will strip all blanks.
 
 If [range] is given, it defaults to the current line.
 
-## DeleteColumn                                           *DeleteColumn_CSV*
-----------------
+## DeleteColumn
 
 The command `:DeleteColumn` or `:CSVDeleteColumn` can be used to delete a specific column. 
 ```vim
-    :DeleteColumn 2
+:DeleteColumn 2
+```
 
 will delete column 2.
 
@@ -238,21 +238,19 @@ If you don't specify a column number, it will delete the column on which the
 cursor is. Alternatively, you can also specify a search string. The plugin
 will then delete all columns that match the pattern: 
 ```vim
-    :DeleteColumn /foobar
+:DeleteColumn /foobar
 ```
 will delete all columns where the pattern "foobar" matches.
 
-                                                                *:CSVInit*
 ## CSVInit
------------
+
 Reinitialize the Plugin. Use this, if you have changed the configuration
 of the plugin (see `csv-configuration` ).
 If you use the bang (!) attribute, it will keep the b:delimiter configuration
 variable.
 
-                                                                *:CSVHeader*
-## Header lines						 *Header_CSV*
-----------------
+## Header Lines
+
 The `:Header` or `:CSVHeader` command splits the csv-buffer and adds a window,
 that holds a small fraction of the csv file. This is useful, if the first line
 contains some kind of a heading and you want always to display it. This works
@@ -260,15 +258,19 @@ similar to fixing a certain line at the top. As optional argument, you can
 give the number of columns from the top, that shall be displayed. By default,
 1 is used (You can define youre own default by setting the b:csv_headerline
 variable, see `csv-header`). Use the '!' to close this window. So this 
+
 ```vim
-    :Header 3
+:Header 3
+```
 
 opens at the top a split window, that holds the first 3 lines, is fixed
 and horizontally 'scrollbind'ed to the csv window and highlighted using the
 CSVHeaderLine highlighting.
 To close the header window, use 
+
 ```vim
-    :Header!
+:Header!
+```
 
 Note, this won't work with linebreaks in the column.
 
@@ -280,7 +282,7 @@ its scrolling vertically.
 
 Note: this command does not work for fixed width columns `csv-fixedwidth`
 
-                                                *:CSVVHeader* *VHeader_CSV*
+												*:CSVVHeader* *VHeader_CSV*
 If you want a vertical header line, use `:VHeader` or `:CSVVHeader`. This works
 similar to the `Header_CSV` command, except that it will open a vertical split
 window with the first column always visible. It will always open the first
@@ -288,11 +290,13 @@ column in the new split window. Use the '!' to close the window. If you
 specify a count, that many columns will be visible (default: the first). Add
 the bang to the count, if you only want the specific column to be visible.
 
-```vim:VHeader 2
+```
+vim:VHeader 2
 ```
 This will open a vertical split window containing the first 2 columns, while
 
-```vim:VHeader 2!
+```
+vim:VHeader 2!
 ```
 Opens a new vertical split window containing only the 2 second column.
 
@@ -300,27 +304,27 @@ Note, this won't work with linebreaks in the column.
 Note also: this command does not work for fixed width columns `csv-fixedwidth`
 
 
-                                        *:CSVVHeaderToggle* *:CSVHeaderToggle*
-                                        *VHeaderToggle_CSV* *HeaderToggle_CSV*
 Use the `:HeaderToggle` and `:VHeaderToggle` command to toggle displaying the
 horizontal or vertical header line. Alternatively, use `:CSVHeaderToggle` or
 `:CSVVHeaderToggle`
 
+## Sort
 
-                                                                *:CSVSort*
-##0 Sort							*Sort_CSV*
----------
 The command `:Sort` or `:CSVSort` can be used to sort the csv file on a
 certain column. If no range is given, is sorts the whole file. Specify the
 column number to sort on as argument. Use the '!' attribute to reverse the
 sort order. For example, the following command sorts line 1 til 10 on the 3
 column 
+
 ```vim
-    :1,10Sort 3
+:1,10Sort 3
+```
 
 While this command 
+
 ```vim
-    :1,10Sort! 3
+:1,10Sort! 3
+```
 
 reverses the order based on column 3.
 
@@ -331,13 +335,14 @@ or [o]ctal value.
 When no column number is given, it will sort by the column, on which the
 cursor is currently.
 
-                                                                *:CSVColumn*
-## Copy Column        					 *Copy_CSV*
-----------------
+## Copy Column
+
 If you need to copy a specific column, you can use the command `:CSVColumn` or
 `:Column` 
+
 ```vim
-    :[N]Column [a]
+:[N]Column [a]
+```
 
 Copy column N into register a. This will copy all the values, that are
 not folded-away (`csv-filter`) and skip comments.
@@ -346,13 +351,14 @@ If you don't specify N, the column of the current cursor position is used.
 If no register is given, the default register
 `quotequote` is used.
 
-                                                                *:CSVMoveCol*
-## Move A Column        					 *MoveCol_CSV*
-------------------
+## Move A Column
+
 You can move one column to the right of another column by using the
 `:CSVMoveColumn` or `:MoveColumn` command 
+
 ```vim
-    :[range]MoveColumn [source] [dest]
+:[range]MoveColumn [source] [dest]
+```
 
 This moves the column number source to the right of column nr destination. If
 both arguments are not given, move the column on which the cursor is to the
@@ -360,20 +366,23 @@ right of the current last column. If [range] is not given, MoveColumn moves
 the entire column, otherwise, it moves the columns only for the lines within
 the range, e.g. given that your first line is a header line, which you don't
 want to change 
+
 ```vim
-    :2,$MoveColumn 1 $
+:2,$MoveColumn 1 $
+```
 
 this would move column 1 behind the last column, while keeping the header line
 as is.
 
 
-                                                                *:CSVSumCol*
-## Sum of a Column        					 *SumCol_CSV*
---------------------
+## Sum of a Column
+
 You can let Vim output the sum of a column using the `:CSVSumCol` or `:SumCol`
 command 
+
 ```vim
-    :[range]SumCol [nr] [/format/]
+:[range]SumCol [nr] [/format/]
+```
 
 This outputs the result of the column <nr> within the range given. If no range
 is given, this will calculate the sum of the whole column. If <nr> is not
@@ -386,15 +395,22 @@ separator while there is no thousands separator. If youre file contains
 the numbers in a different format, you can use the /format/ option to specify
 a different thousands separator or a different decimal separator. The format
 needs to be specified like this:
-    /x:y/
+
+```
+/x:y/
+```
 where 'x' defines the thousands separator and y defines the decimal
 separator and each one is optional. This means, that 
+
 ```vim
-    :SumCol 1 /:,/
+:SumCol 1 /:,/
+```
 
 uses the default thousands separator and ',' as the decimal separator and 
+
 ```vim
-    :SumCol 2 / :./
+:SumCol 2 / :./
+```
 
 uses the Space as thousands separator and the '.' as decimal separator.
 
@@ -404,37 +420,38 @@ argument in the /format/ specifier.
 
 See also `csv-aggregate-functions`
 
-                                                            *:CSVNewRecord*
-## Create new Records                                      *NewRecord_CSV*
------------------------
+## Create new Records
+
 If you want to create one or several records, you can use the `:NewRecord` or
 `:CSVNewRecord` command: 
+
 ```vim
-    :[range]NewRecord [count]
+:[range]NewRecord [count]
+```
 
 This will create in each line given by range [count] number of new empty
 records. If [range] is not specified, creates a new line below the line the
 cursor is on and if count is not given, it defaults to 1.
 
+## Change the delimiter
 
-                                                            *:CSVNewDelimiter*
-## Change the delimiter                                    *NewDelimiter_CSV*
--------------------------
 If you want to change the field delimiter of your file you can use the
 `:CSVNewDelimiter` or `:NewDelimiter` command: 
+
 ```vim
-    :NewDelimiter char
+:NewDelimiter char
+```
 
 This changes the field delimiter of your file to the new delimiter "char".
 Note: Will remove trailing delimiters.
 
-                                                            *:CSVDuplicate*
-## Check for duplicate records                            *Duplicate_CSV*
---------------------------------
+## Check for duplicate records
+
 If you want to check the file for duplicate records, use the command
 `:Duplicate` or `:CSVDuplicate`: 
+
 ```vim
-    :Duplicate columnlist
+:Duplicate columnlist
 ```
 
 Columnlist needs to be a numeric comma-separated list of all columns that you
@@ -444,33 +461,32 @@ should check columns 2,3,4 and 5.
 If the plugin finds a duplicate records, it outputs its line number (but it
 only does that at most 10 times).
 
-## Normal mode commands					 *csv-mapping*
--------------------------
+## Normal mode commands
+
 The csv filetype plugin redefines the following keys as:
 
 <C-Right> or L or W	Move [count] field forwards
 
 <C-Left> or E or H	Move [count] field backwards (but see `csv-mapping-H` 
-                        for the movement of H).
+						for the movement of H).
 
 <Up> or K		Move [count] lines upwards within the same column
 
 <Down> or J		Move [count] lines downwards within the same column
 
-<Enter>                 Dynamically fold all lines away, that don't match
-                        the value in the current column. See `csv-filter`
+<Enter>					Dynamically fold all lines away, that don't match
+						the value in the current column. See `csv-filter`
 
-                        In `Replace-mode` and `Virtual-Replace-mode` does not
-                        create a new row, but instead moves the cursor to the
-                        beginning of the same column, one more line below.
+						In `Replace-mode` and `Virtual-Replace-mode` does not
+						create a new row, but instead moves the cursor to the
+						beginning of the same column, one more line below.
 
-<Space>                 Dynamically fold all lines away, that match
-                        the value in the current column. See `csv-filter`
+<Space>					Dynamically fold all lines away, that match
+						the value in the current column. See `csv-filter`
 
-<BS>                    Remove last item from the dynamic filter.
-                        See `csv-filter`
+<BS>					Remove last item from the dynamic filter.
+						See `csv-filter`
 
-                                                    *csv-mapping-H*
 Note how the mapping of 'H' differs from 'E'
 
 H step fields backwards but also stops at where the content of the columns
@@ -478,36 +494,35 @@ begins.
 
 If you look into this example (with the cursor being '|')
 
-    aaa,   bbbb,|ccc `
+	aaa,   bbbb,|ccc `
 
 Pressing 'H' moves to
 
-    aaa,   |bbbb,ccc `
+	aaa,   |bbbb,ccc `
 
 Pressing 'H' again moves to
 
-    aaa,|   bbbb,ccc `
+	aaa,|	bbbb,ccc `
 
 Pressing 'H' again moves to 
 
-    |aaa,   bbbb,ccc `
+	|aaa,	bbbb,ccc `
 
 While with 'E', the cursor moves to: 
 
-     aaa,|  bbbb,ccc `
+	 aaa,|	bbbb,ccc `
 
 and pressing  'E' again, it would move directly to 
 
-    |aaa,   bbbb,ccc `
+	|aaa,	bbbb,ccc `
 
-                                                            *csv-textobjects*
 Also, the csv plugin defines these text-object:
 
-if                      Inner Field (contains everything up to the delimiter)
-af                      Outer Field (contains everything up to and including
-                        the delimiter)
-iL                      Inner Line (visually linewise select all lines, that
-                        has the same value at the cursor's column)
+if						Inner Field (contains everything up to the delimiter)
+af						Outer Field (contains everything up to and including
+						the delimiter)
+iL						Inner Line (visually linewise select all lines, that
+						has the same value at the cursor's column)
 
 Note, that the <BS>, <CR>, K and J overlap Vim's default mapping for `<CR>`,
 `<BS>`, `J` and `K` respectively. Therefore, this functionality has been
@@ -519,18 +534,19 @@ the word under the cursor and \J would join this line with the previous line.
 If you want to prevent the mapping of keys, simply set the global variable
 g:csv_nomap_<key> to 1, e.g. to prevent mapping of <CR> in csv files, put 
 ```vim
-    let g:csv_nomap_cr = 1
+let g:csv_nomap_cr = 1
 ```
 into your `.vimrc`. Note, the keyname must be lower case.
 
 
-                                           *:CSVConvertData* *ConvertData_CSV*
-## Converting a CSV File					 *csv-convert*
---------------------------
+## Converting a CSV File
+
 You can convert your CSV file to a different format with the `:ConvertData`
 or `:CSVConvertData` command 
+
 ```vim
-    ConvertData
+ConvertData
+```
 
 Use the the ! attribute, to convert your data without the delimiter.
 
@@ -554,13 +570,17 @@ replaced by the content of the actual column.
 
 For example, suppose you want to convert your data into HTML, then you first
 call the 
+
 ```vim
-    :ConvertData
+:ConvertData
+```
 
 At this point, Vim will ask you for input. First, you need to specify, what
 needs to be done before processing the data:
 
-    Pre convert text: <html><body><table> `
+```
+Pre convert text: <html><body><table>
+```
 
 This would specify to put the HTML Header before the actual data can be
 processed. If the variable g:csv_pre_convert is already defined, Vim will
@@ -568,15 +588,19 @@ already show you its' content as default value. Simply pressing Enter will use
 this data. After that, Vim asks, what the end of the converted file needs to
 look like:
 
-    Post convert text: </table></body></html> `
+```
+Post convert text: </table></body></html>
+```
 
 So here you are defining how to finish up the HTML file. If the variable
 g:csv_post_convert is already defined, Vim will already show you its' content
 as default value which you can confirm by pressing Enter. Last, you define,
 how your columns need to be converted. Again, Vim asks you for how to do that:
 
-    Converted text, use %s for column input: `
-    <tr><td>%s</td><td>%s</td><td>%s</td></tr>
+```
+	Converted text, use %s for column input:
+	<tr><td>%s</td><td>%s</td><td>%s</td></tr>
+```
 
 This time, you can use '%s' expandos. They tell Vim, that they need to be
 replaced by the actual content of your file. It does by going from the first
@@ -589,29 +613,39 @@ confirm by pressing Enter.
 After you hit Enter, Vim will convert your data and put it into a new window.
 It may look like this:
 
-    <html><body><table> `
-    <tr><td>1,</td><td>2,</td><td>3,</td></tr> `
-    <tr><td>2,</td><td>2,</td><td>4,</td></tr> `
-    </table></body></html> `
+```html
+	<html><body><table>
+	<tr><td>1,</td><td>2,</td><td>3,</td></tr>
+	<tr><td>2,</td><td>2,</td><td>4,</td></tr>
+	</table></body></html> `
+```
 
 Note, this is only a proof of concept. A better version of converting your
 data to HTML is bundled with Vim (`:TOhtml`).
 
 But may be you want your data converted into SQL-insert statements. That could
 be done like this: 
+
 ```vim
-    ConvertData!
+ConvertData!
 ```
-    Pre convert text: `
+
+```
+Pre convert text:
+```
 
 (Leave this empty. It won't be used).
 
-    Post convert text: Commit; `
+```
+Post convert text: Commit;
+```
 
 After inserting the data, commit it into the database.
 
-    Converted text, use %s for column input: `
-    Insert into table foobar values ('%s', '%s', %s); `
+```
+Converted text, use %s for column input:
+Insert into table foobar values ('%s', '%s', %s);
+```
 
 Note, that the last argument is not included within single quotation marks,
 since in this case the data is assumed to be integer and won't need to be
@@ -619,17 +653,19 @@ quoted for the database.
 
 After hitting Enter, a new Window will be opened, which might look like this:
 
-    Insert into table foobar values('Foobar', '2', 2011); `
-    Insert into table foobar values('Bar', '1', 2011); `
-    Commit; `
+```
+Insert into table foobar values('Foobar', '2', 2011);
+Insert into table foobar values('Bar', '1', 2011);
+Commit;
+```
 
 Since the command was used with the bang attribute (!), the converted data
 doesn't include the column delimiters.
 
 Now you can copy it into your database, or further manipulate it.
 
-## Dynamic filters      					 *csv-filter*
---------------------
+## Dynamic filters
+
 If you are on a value and only want to see lines that have the same value in
 this column, you can dynamically filter the file and fold away all lines not
 matching the value in the current column. To do so, simply press <CR> (Enter).
@@ -658,15 +694,15 @@ If you have set the g:csv_move_folds variable and the file is modifiable, all
 folded lines will be moved to the end of the file, so you can view all
 non-folded lines as one consecutive area  (see also `csv-move-folds`)
 
-                                           *:CSVFilter* *:Filter* *Filter_CSV*
+										   *:CSVFilter* *:Filter* *Filter_CSV*
 To see the active filters, you can use the `:Filter` or `:CSVFilter` command.
 This will show you a small summary, of what filters are active and looks like
 this:
 
-Nr      Match   Col           Name              Value ~
-===================================================== `
-01       -       07          Price              23.10 `
-02       +       08            Qty                 10 `
+Nr | Match | Col | Name | Value
+--- | --- | --- | --- | ---
+01 | - | 07 | Price | 23.10
+02 | + | 08 | Qty | 10
 
 This means, there are two filters active. The current active filter is on
 column 7 (column name is Price) and all values that match 23.10 will be folded
@@ -681,41 +717,45 @@ expression is generated that is applied by the fold expression. Look into the
 @/ (`quote_/`) register to see its value.
 
 Use `zX` to apply the current value of your search register as filter. Use 
+
 ```vim
-    :Filters!
+:Filters!
+```
 
 to reapply all values from the current active filter and fold non-matching
 items away.
 
-                                                    *:CSVAnalyze* *Analyze_CSV*
-## Analyze a Column       					 *csv-analyze*
----------------------
+## Analyze a Column
+
 If you'd like to know, how the values are distributed among a certain column,
 you can use the `:CSVAnalyze` or `:Analyze` command. So 
+
 ```vim
-    :Analyze 3
+:Analyze 3
+```
 
 outputs the the distribution of the top 5 values in column 3. This looks like
 this:
 
-Nr      Count    %      Value ~
-============================= `
-01      20      50%     10    `
-02      10      25%     2     `
-03      10      25%     5     `
+Nr | Count | % | Value
+--- | --- | --- | ---
+01		20		50%		10
+02		10		25%		2
+03		10		25%		5
 
 This tells you, that the the value '10' in column 3 occurs 50% of the time
 (exactly 20 times) and the other 2 values '2' and '5' occur only 10 times, so
 25% of the time.
 
-                                                 *:CSVVertFold* *VertFold_CSV*
-## Vertical Folding       					 *csv-vertfold*
+												 *:CSVVertFold* *VertFold_CSV*
+## Vertical Folding						 *csv-vertfold*
 ---------------------
 Sometimes, you want to hide away certain columns to better view only certain
 columns without having to horizontally scroll. You can use the `:CSVVertFold`
 or `:VertFold` command to hide certain columns: 
+
 ```vim
-    :VertFold [<nr>]
+:VertFold [<nr>]
 ```
 This will hide all columns from the first until the number entered. It
 currently can't hide single columns, because of the way, syntax highlighting
@@ -724,51 +764,57 @@ those columns. If no nr is given, hides all columns from the beginning till
 the current column.
 
 Use 
-```vim:VertFold!
+
+```
+vim:VertFold!
+```
 
 to display all hidden columns again.
 
-                                                *:CSVTranspose* *Transpose_CSV*
-## Transposing a column                                      *csv-transpose*
--------------------------
+## Transposing a column
+
 Transposing means to exchange rows and columns. You can transpose the csv
-file, using the `:CSVTranspose` or `:Transpose` : 
+file, using the `:CSVTranspose` or `:Transpose`:
+
 ```vim
-    :[range]Transpose
+:[range]Transpose
 ```
 command. If [range] is not given, it will transpose the complete file,
 otherwise it will only transpose the lines in the range given. Note, comments
 will be deleted and transposing does not work with fixed-width columns.
 
-                                                          *:CSVTabularize*
-## Transforming into a table                      *:CSVTable* *csv-tabularize*
-------------------------------
+## Transforming into a table
+
 You  can also transform your csv data into a visual table, using the
 `:CSVTabularize` or `:CSVTable`: 
+
 ```vim
-    :CSVTabularize
+:CSVTabularize
 ```
 command. This will make a frame around your csv data and substitute all
 delimiters by '|', so that it will look like a table.
 
 e.g. consider this data: 
-```vim>
+
+```
 First,Second,Third ~
 10,5,2 `
 5,2,10 `
 2,10,5 `
 10,5,2 `
+```
 
 This will be transformed into: 
-```vim
-    |---------------------|
-    | First| Second| Third|
-    |------|-------|------|
-    |    10|      5|     2|
-    |     5|      2|    10|
-    |     2|     10|     5|
-    |    10|      5|     2|
-    |---------------------|
+```
+|---------------------|
+| First| Second| Third|
+|------|-------|------|
+|	 10|	  5|	 2|
+|	  5|	  2|	10|
+|	  2|	 10|	 5|
+|	 10|	  5|	 2|
+|---------------------|
+```
 
 If your Vim uses an unicode 'encoding', the plugin makes a nice table using
 special unicode drawing glyphs (but it might be possible, that those chars are
@@ -790,13 +836,14 @@ leftaligned.
 
 Note: Each row must contain exactly as many fields as columns.
 
-                                                            *:CSVAddColumn*
-## Add new empty columns                                   *AddColumn_CSV*
---------------------------
+## Add new empty columns
+
 If you want to add new empty columns to your file you can use the
 `:CSVAddColumn` or `:AddColumn` command: 
+
 ```vim
-    :[range]AddColumn [column] [count]
+:[range]AddColumn [column] [count]
+```
 
 By default, this works for the whole file, but you can give a different range
 to which the AddColumn command applies. If no arguments are given, the new
@@ -808,13 +855,14 @@ Additionally, you can also add a count number to add several columns at once
 after the specified column number. You 0 for the column number, if you want to
 add several columns after the current column.
 
-                                                            *:CSVSubstitute*
-## Substitute in columns                                  *Substitute_CSV*
---------------------------
+## Substitute in columns
+
 If you want to substitute only in specific columns, you can use the
 `:CSVSubstitute` or `:Substitute` command: 
+
 ```vim
-    :[range]Substitute [column/]pattern/string[/flags]
+:[range]Substitute [column/]pattern/string[/flags]
+```
 
 This means in the range and within the given columns replace pattern by
 string. This works bascially like the `:s` command, except that you MUST use
@@ -825,23 +873,29 @@ to substitute within the columns 1 till 5 or you can even use `1,$` which
 means to substitute in each column (so in fact this simplifies to a simple
 `:s` command whithin the given range. For the use of `[/flags]` see `:s_flags`
 Here are some examples: 
+
 ```vim
-    :%Substitute 1,4/foobar/baz/gce
+:%Substitute 1,4/foobar/baz/gce
+```
 
 Substitutes in the whole file in columns 1 till 4 the pattern foobar by baz
 for every match ('g' flag) and asks for confirmation ('c' flag).
 
-    :%S 3,$/(\d\+)/\1 EUR/g
+```vim
+:%S 3,$/(\d\+)/\1 EUR/g
+```
 
 Substitutes in each column starting from the third each number and appends the
 EURO suffix to it.
 
-## Count Values inside a Column      				 *CountCol_CSV*
----------------------------------
+## Count Values inside a Column
+
 You can let Vim output the number of values inside a column using the `:CSVCountCol` 
 command 
+
 ```vim
-    :[range]CountCol [nr] [distinct]
+:[range]CountCol [nr] [distinct]
+```
 
 This outputs the number of [distinct] values visible in the column [nr]
 If [distinct] is not given, count's all values. Note, header rows and folded
@@ -850,14 +904,15 @@ rows won't be counted.
 See also `csv-aggregate-functions`
 
 
-                                                                *MinCol_CSV*
-## Maximum/Minimum value of a Column 				*MaxCol_CSV*
----------------------------------------
+## Maximum/Minimum value of a Column
+
 You can let Vim output the 10 maximum/minimum values of a column using the
 `:CSVMaxCol` command 
+
 ```vim
-    :[range]MaxCol [nr][distinct] [/format/]
-    :[range]MinCol [nr][distinct] [/format/]
+:[range]MaxCol [nr][distinct] [/format/]
+:[range]MinCol [nr][distinct] [/format/]
+```
 
 This outputs the result of the column <nr> within the range given. If no range
 is given, this will calculate the max value of the whole column. If <nr> is not
@@ -870,15 +925,19 @@ separator while there is no thousands separator. If youre file contains
 the numbers in a different format, you can use the /format/ option to specify
 a different thousands separator or a different decimal separator. The format
 needs to be specified like this:
-    /x:y/
+	/x:y/
 where 'x' defines the thousands separator and y defines the decimal
 separator and each one is optional. This means, that 
+
 ```vim
-    :MaxCol 1 /:,/
+:MaxCol 1 /:,/
+```
 
 uses the default thousands separator and ',' as the decimal separator and 
+
 ```vim
-    :MaxCol 2 / :./
+:MaxCol 2 / :./
+```
 
 uses the Space as thousands separator and the '.' as decimal separator.
 
@@ -889,8 +948,8 @@ Vim will only aggregate the integer part and therefore won't use the 'y'
 argument in the /format/ specifier.
 
 See also `csv-aggregate-functions`
-==============================================================================
-4. CSV Configuration					 *csv-configuration*
+
+# CSV Configuration
 
 The CSV plugin tries to automatically detect the field delimiter for your
 file, cause although often the file is called CSV (comma separated values), a
@@ -898,12 +957,14 @@ semicolon is actually used. The column separator is stored in the buffer-local
 variable b:delimiter. This delimiter is heavily used, because you need
 it to define a column. Almost all commands use this variable therefore.
 
-## Delimiter							*csv-delimiter*
--------------
+## Delimiter
+
 To override the automatic detection of the plugin and define the separator
 manually, use: 
+
 ```vim
-    :let g:csv_delim=','
+:let g:csv_delim=','
+```
 
 to let the comma be the delimiter. This sets the buffer local delimiter
 variable b:delimiter.
@@ -918,14 +979,15 @@ Note: the delimiter will be used to generate a regular expression that matches
 a column. Therefore, you need to escape special characters. So instead of '^'
 use '\^'.
 
-## Column							*csv-column*
-----------
+## Column
+
 The definition, of what a column is, is defined as buffer-local variable
 b:col. By default this variable is initialized to: 
 ```vim
-    let b:col='\%(\%([^' . b:delimiter . ']*"[^"]*"[^' . b:delimiter . ']*'
-    \. b:delimiter . '\)\|\%([^' . b:delimiter . ']*\%(' . b:delimiter
-    \. '\|$\)\)\)'
+let b:col='\%(\%([^' . b:delimiter . ']*"[^"]*"[^' . b:delimiter . ']*'
+	\. b:delimiter . '\)\|\%([^' . b:delimiter . ']*\%(' . b:delimiter
+	\. '\|$\)\)\)'
+```
 
 This should take care of quoted delimiters within a column. Those should
 obviously not count as a delimiter. This regular expression is quite
@@ -937,49 +999,59 @@ If you changed the b:delimiter variable, you need to redefine the b:col
 variable, cause otherwise it will not reflect the change. To change the
 variable from the comma to a semicolon, you could call in your CSV-Buffer
 this command: 
+
 ```vim
-    :let b:col=substitute(b:col, ',', ';', 'g')
+:let b:col=substitute(b:col, ',', ';', 'g')
+```
 
 Check with :echo b:col, if the definition is correct afterwards.
 
 You can also force the plugin to use your own defined regular expression as
 column. That regular expression should include the delimiter for the columns.
 To define your own regular expression, set the g:csv_col variable: 
+
 ```vim
-    let g:csv_col='[^,]*,'
+let g:csv_col='[^,]*,'
+```
 
 This defines a column as a field delimited by the comma (where no comma can be
 contained inside a field), similar to how `csv-strict` works.
 
 You should reinitialize the plugin afterwards `InitCSV`
 
-## Highlighting Group                                         *csv-higroup*
-----------------------
+## Highlighting Group
+
 By default the csv ftplugin uses the WildMenu highlighting Group to define how
 the `HiColumn` command highlights columns. If you would like to define a
 different highlighting group, you need to set this via the g:csv_hiGroup
 variable. You can e.g. define it in your `.vimrc`: 
+
 ```vim
-    :let g:csv_hiGroup = "IncSearch"
+:let g:csv_hiGroup = "IncSearch"
+```
 
 You need to restart Vim, if you have changed this variable or use `InitCSV`
 
 The `hl-Title` highlighting is used for the Header line that is created by the
 `Header_CSV` command. If you prefer a different highlighting, set the
 g:csv_hiHeader variable to the prefered highlighting: 
+
 ```vim
-    let g:csv_hiHeader = 'Pmenu'
+let g:csv_hiHeader = 'Pmenu'
 ```
+
 This would set the header window to the `hl-Pmenu` highlighting, that is used
 for the popup menu. To disable the custom highlighting, simply `unlet` the
 variable: 
+
 ```vim
-    unlet g:csv_hiHeader
+unlet g:csv_hiHeader
+```
 
 You should reinitialize the plugin afterwards `InitCSV`
 
-## Strict Columns						*csv-strict*
-------------------
+## Strict Columns
+
 The default regular expression to define a column is quite complex
 (`csv-column`). This slows down the processing and makes Vim use more memory
 and it could still not fit to your specific use case.
@@ -988,19 +1060,25 @@ If you know, that in your data file, the delimiter cannot be contained inside
 the fields quoted or escaped, you can speed up processing (this is quite
 noticeable when using the `ArrangeColumn_CSV` command) by setting the
 g:csv_strict_columns variable: 
+
 ```vim
-    let g:csv_strict_columns = 1
+let g:csv_strict_columns = 1
+```
 
 This would define a column as this regex: 
+
 ```vim
-    let b:col = '\%([^' . b:delimiter . ']*' . b:delimiter . '\`$\)'
+let b:col = '\%([^' . b:delimiter . ']*' . b:delimiter . '\`$\)'
+```
 
 Much simpler then the default column definition, isn't it?
 See also `csv-column` and `csv-delimiter`
 
 You can disable the effect if you `unlet` the variable: 
+
 ```vim
-    unlet g:csv_strict_columns
+unlet g:csv_strict_columns
+```
 
 You should reinitialize the plugin afterwards `InitCSV`
 
@@ -1009,20 +1087,24 @@ more memory than 'maxmempattern'. In this case, either increase the
 'maxmempattern' or set the g:csv_strict_columns variable.
 
 
-## Concealing					*csv-syntax*	*csv-conceal*
---------------
+## Concealing
+
 The CSV plugin comes with a function to syntax highlight csv files. Basically
 allt it does is highlight the columns and the header line.
 
 By default, the delimiter will not be displayed, if Vim supports `conceal` of
 syntax items and instead draws a vertical line. If you don't want that, simply
 set the g:csv_noconceal variable in your .vimrc 
+
 ```vim
-    let g:csv_no_conceal = 1
+let g:csv_no_conceal = 1
+```
 
 and to disable it, simply unlet the variable 
+
 ```vim
-    unlet g:csv_no_conceal
+unlet g:csv_no_conceal
+```
 
 You should reinitialize the plugin afterwards `InitCSV`
 Note: You can also set the 'conceallevel' option to control how the concealed
@@ -1038,37 +1120,45 @@ CSVColumnEven highlighting.
 
 In case you want to define your own highlighting groups, you can define your
 own syntax highlighting like this in your `.vimrc` 
+
 ```vim
-    hi CSVColumnEven term=bold ctermbg=4 guibg=DarkBlue
-    hi CSVColumnOdd  term=bold ctermbg=5 guibg=DarkMagenta
-    hi CSVColumnHeaderEven ...
-    hi CSVColumnHeaderOdd ...
+hi CSVColumnEven term=bold ctermbg=4 guibg=DarkBlue
+hi CSVColumnOdd  term=bold ctermbg=5 guibg=DarkMagenta
+hi CSVColumnHeaderEven ...
+hi CSVColumnHeaderOdd ...
+```
 
 Alternatively, you can simply link those highlighting groups to some other
 ones, you really like: 
+
 ```vim
-    hi link CSVColumnOdd MoreMsg
-    hi link CSVColumnEven Question
+hi link CSVColumnOdd MoreMsg
+hi link CSVColumnEven Question
 ```
 If you do not want column highlighting, set the variable
 g:csv_no_column_highlight to 1 
+
 ```vim
-    :let g:csv_no_column_highlight = 1
+:let g:csv_no_column_highlight = 1
 ```
 Note, these changes won't take effect, until you restart Vim.
 
 
-## Newlines						*csv-newline*
-------------
+## Newlines
+
 RFC4180 allows newlines in double quoted strings. By default, the csv-plugin
 won't recognize newlines inside fields. It is however possible to make the
 plugin aware of newlines within quoted strings. To enable this, set 
+
 ```vim
-    let g:csv_nl = 1
+let g:csv_nl = 1
+```
 
 and to disable it again, simply unset the variable 
+
 ```vim
-    unlet g:csv_nl
+unlet g:csv_nl
+```
 
 It is a good idea to reinitialize the plugin afterwards `InitCSV`
 
@@ -1086,13 +1176,13 @@ the highlighting, if the Cursor is moved in Insert mode. To enable this,
 define the g:csv_highlight_column variable like this 
 
 ```vim
-    let g:csv_highlight_column = 'y'
+let g:csv_highlight_column = 'y'
 ```
 
 and to disable it again, simply unset the variable 
 
 ```vim
-    unlet g:csv_highlight_column
+unlet g:csv_highlight_column
 ```
 
 It is a good idea to reinitialize the plugin afterwards `InitCSV`
@@ -1114,7 +1204,7 @@ You can do this, by setting the buffer-local variable
 b:csv_fixed_width like this 
 
 ```vim
-    let b:csv_fixed_width="1,5,9,13,17,21"
+let b:csv_fixed_width="1,5,9,13,17,21"
 ```
 
 This defines that each column starts at multiples of 4. Be sure, to issue
@@ -1137,31 +1227,26 @@ The first column will be highlighted and Vim outputs:
 <Cursor>, <Space>, <ESC>, <BS>, <CR>...
 This means, you can now use those 5 keys to configure the fixed-width columns:
 
-   <Cursor> Use Cursor Left (<Left>) and Cursor Right (<Right>) to move the
-            highlighting bar.
-   <Space>  If you press <Space>, this column will be fixed and remain
-            highlighted and there will be another bar, you can move using
-            the Cursor keys. This means this column will be considered to be
-            the border between 2 fixed with columns.
-   <ESC>    Abort
-   <BS>     Press the backspace key, to remove the last column you fixed with
-            the <Space> key.
-   <CR>     Use Enter to finish the wizard. This will use all fixed columns
-            to define the fixed width columns of your csv file. The plugin
-            will be initialized and syntax highlighting should appear.
+Key | Effect
+--- | ---
+<Cursor> | Use Cursor Left (<Left>) and Cursor Right (<Right>) to move the highlighting bar.
+<Space> | If you press <Space>, this column will be fixed and remain highlighted and there will be another bar, you can move using the Cursor keys. This means this column will be considered to be the border between 2 fixed with columns.
+<ESC> | Abort
+<BS> | Press the backspace key, to remove the last column you fixed with the <Space> key.
+<CR> | Use Enter to finish the wizard. This will use all fixed columns to define the fixed width columns of your csv file. The plugin will be initialized and syntax highlighting should appear.
 
 Note: This only works, if your Vim has the 'colorcolumn' option available
 (This won't work with Vim < 7.3 and also not with a Vim without +syntax
 feature).
-
 
 ## CSV Header lines
 
 By default, dynamic filtering `csv-filter` will not fold away the first line.
 If you don't like that, you can define your header line using the variable
 b:csv_fold_headerline, e.g. 
+
 ```vim
-    let b:csv_headerline = 0
+let b:csv_headerline = 0
 ```
 
 to disable, that a header line won't be folded away. If your header line
@@ -1178,13 +1263,13 @@ support a thousands separator and uses the '.' as decimal separator).
 To specify a different thousands separator by default, use 
 
 ```vim
-    let b:csv_thousands_sep = ' '
+let b:csv_thousands_sep = ' '
 ```
 
 to have the space use as thousands separator and 
 
 ```vim
-    let b:csv_decimal_sep = ','
+let b:csv_decimal_sep = ','
 ```
 
 to use the comma as decimal separator.
@@ -1196,7 +1281,7 @@ move all folded lines to the end of the file. This only happens if you set the
 variable 
 
 ```vim
-    let g:csv_move_folds = 1
+let g:csv_move_folds = 1
 ```
 and the file is modifiable. This let's you see all non-folded records as a
 consecutive area without being disrupted by folded lines.
@@ -1218,7 +1303,7 @@ expandos, that will denote where the actual comment text belongs. To define
 your own comment string, put this in your `.vimrc` 
 
 ```vim
-    :let g:csv_comment = '#'
+:let g:csv_comment = '#'
 ```
 Which will use the '#' sign as comment leader like in many scripting
 languages.
@@ -1226,12 +1311,12 @@ languages.
 After setting this variable, you should reinitialize the plugins using
 `InitCSV`
 
-                                                            *csv-foldtext*
+															*csv-foldtext*
 By default, the csv plugin sets the 'foldtext' option. If you don't want this,
 set the variable `g:csv_disable_fdt` in your `.vimrc` 
 
 ```vim
-    :let g:csv_disable_fdt = 1
+:let g:csv_disable_fdt = 1
 ```
 
 # Functions
@@ -1246,13 +1331,13 @@ CSVPat({column}[, {pattern}])
 ```
 
 This function returns the pattern for the selected column. If only columns is
-given, returns the regular expression used to search for the pattern '.*' in
+given, returns the regular expression used to search for the pattern `.*` in
 that column (which means the content of that column). Alternatively, an
 optional pattern can be given, so the return string can be directly feeded to
 the `/` or `:s` command, e.g. type: 
 
 ```vim
-    :s/<C-R>=CSVPat(3, 'foobar')<cr>/baz
+:s/<C-R>=CSVPat(3, 'foobar')<cr>/baz
 ```
 
 where the <C-R> means pressing Control followed by R followed by =
@@ -1310,19 +1395,19 @@ statusline. You can do this, by defining in your .vimrc the 'statusline' like
 this: 
 
 ```vim
-    function MySTL()
-        if has("statusline")
-            hi User1 term=standout ctermfg=0 ctermbg=11 guifg=Black guibg=Yellow
-            let stl = ...
-            if exists("*CSV_WCol")
-                let csv = '%1*%{&ft=~"csv" ? CSV_WCol() : ""}%*'
-            else
-                let csv = ''
-            endif
-            return stl.csv
+function MySTL()
+    if has("statusline")
+		hi User1 term=standout ctermfg=0 ctermbg=11 guifg=Black guibg=Yellow
+        let stl = ...
+        if exists("*CSV_WCol")
+				let csv = '%1*%{&ft=~"csv" ? CSV_WCol() : ""}%*'
+        else
+				let csv = ''
         endif
-    endfunc
-    set stl=%!MySTL()
+        return stl.csv
+    endif
+endfunc
+set stl=%!MySTL()
 ```
 
 This will draw in your statusline right aligned the current column and max
@@ -1346,12 +1431,12 @@ have the column name printed into the statusline (see `csv-stl` above) by
 replacing the line 
 
 ```vim
-    let csv = '%1*%{&ft=~"csv" ? CSV_WCol() : ""}%*'
+let csv = '%1*%{&ft=~"csv" ? CSV_WCol() : ""}%*'
 ```
 by e.g.
 
 ```vim
-    let csv = '%1*%{&ft=~"csv" ? CSV_WCol("Name") . " " . CSV_WCol() : ""}%*'
+let csv = '%1*%{&ft=~"csv" ? CSV_WCol("Name") . " " . CSV_WCol() : ""}%*'
 ```
 
 which will output "Name 2/10" if the cursor is in the second column
@@ -1380,7 +1465,6 @@ those functions if you are using a large csv file (so using strict columns
 `csv-strict` might help a little and also setting 're' to 1 might also
 alleviate it a little).
 
-
 ## Defining custom aggregate functions
 
 The CSV plugin already defines the `SumCol_CSV` command, to let you calculate
@@ -1393,58 +1477,58 @@ But it may be, that you don't need the sum, but would rather want to have the
 average of all values within a certain column. You can define your own
 function and let the plugin call it for a column like this:
 
-    1. You define your own custom function in the after directory of your
-       vim runtime path `after-directory` (see also #2 below) 
+	1. You define your own custom function in the after directory of your
+	   vim runtime path `after-directory` (see also #2 below) 
 	```vim
 	fun! My_CSV_Average(col)
-	    let sum=0
-	    for item in a:col
+		let sum=0
+		for item in a:col
 		let sum+=item
-	    endfor
-	    return sum/len(a:col)
+		endfor
+		return sum/len(a:col)
 	endfun
 	```
-       This function takes a list as argument, and calculates the average for
-       all items in the list. You could also make use of Vim's `eval()`
-       function and write your own Product function like this 
+	   This function takes a list as argument, and calculates the average for
+	   all items in the list. You could also make use of Vim's `eval()`
+	   function and write your own Product function like this 
 
 	```vim
 	fun! My_CSV_Product(col)
-	    return eval(join(a:col, '*'))
+		return eval(join(a:col, '*'))
 	endfun
 	```
 
-    2. Now define your own custom command, that calls your custom function for
-    a certain column 
+	2. Now define your own custom command, that calls your custom function for
+	a certain column 
 	```vim
-		    command! -buffer -nargs=? -range=% AvgCol
-		    \ :echo csv#EvalColumn(<q-args>,
-		    \ "My_CSV_Average", <line1>,<line2>)
+			command! -buffer -nargs=? -range=% AvgCol
+			\ :echo csv#EvalColumn(<q-args>,
+			\ "My_CSV_Average", <line1>,<line2>)
 	```
-        This command should best be put into a file called csv.vim and save
-        it into your ~/.vim/after/ftplugin/ directory. Create directories
-        that don't exist yet. For Windows, this would be the
-        $VIMRUNTIME/vimfiles/after/ftplugin directory.
+		This command should best be put into a file called csv.vim and save
+		it into your ~/.vim/after/ftplugin/ directory. Create directories
+		that don't exist yet. For Windows, this would be the
+		$VIMRUNTIME/vimfiles/after/ftplugin directory.
 
-    3. Make sure, your `.vimrc` includes a filetype plugin setting like this 
+	3. Make sure, your `.vimrc` includes a filetype plugin setting like this 
 	```vim
 	filetype plugin on
 	```
-       This should make sure, that all the necessary scripts are loaded by
-       Vim.
+	   This should make sure, that all the necessary scripts are loaded by
+	   Vim.
 
-    After restarting Vim, you can now use your custom command definition
-    :AvgCol. Use a range, for the number of lines you want to evaluate and
-    optionally use an argument to specify which column you want to be
-    evaluated 
+	After restarting Vim, you can now use your custom command definition
+	:AvgCol. Use a range, for the number of lines you want to evaluate and
+	optionally use an argument to specify which column you want to be
+	evaluated 
 
-    ```vim
-    :2,$AvgCol 7
-    ```
-    This will evaluate the average of column seven (assuming, line 1 is the
-    header line, which should not be taken into account).
+	```vim
+:2,$AvgCol 7
+	```
+	This will evaluate the average of column seven (assuming, line 1 is the
+	header line, which should not be taken into account).
 
-    Note: this plugin already defines an average function.
+	Note: this plugin already defines an average function.
 
 ## Autocommand on opening/closing files
 
@@ -1453,11 +1537,11 @@ achieve this using the `ArrangeColumn_CSV` command and some autocommands.
 Define these autocommands in your `.vimrc` 
 
 ```vim
-    aug CSV_Editing
-        au!
-        au BufRead,BufWritePost *.csv :%ArrangeColumn
-        au BufWritePre *.csv :%UnArrangeColumn
-    aug end
+aug CSV_Editing
+		au!
+		au BufRead,BufWritePost *.csv :%ArrangeColumn
+		au BufWritePre *.csv :%UnArrangeColumn
+aug end
 ```
 
 Upon Entering a csv file, Vim will visually arrange all columns and before
@@ -1468,15 +1552,17 @@ will again be visually arranged.
 You can also simply set the variable 
 
 ```vim
-    let g:csv_autocmd_arrange = 1
+let g:csv_autocmd_arrange = 1
 ```
 in your vimrc and an autocmd will be installed, that visually arranges your
 csv file whenever you open them for editing. Alternatively, you can restrict
 this setting to files below a certain size. For example, if you only want to
 enable this feature for files smaller than 1 MB, put this into your `.vimrc` 
+
 ```vim
-    let g:csv_autocmd_arrange      = 1
-    let g:csv_autocmd_arrange_size = 1024*1024
+let g:csv_autocmd_arrange	   = 1
+let g:csv_autocmd_arrange_size = 1024*1024
+```
 
 Note, this is highly experimental and especially on big files, this might
 slow down Vim considerably.
@@ -1486,7 +1572,7 @@ slow down Vim considerably.
 If you see this error: 
 
 ```vim
-   CSV Syntax:Invalid column pattern, using default pattern \%([^,]*,\|$\)
+CSV Syntax:Invalid column pattern, using default pattern \%([^,]*,\|$\)
 ```
 This happens usually, when the syntax script is read before the filetype
 plugin, so the plugin did not have a chance to setup the column delimiter
@@ -1511,8 +1597,9 @@ And you need one more column, that is the calculated product of column 2 and
 `sub-replace-expression` of an `:s` command. In this case, you would do this: 
 
 ```vim
-    :2,3s/$/\=printf("%s%.2f", b:delimiter,
-    (CSVField(2,line('.'))+0.0)*(CSVField(3,line('.'))+0.0/
+:2,3s/$/\=printf("%s%.2f", b:delimiter,
+	(CSVField(2,line('.'))+0.0)*(CSVField(3,line('.'))+0.0/
+```
 
 Note: Enter as single line. The result will be this: 
 
