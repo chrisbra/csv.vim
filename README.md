@@ -41,6 +41,7 @@ works differently.
   * [Substitute in columns](#substitute-in-columns)
   * [Count Values inside a Column](#count-values-inside-a-column)
   * [Maximum/Minimum value of a Column](#maximumminimum-value-of-a-column)
+  * [Average value of a Column](#average-value-of-a-column)
 - [CSV Configuration](#csv-configuration)
   * [Delimiter](#delimiter)
   * [Column](#column)
