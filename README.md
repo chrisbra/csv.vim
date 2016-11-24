@@ -1,5 +1,17 @@
+# Introduction
+
+This plugin is used for handling column separated data with Vim. Usually those
+files are called csv files and use the ',' as delimiter, though sometimes they
+use e.g. the '|' or ';' as delimiter and there also exists fixedwidth columns.
+The aim of this plugin is to ease handling these kinds of files.
+
+This is a filetype plugin for CSV files. It was heavily influenced by
+the [Vim Wiki Tip667](http://vim.wikia.com/wiki/VimTip667), though it
+works differently. 
+
+![Screenshot](http://www.256bit.org/~chrisbra/csv.gif)
+
 # Table of Contents
-- [Introduction](#introduction)
 - [Installation](#installation)
 - [Commands](#commands)
   * [WhatColumn](#whatcolumn)
@@ -60,19 +72,6 @@
   * [Autocommand on opening/closing files](#autocommand-on-openingclosing-files)
   * [Syntax error when opening a CSV file](#syntax-error-when-opening-a-csv-file)
   * [Calculate new columns](#calculate-new-columns)
-
-# Introduction
-
-This plugin is used for handling column separated data with Vim. Usually those
-files are called csv files and use the ',' as delimiter, though sometimes they
-use e.g. the '|' or ';' as delimiter and there also exists fixedwidth columns.
-The aim of this plugin is to ease handling these kinds of files.
-
-This is a filetype plugin for CSV files. It was heavily influenced by
-the [Vim Wiki Tip667](http://vim.wikia.com/wiki/VimTip667), though it
-works differently. 
-
-![Screenshot](http://www.256bit.org/~chrisbra/csv.gif)
 
 # Installation
 
