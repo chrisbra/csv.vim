@@ -351,13 +351,13 @@ column in the new split window. Use the '!' to close the window. If you
 specify a count, that many columns will be visible (default: the first). Add
 the bang to the count, if you only want the specific column to be visible.
 
-```
-vim:VHeader 2
+```vim
+:VHeader 2
 ```
 This will open a vertical split window containing the first 2 columns, while
 
-```
-vim:VHeader 2!
+```vim
+:VHeader 2!
 ```
 Opens a new vertical split window containing only the 2 second column.
 
@@ -678,7 +678,7 @@ It may look like this:
 <html><body><table>
 <tr><td>1,</td><td>2,</td><td>3,</td></tr>
 <tr><td>2,</td><td>2,</td><td>4,</td></tr>
-</table></body></html> `
+</table></body></html>
 ```
 
 Note, this is only a proof of concept. A better version of converting your
@@ -824,8 +824,8 @@ the current column.
 
 Use 
 
-```
-vim:VertFold!
+``` vim
+:VertFold!
 ```
 
 to display all hidden columns again.
@@ -856,11 +856,11 @@ delimiters by '|', so that it will look like a table.
 e.g. consider this data: 
 
 ```
-First,Second,Third ~
-10,5,2 `
-5,2,10 `
-2,10,5 `
-10,5,2 `
+First,Second,Third
+10,5,2
+5,2,10
+2,10,5
+10,5,2
 ```
 
 This will be transformed into: 
@@ -1005,6 +1005,24 @@ If [distinct] is given, only returns the number of distinct values.
 Note, if you Vim is compiled without floating point number format (`+float`),
 Vim will only aggregate the integer part and therefore won't use the 'y'
 argument in the /format/ specifier.
+
+See also `csv-aggregate-functions`
+
+## Average value of a Column
+
+You can let Vim output the value of a column using the `:CSVAvgCol` command
+
+```vim
+:[range]AvgCol [nr] [/format/]
+```
+
+This outputs the result of the column `<nr>` within the range given. If no range
+is given, this will calculate the average value of the whole column. If <nr> is not
+given, this calculates the sum for the column the cursor is on. Note, that the
+delimiter will be stripped away from each value and also empty values won't be
+considered.
+
+For the `[/format/]` part, see `MaxCol_CSV`.
 
 See also `csv-aggregate-functions`
 
@@ -1280,7 +1298,7 @@ command. This provides a simple wizard to select each column. If you enter
 the command: 
 
 ```vim
-vim:CSVFixed
+:CSVFixed
 ```
 The first column will be highlighted and Vim outputs:
 `<Cursor>`, `<Space>`, `<ESC>`, `<BS>`, `<CR>`
@@ -1475,7 +1493,7 @@ second line of the function. In the third line of your function, put your
 desired 'statusline' settings as `expression`. Note the section starting with
 'if exists(..)' guards against not having loaded the filetype plugin.
 
-Note: vim-airline (https://github.com/bling/vim-airline) by default supports
+Note: [vim-airline](https://github.com/vim-airline/vim-airline) by default supports
 the csv plugin and enables a nice little csv statusline which helps for
 navigating within a csv file. For details, see the Vim-Airline documentation.
 
@@ -1646,9 +1664,10 @@ Alternatively, you can simply call `InitCSV` and ignore the error.
 
 Suppose you have a table like this:
 
-Index;Value1;Value2~
-1;100;3 `
-2;20;4 `
+Index | Value | Value2
+--- | --- | ---
+1 | 100 | 3
+2 | 20 | 4
 
 And you need one more column, that is the calculated product of column 2 and
 3, you can make use of the provided `CSVField()` function using a
@@ -1661,8 +1680,7 @@ And you need one more column, that is the calculated product of column 2 and
 
 Note: Enter as single line. The result will be this: 
 
-```vim
-Index;Value1;Value2~
-1;100;3;300.00 `
-2;20;4;80.00 `
-```
+Index | Value | Value2
+--- | --- | ---
+1 | 100 | 3 | 300.00
+2 | 20 | 4 | 80.00
