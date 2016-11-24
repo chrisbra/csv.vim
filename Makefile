@@ -38,4 +38,3 @@ csv:
 	perl -i -pne 'if (/Last Change:/) {s/(:\s+).*\n$$/sprintf(": %s", `date -R`)/e}' ${SCRIPT}
 	perl -i -pne 'if (/Last Change:/) {s/(:\s+).*\n$$/sprintf(": %s", `LC_TIME=C date +"%a, %d %b %Y"`)/e}' ${DOC}
 	perl -i.orig -pne 'if (/Version:/) {s/\.(\d+).*/sprintf(".%d", 1+$$1)/e}' ${DOC}
-	cp -f $(DOC) README
