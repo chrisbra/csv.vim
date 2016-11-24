@@ -1290,7 +1290,7 @@ fu! <sid>AddColumn(start, stop, ...) range "{{{3
 
     if pos == 0
         let pat = '^'
-    elseif pos == max-1
+    elseif pos == max
         let pat = '$'
     else
         let pat = <sid>GetColPat(pos,1)

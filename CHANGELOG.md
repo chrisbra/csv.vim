@@ -80,6 +80,7 @@
   (by Hans-Guenter, https://github.com/chrisbra/csv.vim/pull/90, thanks!)
 - add `:AvgCol_CSV` command (suggested by jungle-boogie
   https://github.com/chrisbra/csv.vim/issues/85, thanks!)
+- Make `:AddColumn_CSV` work as expected
 
 ## 0.31 Jan 15, 2015
 - supports for Vim 7.3 dropped
