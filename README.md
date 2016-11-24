@@ -465,27 +465,15 @@ only does that at most 10 times).
 
 The csv filetype plugin redefines the following keys as:
 
-<C-Right> or L or W	Move [count] field forwards
-
-<C-Left> or E or H	Move [count] field backwards (but see `csv-mapping-H` 
-						for the movement of H).
-
-<Up> or K		Move [count] lines upwards within the same column
-
-<Down> or J		Move [count] lines downwards within the same column
-
-<Enter>					Dynamically fold all lines away, that don't match
-						the value in the current column. See `csv-filter`
-
-						In `Replace-mode` and `Virtual-Replace-mode` does not
-						create a new row, but instead moves the cursor to the
-						beginning of the same column, one more line below.
-
-<Space>					Dynamically fold all lines away, that match
-						the value in the current column. See `csv-filter`
-
-<BS>					Remove last item from the dynamic filter.
-						See `csv-filter`
+Key | Effect
+--- | ---
+<C-Right> or L or W | Move [count] field forwards
+<C-Left> or E or H | Move [count] field backwards (but see `csv-mapping-H` for the movement of H).
+<Up> or K | Move [count] lines upwards within the same column
+<Down> or J | Move [count] lines downwards within the same column
+<Enter> | Dynamically fold all lines away, that don't match the value in the current column. See `csv-filter` In `Replace-mode` and `Virtual-Replace-mode` does not create a new row, but instead moves the cursor to the beginning of the same column, one more line below.  
+<Space> | Dynamically fold all lines away, that match the value in the current column. See `csv-filter`
+<BS> | Remove last item from the dynamic filter. See `csv-filter`
 
 Note how the mapping of 'H' differs from 'E'
 
@@ -494,35 +482,47 @@ begins.
 
 If you look into this example (with the cursor being '|')
 
-	aaa,   bbbb,|ccc `
+```
+	aaa,   bbbb,|ccc
+```
 
 Pressing 'H' moves to
 
-	aaa,   |bbbb,ccc `
+```
+	aaa,   |bbbb,ccc
+```
 
 Pressing 'H' again moves to
 
-	aaa,|	bbbb,ccc `
+```
+	aaa,|	bbbb,ccc
+```
 
 Pressing 'H' again moves to 
 
-	|aaa,	bbbb,ccc `
+```
+	|aaa,	bbbb,ccc
+```
 
 While with 'E', the cursor moves to: 
 
-	 aaa,|	bbbb,ccc `
+```
+	 aaa,|	bbbb,ccc
+```
 
 and pressing  'E' again, it would move directly to 
 
-	|aaa,	bbbb,ccc `
+```
+	|aaa,	bbbb,ccc
+```
 
 Also, the csv plugin defines these text-object:
 
-if						Inner Field (contains everything up to the delimiter)
-af						Outer Field (contains everything up to and including
-						the delimiter)
-iL						Inner Line (visually linewise select all lines, that
-						has the same value at the cursor's column)
+Field | Meaning
+--- | ---
+if | Inner Field (contains everything up to the delimiter)
+af | Outer Field (contains everything up to and including the delimiter)
+iL | Inner Line (visually linewise select all lines, that has the same value at the cursor's column)
 
 Note, that the <BS>, <CR>, K and J overlap Vim's default mapping for `<CR>`,
 `<BS>`, `J` and `K` respectively. Therefore, this functionality has been
@@ -533,11 +533,11 @@ the word under the cursor and \J would join this line with the previous line.
 
 If you want to prevent the mapping of keys, simply set the global variable
 g:csv_nomap_<key> to 1, e.g. to prevent mapping of <CR> in csv files, put 
+
 ```vim
 let g:csv_nomap_cr = 1
 ```
 into your `.vimrc`. Note, the keyname must be lower case.
-
 
 ## Converting a CSV File
 
@@ -598,8 +598,8 @@ as default value which you can confirm by pressing Enter. Last, you define,
 how your columns need to be converted. Again, Vim asks you for how to do that:
 
 ```
-	Converted text, use %s for column input:
-	<tr><td>%s</td><td>%s</td><td>%s</td></tr>
+Converted text, use %s for column input:
+<tr><td>%s</td><td>%s</td><td>%s</td></tr>
 ```
 
 This time, you can use '%s' expandos. They tell Vim, that they need to be
@@ -614,10 +614,10 @@ After you hit Enter, Vim will convert your data and put it into a new window.
 It may look like this:
 
 ```html
-	<html><body><table>
-	<tr><td>1,</td><td>2,</td><td>3,</td></tr>
-	<tr><td>2,</td><td>2,</td><td>4,</td></tr>
-	</table></body></html> `
+<html><body><table>
+<tr><td>1,</td><td>2,</td><td>3,</td></tr>
+<tr><td>2,</td><td>2,</td><td>4,</td></tr>
+</table></body></html> `
 ```
 
 Note, this is only a proof of concept. A better version of converting your
@@ -739,17 +739,16 @@ this:
 
 Nr | Count | % | Value
 --- | --- | --- | ---
-01		20		50%		10
-02		10		25%		2
-03		10		25%		5
+01 | 20 | 50% | 10
+02 | 10 | 25% | 2
+03 | 10 | 25% | 5
 
 This tells you, that the the value '10' in column 3 occurs 50% of the time
 (exactly 20 times) and the other 2 values '2' and '5' occur only 10 times, so
 25% of the time.
 
-												 *:CSVVertFold* *VertFold_CSV*
-## Vertical Folding						 *csv-vertfold*
----------------------
+## Vertical Folding
+
 Sometimes, you want to hide away certain columns to better view only certain
 columns without having to horizontally scroll. You can use the `:CSVVertFold`
 or `:VertFold` command to hide certain columns: 
@@ -1224,16 +1223,16 @@ the command:
 vim:CSVFixed
 ```
 The first column will be highlighted and Vim outputs:
-<Cursor>, <Space>, <ESC>, <BS>, <CR>...
+`<Cursor>`, `<Space>`, `<ESC>`, `<BS>`, `<CR>`
 This means, you can now use those 5 keys to configure the fixed-width columns:
 
 Key | Effect
 --- | ---
-<Cursor> | Use Cursor Left (<Left>) and Cursor Right (<Right>) to move the highlighting bar.
-<Space> | If you press <Space>, this column will be fixed and remain highlighted and there will be another bar, you can move using the Cursor keys. This means this column will be considered to be the border between 2 fixed with columns.
-<ESC> | Abort
-<BS> | Press the backspace key, to remove the last column you fixed with the <Space> key.
-<CR> | Use Enter to finish the wizard. This will use all fixed columns to define the fixed width columns of your csv file. The plugin will be initialized and syntax highlighting should appear.
+`<Cursor>` | Use Cursor Left (<Left>) and Cursor Right (<Right>) to move the highlighting bar.
+`<Space>` | If you press <Space>, this column will be fixed and remain highlighted and there will be another bar, you can move using the Cursor keys. This means this column will be considered to be the border between 2 fixed with columns.
+`<ESC>` | Abort
+`<BS>` | Press the backspace key, to remove the last column you fixed with the <Space> key.
+`<CR>` | Use Enter to finish the wizard. This will use all fixed columns to define the fixed width columns of your csv file. The plugin will be initialized and syntax highlighting should appear.
 
 Note: This only works, if your Vim has the 'colorcolumn' option available
 (This won't work with Vim < 7.3 and also not with a Vim without +syntax
@@ -1311,7 +1310,6 @@ languages.
 After setting this variable, you should reinitialize the plugins using
 `InitCSV`
 
-															*csv-foldtext*
 By default, the csv plugin sets the 'foldtext' option. If you don't want this,
 set the variable `g:csv_disable_fdt` in your `.vimrc` 
 
@@ -1477,8 +1475,8 @@ But it may be, that you don't need the sum, but would rather want to have the
 average of all values within a certain column. You can define your own
 function and let the plugin call it for a column like this:
 
-	1. You define your own custom function in the after directory of your
-	   vim runtime path `after-directory` (see also #2 below) 
+1. You define your own custom function in the after directory of your
+   vim runtime path `after-directory` (see also #2 below) 
 	```vim
 	fun! My_CSV_Average(col)
 		let sum=0
@@ -1488,9 +1486,9 @@ function and let the plugin call it for a column like this:
 		return sum/len(a:col)
 	endfun
 	```
-	   This function takes a list as argument, and calculates the average for
-	   all items in the list. You could also make use of Vim's `eval()`
-	   function and write your own Product function like this 
+   This function takes a list as argument, and calculates the average for
+   all items in the list. You could also make use of Vim's `eval()`
+   function and write your own Product function like this 
 
 	```vim
 	fun! My_CSV_Product(col)
@@ -1498,37 +1496,37 @@ function and let the plugin call it for a column like this:
 	endfun
 	```
 
-	2. Now define your own custom command, that calls your custom function for
-	a certain column 
+2. Now define your own custom command, that calls your custom function for
+a certain column 
 	```vim
-			command! -buffer -nargs=? -range=% AvgCol
-			\ :echo csv#EvalColumn(<q-args>,
-			\ "My_CSV_Average", <line1>,<line2>)
+	command! -buffer -nargs=? -range=% AvgCol
+	\ :echo csv#EvalColumn(<q-args>,
+	\ "My_CSV_Average", <line1>,<line2>)
 	```
-		This command should best be put into a file called csv.vim and save
-		it into your ~/.vim/after/ftplugin/ directory. Create directories
-		that don't exist yet. For Windows, this would be the
-		$VIMRUNTIME/vimfiles/after/ftplugin directory.
+	This command should best be put into a file called csv.vim and save
+	it into your ~/.vim/after/ftplugin/ directory. Create directories
+	that don't exist yet. For Windows, this would be the
+	$VIMRUNTIME/vimfiles/after/ftplugin directory.
 
-	3. Make sure, your `.vimrc` includes a filetype plugin setting like this 
+3. Make sure, your `.vimrc` includes a filetype plugin setting like this 
 	```vim
 	filetype plugin on
 	```
-	   This should make sure, that all the necessary scripts are loaded by
-	   Vim.
+   This should make sure, that all the necessary scripts are loaded by
+   Vim.
 
-	After restarting Vim, you can now use your custom command definition
-	:AvgCol. Use a range, for the number of lines you want to evaluate and
-	optionally use an argument to specify which column you want to be
-	evaluated 
+After restarting Vim, you can now use your custom command definition
+:AvgCol. Use a range, for the number of lines you want to evaluate and
+optionally use an argument to specify which column you want to be
+evaluated 
 
-	```vim
+```vim
 :2,$AvgCol 7
-	```
-	This will evaluate the average of column seven (assuming, line 1 is the
-	header line, which should not be taken into account).
+```
+This will evaluate the average of column seven (assuming, line 1 is the
+header line, which should not be taken into account).
 
-	Note: this plugin already defines an average function.
+Note: this plugin already defines an average function.
 
 ## Autocommand on opening/closing files
 
