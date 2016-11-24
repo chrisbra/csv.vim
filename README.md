@@ -282,7 +282,6 @@ its scrolling vertically.
 
 Note: this command does not work for fixed width columns `csv-fixedwidth`
 
-												*:CSVVHeader* *VHeader_CSV*
 If you want a vertical header line, use `:VHeader` or `:CSVVHeader`. This works
 similar to the `Header_CSV` command, except that it will open a vertical split
 window with the first column always visible. It will always open the first
@@ -467,13 +466,13 @@ The csv filetype plugin redefines the following keys as:
 
 Key | Effect
 --- | ---
-<C-Right> or L or W | Move [count] field forwards
-<C-Left> or E or H | Move [count] field backwards (but see `csv-mapping-H` for the movement of H).
-<Up> or K | Move [count] lines upwards within the same column
-<Down> or J | Move [count] lines downwards within the same column
-<Enter> | Dynamically fold all lines away, that don't match the value in the current column. See `csv-filter` In `Replace-mode` and `Virtual-Replace-mode` does not create a new row, but instead moves the cursor to the beginning of the same column, one more line below.  
-<Space> | Dynamically fold all lines away, that match the value in the current column. See `csv-filter`
-<BS> | Remove last item from the dynamic filter. See `csv-filter`
+`<C-Right>` or L or W | Move [count] field forwards
+`<C-Left>` or E or H | Move [count] field backwards (but see `csv-mapping-H` for the movement of H).
+`<Up>` or K | Move [count] lines upwards within the same column
+`<Down>` or J | Move [count] lines downwards within the same column
+`<Enter>` | Dynamically fold all lines away, that don't match the value in the current column. See `csv-filter` In `Replace-mode` and `Virtual-Replace-mode` does not create a new row, but instead moves the cursor to the beginning of the same column, one more line below.  
+`<Space>` | Dynamically fold all lines away, that match the value in the current column. See `csv-filter`
+`<BS>` | Remove last item from the dynamic filter. See `csv-filter`
 
 Note how the mapping of 'H' differs from 'E'
 
@@ -483,37 +482,37 @@ begins.
 If you look into this example (with the cursor being '|')
 
 ```
-	aaa,   bbbb,|ccc
+aaa,   bbbb,|ccc
 ```
 
 Pressing 'H' moves to
 
 ```
-	aaa,   |bbbb,ccc
+aaa,   |bbbb,ccc
 ```
 
 Pressing 'H' again moves to
 
 ```
-	aaa,|	bbbb,ccc
+aaa,|	bbbb,ccc
 ```
 
 Pressing 'H' again moves to 
 
 ```
-	|aaa,	bbbb,ccc
+|aaa,	bbbb,ccc
 ```
 
 While with 'E', the cursor moves to: 
 
 ```
-	 aaa,|	bbbb,ccc
+ aaa,|	bbbb,ccc
 ```
 
 and pressing  'E' again, it would move directly to 
 
 ```
-	|aaa,	bbbb,ccc
+|aaa,	bbbb,ccc
 ```
 
 Also, the csv plugin defines these text-object:
@@ -524,10 +523,10 @@ if | Inner Field (contains everything up to the delimiter)
 af | Outer Field (contains everything up to and including the delimiter)
 iL | Inner Line (visually linewise select all lines, that has the same value at the cursor's column)
 
-Note, that the <BS>, <CR>, K and J overlap Vim's default mapping for `<CR>`,
+Note, that the `<BS>`, `<CR>`, K and J overlap Vim's default mapping for `<CR>`,
 `<BS>`, `J` and `K` respectively. Therefore, this functionality has been
-mapped to a sane default of <Localleader>J and <LocalLeader>K. If you haven't
-changed the `<Leader>` or `<LocalLeader>` variables, those the <Localleader>
+mapped to a sane default of `<Localleader>`J and `<LocalLeader>`K. If you haven't
+changed the `<Leader>` or `<LocalLeader>` variables, those the `<Localleader>`
 is equival to a single backslash '\', e.g. \K would run the lookup function on
 the word under the cursor and \J would join this line with the previous line.
 
@@ -694,7 +693,6 @@ If you have set the g:csv_move_folds variable and the file is modifiable, all
 folded lines will be moved to the end of the file, so you can view all
 non-folded lines as one consecutive area  (see also `csv-move-folds`)
 
-										   *:CSVFilter* *:Filter* *Filter_CSV*
 To see the active filters, you can use the `:Filter` or `:CSVFilter` command.
 This will show you a small summary, of what filters are active and looks like
 this:
