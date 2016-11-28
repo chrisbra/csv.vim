@@ -83,6 +83,8 @@
 - Make `:AddColumn_CSV` work as expected
 - Add `:DupColumn` command (suggested by lkraav in
   https://github.com/chrisbra/csv.vim/issues/84, thanks!)
+- Do not remove tabs on `:UnArrangeColumn` (reported by taylor-peterson in 
+  https://github.com/chrisbra/csv.vim/issues/98, thanks!)
 
 ## 0.31 Jan 15, 2015
 - supports for Vim 7.3 dropped

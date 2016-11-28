@@ -709,7 +709,7 @@ fu! <sid>PrepUnArrangeCol(first, last) "{{{3
 endfu
 fu! <sid>UnArrangeCol(match) "{{{3
     " Strip leading white space, also trims empty records:
-    return substitute(a:match, '\%(^\s\+\)\|\%(\s\+\ze'.b:delimiter. '\?$\)', '', 'g')
+    return substitute(a:match, '\%(^ \+\)\|\%( \+\ze'.b:delimiter. '\?$\)', '', 'g')
 endfu
 fu! <sid>CalculateColumnWidth(row) "{{{3
     " Internal function, not called from external,
