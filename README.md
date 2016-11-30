@@ -232,11 +232,12 @@ overriden by setting the "b:csv_arrange_use_all_rows" variable (see below).
 
 If [range] is not given, it defaults to the current line.
 
-By default, the columns will be righ-aligned. If you want a different
+By default, the columns will be right-aligned. If you want a different
 alignment you need to specify this through the b:csv_arrange_align variable.
 This is a string of flags ('r': right align, 'l': left align, 'c': center
 alignment, '.': decimal alignment) where each flag defines the alignment for
 a particular column (starting from left). Missing columns will be right aligned.
+You can use '\*' to repeat the previous value until the end.
 So this: 
 
 ```vim
@@ -246,6 +247,13 @@ Will left-align the first column, center align the second column, decimal
 align the third column and all following columns right align. (Note: decimal
 aligning might slow down Vim and additionally, if the value is no decimal
 number it will be right aligned).
+And this:
+
+```vim
+:let b:csv_arrange_align = 'l*'
+```
+will left align all columns.
+
 If you change the alignment parameter, you need to use the "!" attribute, the
 next time you run the `:ArrangeCol` command, otherwise for performance
 reasons, it won't be considered.

@@ -761,7 +761,12 @@ fu! <sid>Columnize(field) "{{{3
     let width = get(b:col_width, colnr, 20)
     let align = 'r'
     if exists('b:csv_arrange_align')
-        let align_list=split(get(b:, 'csv_arrange_align', " "), '\zs')
+        let align=b:csv_arrange_align
+        let indx=match(align, '\*')
+        if indx > 0
+            let align = align[0:(indx-1)]. repeat(align[indx-1], len(b:col_width)-indx)
+        endif
+        let align_list=split(align, '\zs')
         try
             let align = align_list[colnr]
         catch
