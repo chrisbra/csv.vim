@@ -550,7 +550,7 @@ fu! <sid>ColWidth(colnr, ...) "{{{3
         if !exists("b:csv_list")
             " only check first 10000 lines, to be faster
             let last = line('$')
-            if exists("a:1")
+            if exists("a:1") && !empty("a:1")
                 let last = a:1
             endif
             if !get(b:, 'csv_arrange_use_all_rows', 0)
@@ -601,7 +601,9 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
         return
     endif
     let cur=winsaveview()
-    if a:bang || (exists("a:1") && !empty(a:1))
+    " Force recalculation of Column width
+    let row = exists("a:1") ? a:1 : ''
+    if a:bang || !empty(row)
         if a:bang && exists("b:col_width")
           " Unarrange, so that if csv_arrange_align has changed
           " it will be adjusted automaticaly
@@ -634,8 +636,6 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
     endif
 
     if !exists("b:col_width")
-        " Force recalculation of Column width
-        let row = exists("a:1") ? a:1 : ''
         call <sid>CalculateColumnWidth(row)
     endif
 
@@ -714,6 +714,7 @@ endfu
 fu! <sid>CalculateColumnWidth(row) "{{{3
     " Internal function, not called from external,
     " does not work with fixed width columns
+    " row for the row for which to calculate the width
     let b:col_width=[]
     try
         if exists("b:csv_headerline")
@@ -723,11 +724,7 @@ fu! <sid>CalculateColumnWidth(row) "{{{3
         endif
         let s:max_cols=<SID>MaxColumns(line('.'))
         for i in range(1,s:max_cols)
-            if empty(a:row)
-                call add(b:col_width, <SID>ColWidth(i))
-            else
-                call add(b:col_width, <SID>ColWidth(i,a:row))
-            endif
+            call add(b:col_width, <SID>ColWidth(i, a:row))
         endfor
     catch /csv:no_col/
         call <sid>Warn("Error: getting Column numbers, aborting!")
