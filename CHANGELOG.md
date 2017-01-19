@@ -87,6 +87,8 @@
   https://github.com/chrisbra/csv.vim/issues/98, thanks!)
 - Allow for better aligning of columns (reported by taylor-peterson in
   https://github.com/chrisbra/csv.vim/issues/99, thanks!)
+- `:SearchInColumn` did not work correctly for the last column, if `:ArrangeColumn`
+  has been used (reported by Xavier Laviron in #100, thanks!)
 
 ## 0.31 Jan 15, 2015
 - supports for Vim 7.3 dropped
