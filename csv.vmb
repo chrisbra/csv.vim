@@ -2,7 +2,7 @@
 UseVimball
 finish
 ftplugin/csv.vim	[[[1
-2857
+2963
 " Filetype plugin for editing CSV files. "{{{1
 " Author:  Christian Brabandt <cb@256bit.org>
 " Version: 0.31
@@ -221,7 +221,7 @@ fu! <sid>DoAutoCommands() "{{{3
         exe "aug CSV_HI".bufnr('')
             au!
             exe "au CursorMoved <buffer=".bufnr('')."> HiColumn"
-            exe "au BufWinLeave <buffer=".bufnr('')."> HiColumn!"
+            exe "au BufWinLeave <buffer=".bufnr('')."> sil! HiColumn!"
         aug end
         " Set highlighting for column, on which the cursor is currently
         HiColumn
@@ -262,8 +262,10 @@ fu! <sid>GetPat(colnr, maxcolnr, pat, allowmore) "{{{3
         endif
     elseif a:colnr == a:maxcolnr
         if !exists("b:csv_fixed_width_cols")
+            " Allow space in front of the pattern, so that it works correctly
+            " even if :Arrange Col has been used #100
             return '^' . <SID>GetColPat(a:colnr - 1,0) .
-                \ '\zs' . a:pat . '\ze' . (a:allowmore ? '' : '$')
+                \ '\s*\zs' . a:pat . '\ze' . (a:allowmore ? '' : '$')
         else
             return '\%' . b:csv_fixed_width_cols[-1] .
                 \ 'c\zs' . a:pat . '\ze' . (a:allowmore ? '' : '$')
@@ -352,8 +354,10 @@ fu! <sid>DeleteColumn(arg) "{{{3
     endif
     if i > 1
         call <sid>Warn(printf("%d columns deleted", i))
-    else
+    elseif i == 1
         call <sid>Warn("1 column deleted")
+    else
+        call <sid>Warn("no column deleted")
     endif
     call winrestview(_wsv)
 endfu
@@ -555,7 +559,7 @@ fu! <sid>ColWidth(colnr, ...) "{{{3
         if !exists("b:csv_list")
             " only check first 10000 lines, to be faster
             let last = line('$')
-            if exists("a:1")
+            if exists("a:1") && !empty(a:1)
                 let last = a:1
             endif
             if !get(b:, 'csv_arrange_use_all_rows', 0)
@@ -606,7 +610,9 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
         return
     endif
     let cur=winsaveview()
-    if a:bang || (exists("a:1") && !empty(a:1))
+    " Force recalculation of Column width
+    let row = exists("a:1") ? a:1 : ''
+    if a:bang || !empty(row)
         if a:bang && exists("b:col_width")
           " Unarrange, so that if csv_arrange_align has changed
           " it will be adjusted automaticaly
@@ -639,8 +645,6 @@ fu! <sid>ArrangeCol(first, last, bang, limit, ...) range "{{{3
     endif
 
     if !exists("b:col_width")
-        " Force recalculation of Column width
-        let row = exists("a:1") ? a:1 : ''
         call <sid>CalculateColumnWidth(row)
     endif
 
@@ -714,11 +718,12 @@ fu! <sid>PrepUnArrangeCol(first, last) "{{{3
 endfu
 fu! <sid>UnArrangeCol(match) "{{{3
     " Strip leading white space, also trims empty records:
-    return substitute(a:match, '\%(^\s\+\)\|\%(\s\+\ze'.b:delimiter. '\?$\)', '', 'g')
+    return substitute(a:match, '\%(^ \+\)\|\%( \+\ze'.b:delimiter. '\?$\)', '', 'g')
 endfu
 fu! <sid>CalculateColumnWidth(row) "{{{3
     " Internal function, not called from external,
     " does not work with fixed width columns
+    " row for the row for which to calculate the width
     let b:col_width=[]
     try
         if exists("b:csv_headerline")
@@ -728,11 +733,7 @@ fu! <sid>CalculateColumnWidth(row) "{{{3
         endif
         let s:max_cols=<SID>MaxColumns(line('.'))
         for i in range(1,s:max_cols)
-            if empty(a:row)
-                call add(b:col_width, <SID>ColWidth(i))
-            else
-                call add(b:col_width, <SID>ColWidth(i,a:row))
-            endif
+            call add(b:col_width, <SID>ColWidth(i, a:row))
         endfor
     catch /csv:no_col/
         call <sid>Warn("Error: getting Column numbers, aborting!")
@@ -769,7 +770,12 @@ fu! <sid>Columnize(field) "{{{3
     let width = get(b:col_width, colnr, 20)
     let align = 'r'
     if exists('b:csv_arrange_align')
-        let align_list=split(get(b:, 'csv_arrange_align', " "), '\zs')
+        let align=b:csv_arrange_align
+        let indx=match(align, '\*')
+        if indx > 0
+            let align = align[0:(indx-1)]. repeat(align[indx-1], len(b:col_width)-indx)
+        endif
+        let align_list=split(align, '\zs')
         try
             let align = align_list[colnr]
         catch
@@ -1261,6 +1267,64 @@ fu! <sid>MoveColumn(start, stop, ...) range "{{{3
     endfor
     call winrestview(wsv)
 endfu
+fu! <sid>DupColumn(start, stop, ...) range "{{{3
+    " Add new empty column
+    " Explicitly give the range as argument,
+    " cause otherwise, Vim would move the cursor
+    if exists("b:csv_fixed_width_cols")
+        call <sid>Warn("Duplicating Columns only works for delimited files")
+        return
+    endif
+
+    let wsv = winsaveview()
+
+    " translate 1 based columns into zero based list index
+    let col = <sid>WColumn() - 1
+    let max = <sid>MaxColumns()
+    let add_delim = 0
+
+    " If no argument is given, add column after current column
+    if exists("a:1")
+        if a:1 == '$' || a:1 >= max
+            let pos = max - 1
+        elseif a:1 < 0
+            let pos = col
+        else
+            let pos = a:1 - 1
+        endif
+    else
+        let pos = col
+    endif
+    if pos == max - 1
+        let add_delim = 1
+    endif
+    let cnt=(exists("a:2") && a:2 > 0 ? a:2 : 1)
+
+    " if the data contains comments, substitute one line after another
+    " skipping comment lines (we could do it with a single :s statement,
+    " but that would fail for the first and last column.
+
+    let commentpat = '\%(\%>'.(a:start-1).'l\V'.
+                \ escape(b:csv_cmt[0], '\\').'\m\)'. '\&\%(\%<'.
+                \ (a:stop+1). 'l\V'. escape(b:csv_cmt[0], '\\'). '\m\)'
+
+    for i in range(a:start, a:stop)
+        let content = getline(i)
+        if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+            " skip comments
+            continue
+        endif
+        let fields = split(getline(i), b:col.'\zs')
+        if add_delim && fields[-1][:-1] isnot b:delimiter
+            " Need to add a delimiter
+            let fields[pos] .= b:delimiter
+        endif
+        let fields = fields[0:pos] + repeat([fields[pos]], cnt) + fields[pos+1:-1]
+        call setline(i, join(fields, ''))
+    endfor
+    call winrestview(wsv)
+endfu
+
 fu! <sid>AddColumn(start, stop, ...) range "{{{3
     " Add new empty column
     " Explicitly give the range as argument,
@@ -1290,12 +1354,11 @@ fu! <sid>AddColumn(start, stop, ...) range "{{{3
     let cnt=(exists("a:2") && a:2 > 0 ? a:2 : 1)
 
     " translate 1 based columns into zero based list index
-    "let pos -= 1
     let col -= 1
 
     if pos == 0
         let pat = '^'
-    elseif pos == max-1
+    elseif pos == max
         let pat = '$'
     else
         let pat = <sid>GetColPat(pos,1)
@@ -1363,6 +1426,37 @@ fu! <sid>SumColumn(list) "{{{3
             endif
         endif
         return sum
+    endif
+endfu
+fu! <sid>AvgColumn(list) "{{{3
+    if empty(a:list)
+        return 0
+    else
+        let cnt = 0
+        let sum = has("float") ? 0.0 : 0
+        for item in a:list
+            if empty(item)
+                continue
+            endif
+            let nr = matchstr(item, '-\?\d\(.*\d\)\?$')
+            let format1 = '^-\?\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
+            let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
+            try
+                let nr = substitute(nr, format1, '', '')
+                if has("float") && s:nr_format[1] != '.'
+                    let nr = substitute(nr, format2, '.', '')
+                endif
+            catch
+                let nr = 0
+            endtry
+            let sum += (has("float") ? str2float(nr) : (nr + 0))
+            let cnt += 1
+        endfor
+        if has("float")
+            return printf("%.2f", sum/cnt)
+        else
+            return sum/cnt
+        endif
     endif
 endfu
 fu! <sid>MaxColumn(list) "{{{3
@@ -2060,6 +2154,9 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("CountCol",
         \ ':echo csv#EvalColumn(<q-args>, "<sid>CountColumn", <line1>,<line2>)',
         \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd("AvgCol",
+        \ ':echo csv#EvalColumn(<q-args>, "<sid>AvgColumn", <line1>,<line2>)',
+        \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("ConvertData",
         \ ':call <sid>PrepareDoForEachColumn(<line1>,<line2>,<bang>0)',
         \ '-bang -nargs=? -range=%')
@@ -2082,6 +2179,9 @@ fu! <sid>CommandDefinitions() "{{{3
         \ '-bang -range=%')
     call <sid>LocalCmd("AddColumn",
         \ ':call <sid>AddColumn(<line1>,<line2>,<f-args>)',
+        \ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd("DupColumn",
+        \ ':call <sid>DupColumn(<line1>,<line2>,<f-args>)',
         \ '-range=% -nargs=* -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd('Substitute', ':call <sid>SubstituteInColumn(<q-args>,<line1>,<line2>)',
         \ '-nargs=1 -range=%')
@@ -2684,9 +2784,15 @@ fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
     if col == 0
         let col = 1
     endif
-    " don't take the header line into consideration
-    let start = a:first - 1 + s:csv_fold_headerline
-    let stop  = a:last  - 1 + s:csv_fold_headerline
+
+    let start = a:first - 1
+    let stop  = a:last  - 1
+
+    if a:first <= s:csv_fold_headerline
+        " don't take the header line into consideration
+        let start += s:csv_fold_headerline
+        let stop  += s:csv_fold_headerline
+    endif
 
     let column = <sid>CopyCol('', col, '')[start : stop]
     " Delete delimiter
@@ -2790,7 +2896,7 @@ fu! CSVSum(col, fmt, first, last) "{{{3
     if empty(last)
         let last = line('$')
     endif
-    return csv#EvalColumn(a:col, '<sid>SumColumn', first, last)
+    return csv#EvalColumn(a:col, '<sid>AvgColumn', first, last)
 endfu
 fu! CSVMax(col, fmt, first, last) "{{{3
     let first = a:first
@@ -2859,9 +2965,9 @@ let &cpo = s:cpo_save
 unlet s:cpo_save
 
 " Vim Modeline " {{{2
-" vim: set foldmethod=marker et:
+" vim: set foldmethod=marker et sw=0 sts=-1 ts=4:
 doc/ft-csv.txt	[[[1
-1923
+1594
 *ft-csv.txt*	For Vim version 7.4	Last Change: Thu, 15 Jan 2015
 
 Author:		Christian Brabandt <cb@256bit.org>
@@ -2901,6 +3007,8 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.25 Substitute in columns..................|Substitute_CSV|
     3.26 Count values inside a column...........|Count_CSV|
     3.27 Maximum/Minimum values ................|MaxCol_CSV|
+    3.28 Average values.........................|AvgCol_CSV|
+    3.29 Duplicate columns......................|DupColumn_CSV|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -3093,11 +3201,13 @@ overriden by setting the "b:csv_arrange_use_all_rows" variable (see below).
 
 If [range] is not given, it defaults to the current line.
 
-By default, the columns will be righ-aligned. If you want a different
+							*csv_arrange_align*
+By default, the columns will be right-aligned. If you want a different
 alignment you need to specify this through the b:csv_arrange_align variable.
 This is a string of flags ('r': right align, 'l': left align, 'c': center
 alignment, '.': decimal alignment) where each flag defines the alignment for
 a particular column (starting from left). Missing columns will be right aligned.
+You can use '*' to repeat the previous value until the end.
 So this: >
 
     :let b:csv_arrange_align = 'lc.'
@@ -3106,6 +3216,12 @@ Will left-align the first column, center align the second column, decimal
 align the third column and all following columns right align. (Note: decimal
 aligning might slow down Vim and additionally, if the value is no decimal
 number it will be right aligned).
+And this: >
+
+    :let b:csv_arrange_align = 'l*'
+
+Will left align all columns.
+
 If you change the alignment parameter, you need to use the "!" attribute, the
 next time you run the |:ArrangeCol| command, otherwise for performance
 reasons, it won't be considered.
@@ -3197,7 +3313,7 @@ Note, this won't work with linebreaks in the column.
 
 Note also, that if you already have a horizontal header window (|VHeader_CSV|),
 this command will close the horizontal Header window. This is because of a
-limitation of Vim itsself, which doesn't allow to sync the scrolling between
+limitation of Vim itself, which doesn't allow to sync the scrolling between
 two windows horizontally and at the same time have another window only sync
 its scrolling vertically.
 
@@ -3728,7 +3844,7 @@ however add as first argument the column number after which the new column
 needs to be added.
 
 Additionally, you can also add a count number to add several columns at once
-after the specified column number. You 0 for the column number, if you want to
+after the specified column number. Use 0 for the column number, if you want to
 add several columns after the current column.
 
                                                             *:CSVSubstitute*
@@ -3811,7 +3927,35 @@ Note, if you Vim is compiled without floating point number format (|+float|),
 Vim will only aggregate the integer part and therefore won't use the 'y'
 argument in the /format/ specifier.
 
+3.28 Average value of a Column 				*AvgCol_CSV*
+------------------------------
+You can let Vim output the value of a column using the `:CSVAvgCol` command >
+
+    :[range]AvgCol [nr] [/format/]
+
+This outputs the result of the column <nr> within the range given. If no range
+is given, this will calculate the average value of the whole column. If <nr> is not
+given, this calculates the sum for the column the cursor is on. Note, that the
+delimiter will be stripped away from each value and also empty values won't be
+considered.
+
+For the [/format/] part, see |MaxCol_CSV|.
+
 See also |csv-aggregate-functions|
+
+                                                            *:CSVDupColumn*
+3.29 Duplicate columns                                       *DupColumn_CSV*
+----------------------
+If you want to add duplicate an existing column you can use the
+`:CSVDupColumn` or `:DupColumn` command: >
+
+    :[range]DupColumn [column] [count]
+
+By default, this works for the whole file, but you can give a different range
+to which the command applies. By default it will duplicate the column on which
+the cursor is, but you can add as first argument which column will be duplicated.
+
+Additionally, you can also provide a count to copy several columns at once.
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
 
@@ -3834,7 +3978,7 @@ variable b:delimiter.
 If your file does not consist of delimited columns, but rather is a fixed
 width csv file, see |csv-fixedwidth| for configuring the plugin appropriately.
 
-If you changed the delimiter, you should reinitiliaze the plugin using
+If you changed the delimiter, you should reinitialize the plugin using
 |InitCSV|
 
 Note: the delimiter will be used to generate a regular expression that matches
@@ -4417,374 +4561,7 @@ Index;Value1;Value2~
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 
-0.32 (unreleased) {{{1
-- Remove old Vim 7.3 workarounds (plugin needs now a Vim version 7.4)
-- allow to align columns differently (right/left or center align) for
-  |ArrangeColumn_CSV| (suggested by Giorgio Robino, thanks!)
-- document better how to adjust syntax highlighting (suggested by Giorgio
-  Robino, thanks!)
-- Allow the |:CSVHeader| command to only display a specific column (suggested
-  by Giorgio Robino, thanks!)
-- When using |VHeader_CSV| or |Header_CSV| command, check
-  number/relativenumber and foldcolumn to make sure, header line is always
-  aligened with main window (suggested by Giorgio Robino, thanks!)
-- hide search pattern, when calling |SearchInColumn_CSV| (suggested by Giorgio
-  Robino, thanks!)
-- compute correct width of marginline for |:CSVTable|
-- do not allow |:CSVTable| command for csv files, that's what the
-  |:CSVTabularize| command is for.
-- add progressbar for the |:CSVArrangeCol| command. 
-- |InitCSV| accepts a '!' for keeping the b:delimiter (|csv-delimiter|) variable
-  (https://github.com/chrisbra/csv.vim/issues/43 reported by Jeet Sukumaran,
-  thanks!)
-- New text-object iL (Inner Line, to visually select the lines that have the
-  same value in the cursor column, as requested at
-  https://github.com/chrisbra/csv.vim/issues/44, thanks justmytwospence!)
-- |:CSVArrangeColumn| can be given an optional row number and the width will
-  be calculated using that row. (https://github.com/chrisbra/csv.vim/issues/45
-  reported by jchain, thanks!)
-- Allow for hexadecimal |Sort_CSV|
-  (https://github.com/chrisbra/csv.vim/issues/46, reported by ThomsonTan,
-  thanks!)
-- support all flags for |Sort_CSV| as for the builting |:sort| command (except
-  for "u" and "r")
-- prevent mapping of <Up> and <Down> in visual mode (reported by naught101 at
-  https://github.com/chrisbra/csv.vim/issues/50, thanks!)
-- prevent increasing column width on subsequent call of |:ArrangeColumn_CSV|
-  (reported by naught101 at https://github.com/chrisbra/csv.vim/issues/51,
-  thanks!)
-- New Count function |CSVCount()| (reported by jungle-booke at
-  https://github.com/chrisbra/csv.vim/issues/49, thanks!)
-- fix pattern generation for last column
-- |ConvertData_CSV| should filter out folded lines (reported by jungle-booke
-  at https://github.com/chrisbra/csv.vim/issues/53, thanks!)
-- Make |:CSVTable| ignore folded lines (reported by jungle-booke at 
-  https://github.com/chrisbra/csv.vim/issues/56, thanks!)
-- Better filtering for dynamic filters (reported by jungle-booke at 
-  https://github.com/chrisbra/csv.vim/issues/57, thanks!)
-- Implement a |MaxCol_CSV| and |MinCol_CSV| command (reported by jungle-booke at 
-  https://github.com/chrisbra/csv.vim/issues/60, thanks!)
-- Make |UnArrangeColumn_CSV| strip leading and trailing whitespace (reported
-  by SuperFluffy at https://github.com/chrisbra/csv.vim/issues/62, thanks!)
-- Do not sort headerlines (reported by jungle-booke at https://github.com/chrisbra/csv.vim/issues/63,
-  thanks!)
-- Do not error out in |:ArrangeCol| command, if line does not have that many
-  columns (reported by SuperFluffy at https://github.com/chrisbra/csv.vim/issues/64, thanks)
-- Use |OptionSet|autocommand to adjust window for |CSV_Header| command
-- when doing |:ArrangeCol| with bang attribute, unarrange first, so that if
-  the alignment changed, it will be adjusted accordingly
-- Allow distinct keyword for |MaxCol_CSV| and |MinCol_CSV| command (reported
-  by jungle-boogie at https://github.com/chrisbra/csv.vim/issues/67, thanks!)
-- When left-aligning columns, don't add trailing whitespace (reported by
-  jjaderberg at https://github.com/chrisbra/csv.vim/issues/66, thanks!)
-- Do not remove highlighting when calling ":CSVTabularize" (reported by
-   hyiltiz at https://github.com/chrisbra/csv.vim/issues/70, thanks!)
-- Make |:ArrangeCol| respect given headerlines
-- when checking Header/comment lines at beginning of file, make sure to escape
-  the comment pattern correctly.
-- use b:csv_headerline variable for checking column name and column numbers
-  (reported by Werner Freund at https://github.com/chrisbra/csv.vim/issues/78,
-  thanks!)
-- Statusline function could cause a hang in an empty file (reported by Jeet
-  Sukumaran in issue https://github.com/chrisbra/csv.vim/issues/80, thanks!)
-- Wrong headerline highlighting when creating a new file (reported by Jeet
-  Sukumaran in issue https://github.com/chrisbra/csv.vim/issues/79, thanks!)
-- Do not strip leading whitespace, when applying filters (reported by
-  blubb123muh in https://github.com/chrisbra/csv.vim/issues/87, thanks!)
-- display column name on |:Analyze_CSV| command (suggested by indera in
-  https://github.com/chrisbra/csv.vim/issues/88, thanks!)
-
-0.31 Jan 15, 2015 {{{1
-- supports for Vim 7.3 dropped
-- fix that H on the very first cell, results in an endless loop
-  (https://github.com/chrisbra/csv.vim/issues/31, reported by lahvak, thanks!)
-- fix that count for |AddColumn| did not work (according to the documentation)
-  (https://github.com/chrisbra/csv.vim/issues/32, reported by lahvak, thanks!)
-- invalid reference to a WarningMsg() function
-- WhatColumn! error, if the first line did not contain as many fields
-  as the line to check.
-- Rename |:Table| command to |:CSVTable| (
-  https://github.com/chrisbra/csv.vim/issues/33,
-  reported by Peter Jaros, thanks!)
-- Mention to escape special characters when manually specifying the delimiter.
-  https://github.com/chrisbra/csv.vim/issues/35), also detect '^' as
-  delimiter.
-- Csv fixed with columns better use '\%v' to match columns, otherwise, one
-  could get problems with multibyte chars
-- Sorting should work better with csv fixed with patterns (could generate an
-  inavlide pattern before)
-- Refactor GetSID() (provided by Ingo Karkat
-  https://github.com/chrisbra/csv.vim/pull/37, thanks!)
-- New public function |CSVSum()|
-- Restrict |csv-arrange-autocmd| to specific file sizes (suggested by Spencer
-  Boucher in https://github.com/chrisbra/csv.vim/issues/39, thanks!)
-- Make |:CSVSearchInColumn| wrap pattern in '%\(..\)' pairs, so it works
-  correctly with '\|' atoms
-- Small improvements on |:CSVTable| and |:NewDelimiter| command
-- <Up> and <Down> should skip folds (like in normal Vi mode, suggested by
-  Kamaraju Kusuma, thanks!)
-
-0.30 Mar 27, 2014 {{{1
-- |:CSVSubstitute| should substitute all matches in a column, when 'g' flag is
-  given
-- Don't override 'fdt' setting (https://github.com/chrisbra/csv.vim/issues/18,
-  reported by Noah Frederick, thanks!)
-- Consistent Commands naming (https://github.com/chrisbra/csv.vim/issues/19,
-  reported by Noah Frederick, thanks!)
-- New Function |CSVField()| and |CSVCol()|
-- clean up function did not remove certain buffer local variables,
-  possible error when calling Menu function to disable CSV menu
-- make |:CSVArrangeColumn| do not output the numer of substitutions happened
-  (suggested by Caylan Larson, thanks!)
-- better cleaning up on exit, if Header windows were used
-- Let |:CSVVHeader| accept a number, of how many columns to show
-  (suggested by Caylan Larson, thanks!)
-- better error-handling for |CSVFixed|
-- selection of inner/outer text objects  was wrong, reported by Ingo Karkat,
-  thanks!)
-- errors, when using |:CSVAnalyze| and there were empty attributes
-- allow to left-align columns when using |:CSVArrangeColumn|
-- |SumCol_CSV| did not detect negative values
-- make <cr> in (Virtual-) Replace work as documented
-
-0.29 Aug 14, 2013 {{{1
-- setup |QuitPre| autocommand to quit cleanly in newer vims when using :Header
-  and :VHeader
-- new |AddColumn_CSV| command
-- prevent mapping of keys, if g:csv_nomap_<keyname> is set
-  (reported by ping)
-- new |Substitute_CSV| command
-- better syntax highlighting
-- small speedup for |ArrangeColumn_CSV|
-- 'E' did not correctly move the the previous column
-- support for vim-airline added
-
-0.28 Dec 14, 2012 {{{1
-- new command :Table to create ascii tables for non-csv files
-
-0.27 Nov 21, 2012 {{{1
-- Better |CSV-Tabularize|
-- Documentation update
-
-0.26 Jul 25, 2012 {{{1
-- Better handling of setting filetype specific options
-- |CSV-Tabularize|
-- fix some small errors
-
-0.25 May 17, 2012 {{{1
-- |SearchInColumn_CSV| should match non-greedily, patch by Matěj Korvas,
-- better argument parsing for |SearchInColumn_CSV|, patch by Matěj Korvas,
-  thanks!
-0.24 Apr 12, 2012 {{{1
-- Allow to transpose the file (|csv-transpose|, suggested by Karan Mistry,
-  thanks!)
-- |DeleteColumn_CSV| allows to specify a search pattern and all matching
-  columns will be deleted (suggested by Karan Mistry, thanks!)
-
-0.23 Mar 25, 2012 {{{1
-- Don't error out, when creating a new file and syntax highlighting
-  script can't find the delimiter
-  (ftplugin will still give a warning, so).
-- Don't pollute the search register when loading a file
-- Give Warning when number format is wrong
-- Don't source ftdetect several times (patch by Zhao Cai, thanks!)
-- |NewDelimiter_CSV| to change the delimiter of the file
-- |Duplicate_CSV| to check for duplicate records in the file
-- Issue https://github.com/chrisbra/csv.vim/issues/13 fixed (missing quote,
-  reported by y, thanks!)
-- |CSVPat()| function
-- 'lz' does not work with |:silent| |:s| (patch by Sergey Khorev, thanks!)
-- support comments (|csv_comment|, suggested by Peng Yu, thanks!)
-0.22 Nov 08, 2011 {{{1
-- Small enhancements to |SumCol_CSV|
-- :Filters! reapplys the dynamic filter
-- Apply |csv-aggregate-functions| only to those values, that are
-  not folded away.
-- |SumCol_CSV| can use a different number format (suggested by James Cole,
-  thanks! (also |csv-nrformat|
-- Documentation updates (suggested by James Cole and Peng Yu)
-- More code cleanup and error handling
-  https://github.com/chrisbra/csv.vim/issues/9 reported Daniel Carl, thanks!
-  https://github.com/chrisbra/csv.vim/issues/8 patch by Daniel Carl, thanks!
-- New Command |NewRecord_CSV| (suggest by James Cole, thanks!)
-- new textobjects InnerField (if) and outerField (af) which contain the field
-  without or with the delimiter (suggested by James Cole, thanks!)
-- |csv-arrange-autocmd| to let Vim automatically visually arrange the columns
-  using |ArrangeColumn_CSV|
-- |csv-move-folds| let Vim move folded lines to the end
-- implement a Menu for graphical Vim
-
-0.21 Oct 06, 2011 {{{1
-- same as 0.20 (erroneously uploaded to vim.org)
-
-0.20 Oct 06, 2011 {{{1
-
-- Implement a wizard for initializing fixed-width columns (|CSVFixed|)
-- Vertical folding (|VertFold_CSV|)
-- fix plugin indentation (by Daniel Karl, thanks!)
-- fixed missing bang parameter for HiColumn function (by Daniel Karl, thanks!)
-- fixed broken autodection of delimiter (reported by Peng Yu, thanks!)
-
-0.19 Sep 26, 2011 {{{1
-
-- Make |:ArrangeColumn| more robust
-- Link CSVDelimiter to the Conceal highlighting group for Vim's that have
-  +conceal feature (suggested by John Orr, thanks!)
-- allow the possibility to return the Column name in the statusline |csv-stl|
-  (suggested by John Orr, thanks!)
-- documentation updates
-- Allow to dynamically add Filters, see |csv-filter|
-- Also display what filters are active, see |:Filter|
-- Analyze a column for the distribution of a value |csv-analyze|
-- Implement UnArrangeColumn command |UnArrangeColumn_CSV|
-  (suggested by Daniel Karl in https://github.com/chrisbra/csv.vim/issues/7)
-
-0.18 Aug 30, 2011 {{{1
-
-- fix small typos in documentation
-- document, that 'K' and 'J' have been remapped and the originial function is
-  available as \K and \J
-- Delimiters should not be highlighted within a column, only when used
-  as actual delimiters (suggested by Peng Yu, thanks!)
-- Performance improvements for |:ArrangeColumn|
-
-0.17 Aug 16, 2011 {{{1
-
-- small cosmetic changes
-- small documentation updates
-- fold away changelog in help file
-- Document, that |DeleteColumn_CSV| deletes the column on which the cursor
-  is, if no column number has been specified
-- Support csv fixed width columns (|csv-fixedwidth|)
-- Support to interactively convert your csv file to a different
-  format (|csv-convert|)
-
-0.16 Jul 25, 2011 {{{1
-
-- Sort on the range, specified (reported by Peng Yu, thanks!)
-- |MoveCol_CSV| to move a column behind another column (suggested by Peng Yu,
-  thanks!)
-- Document how to use custom functions with a column
-  (|csv-aggregate-functions|)
-- Use g:csv_highlight_column variable, to have Vim automatically highlight the
-  column on which the cursor is (|csv-hicol|)
-- Header/VHeader command should work better now (|Header_CSV|, |VHeader_CSV|)
-- Use setreg() for setting the register for the |Column_CSV| command and make
-  sure it is blockwise.
-- Release 0.14 was not correctly uploaded to vim.org
-
-0.14 Jul 20, 2011 {{{1
-
-- really use g:csv_no_conceal variable (reported by Antonio Ospite, thanks!)
-- Force redrawing before displaying error messages in syntax script (reported
-  by Antonio Ospite, thanks!)
-- Make syntax highlighting work better with different terminals (Should work
-  now with 8, 88 and 256 color terminals, tested with linux konsole, xterm and
-  rxvt) (https://github.com/chrisbra/csv.vim/issues/4)
-- Automatically detect '|' as field separator for csv files
-
-0.13 Mar 14, 2011 {{{1
-
-- documentation update
-- https://github.com/chrisbra/csv.vim/issues#issue/2 ('splitbelow' breaks
-  |Header_CSV|, fix this; thanks lespea!)
-- https://github.com/chrisbra/csv.vim/issues#issue/3 ('gdefault' breaks
-  |ArrangeColumn_CSV|, fix this; thanks lespea!)
-- https://github.com/chrisbra/csv.vim/issues#issue/1 (make syntax highlighting
-  more robust, thanks lespea!)
-- fix some small annoying bugs
-- WhatColumn! displays column name
-
-0.12 Feb 24, 2011 {{{1
-
-- bugfix release:
-- don't use |:noa| when switching between windows
-- make sure, colwidth() doesn't throw an error
-
-0.11 Feb 24, 2011 {{{1
-
-- new command |Copy_CSV|
-- |Search_CSV| did not find anything in the last column if no delimiter
-  was given (reported by chroyer)
-- |VHeader_CSV| display the first column as Header similar to how
-  |Header_CSV| works
-- |HeaderToggle_CSV| and |VHeaderToggle_CSV| commands that toggle displaying
-  the header lines/columns
-
-0.10 Feb 23, 2011 {{{1
-
-- Only conceal real delimiters
-- document g:csv_no_conceal variable
-- document g:csv_nl variable
-- document conceal feature and syntax highlighting
-- Normal mode command <Up>/<Down> work like K/J
-- More robust regular expression engine, that can also handle newlines inside
-  quoted strings.
-- Slightly adjusted syntax highlighting
-
-0.9 Feb 19, 2011 {{{1
-
-- use conceal char depending on encoding
-- Map normal mode keys also for visual/select and operator pending mode
-
-0.8 Feb 17, 2011 {{{1
-
-- Better Error handling
-- HiColumn! removes highlighting
-- Enable NrColumns, that was deactivated in v.0.7
-- a ColorScheme autocommand makes sure, that the syntax highlighting is
-  reapplied, after changing the colorscheme.
-- SearchInColumn now searches in the current column, if no column has been
-  specified
-- A lot more documentation
-- Syntax Highlighting conceales delimiter
-- small performance improvements for |ArrangeColumn_CSV|
-
-0.7 Feb 16, 2011 {{{1
-
-- Make the motion commands 'W' and 'E' work more reliable
-- Document how to setup filetype plugins
-- Make |WhatColumn_CSV| work more reliable (report from
-  http://vim.wikia.com/Script:3280)
-- DeleteColumn deletes current column, if no argument given
-- |ArrangeColumn_CSV| handles errors better
-- Code cleanup
-- Syntax highlighting
-- 'H' and 'L' move forward/backwards between csv fields
-- 'K' and 'J' move upwards/downwards within the same column
-- |Sort_CSV| to sort on a certain column
-- |csv-tips| on how to colorize the statusline
-
-0.6 Feb 15, 2011 {{{1
-
-- Make |ArrangeColumn_CSV| work more reliable (had problems with multibyte
-  chars before)
-- Add |Header_CSV| function
-- 'W' and 'E' move forward/backwards between csv fields
-- provide a file ftdetect/csv.vim to detect csv files
-
-0.5  Apr 20 2010 {{{1
-
-- documentation update
-- switched to a public repository: http://github.com/chrisbra/csv.vim
-- enabled GLVS (see |GLVS|)
-
-0.4a Mar 11 2010 {{{1
-
-- fixed documentation
-
-0.4  Mar 11 2010 {{{1
-
-- introduce |InitCSV|
-- better Error handling
-- HiColumn now by default highlights the current column, if no argument is
-  specified.
-
-0.3  Oct, 28 2010 {{{1
-
-- initial Version
-
-vim:tw=78:ts=8:ft=help:norl:et:fdm=marker:fdl=0
+see CHANGELOG.md in root directory of the plugin.
 syntax/csv.vim	[[[1
 185
 " A simple syntax highlighting, simply alternate colors between two
