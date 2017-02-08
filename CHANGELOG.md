@@ -89,6 +89,8 @@
   https://github.com/chrisbra/csv.vim/issues/99, thanks!)
 - `:SearchInColumn` did not work correctly for the last column, if `:ArrangeColumn`
   has been used (reported by Xavier Laviron in #100, thanks!)
+- Check that the pattern actually matches for `:CSVDeleteCol /pattern` before
+  reporting that a column has been deleted (reported by cometsong in #101, thanks!)
 
 ## 0.31 Jan 15, 2015
 - supports for Vim 7.3 dropped

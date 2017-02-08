@@ -349,8 +349,10 @@ fu! <sid>DeleteColumn(arg) "{{{3
     endif
     if i > 1
         call <sid>Warn(printf("%d columns deleted", i))
-    else
+    elseif i == 1
         call <sid>Warn("1 column deleted")
+    else
+        call <sid>Warn("no column deleted")
     endif
     call winrestview(_wsv)
 endfu
