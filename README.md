@@ -1079,7 +1079,7 @@ If you changed the delimiter, you should reinitialize the plugin using
 
 Note: the delimiter will be used to generate a regular expression that matches
 a column. Therefore, you need to escape special characters. So instead of '^'
-use '\^'.
+use '\\^'.
 
 ## Column
 
