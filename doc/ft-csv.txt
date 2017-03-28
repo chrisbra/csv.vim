@@ -592,6 +592,9 @@ g:csv_nomap_<key> to 1, e.g. to prevent mapping of <CR> in csv files, put >
 <
 into your |.vimrc|. Note, the keyname must be lower case.
 
+Also the csv plugins follows the general consensus, that when the variable
+g:no_plugin_maps or g:no_csv_maps is set, no key will be mapped.
+
 
                                            *:CSVConvertData* *ConvertData_CSV*
 3.18 Converting a CSV File					 *csv-convert*

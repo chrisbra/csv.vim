@@ -610,6 +610,9 @@ let g:csv_nomap_cr = 1
 ```
 into your `.vimrc`. Note, the keyname must be lower case.
 
+Also the csv plugins follows the general consensus, that when the variable
+`g:no_plugin_maps` or `g:no_csv_maps` is set, no key will be mapped.
+
 ## Converting a CSV File
 
 You can convert your CSV file to a different format with the `:ConvertData`
