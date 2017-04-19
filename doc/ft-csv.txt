@@ -38,7 +38,9 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.26 Count values inside a column...........|Count_CSV|
     3.27 Maximum/Minimum values ................|MaxCol_CSV|
     3.28 Average values.........................|AvgCol_CSV|
-    3.29 Duplicate columns......................|DupColumn_CSV|
+    3.29 Variance of a Column...................|VarCol_CSV|
+    3.30 Standard Deviation of a Column.........|StdDevCol_CSV|
+    3.31 Duplicate columns......................|DupColumn_CSV|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -976,8 +978,32 @@ For the [/format/] part, see |MaxCol_CSV|.
 
 See also |csv-aggregate-functions|
 
+3.29 Variance of a Column 				*VarCol_CSV*
+_________________________
+
+    :[range]PopVarianceCol [nr] [/format/]
+
+    :[range]SmplVarianceCol [nr] [/format/]
+
+This outputs the result of the column `<nr>` within the range given. If no range
+is given, this will calculate the statistical variance of the whole column. If <nr> is not
+given, this calculates the variance for the column the cursor is on. Note, that the delimiter
+will be stripped away from each value and also empty values won't be considered.
+
+3.30 Standard Deviation of a Column 				*StdDevCol_CSV*
+___________________________________
+
+    :[range]PopStdCol [nr] [/format/]
+
+    :[range]SmplStdCol [nr] [/format/]
+
+This outputs the result of the column `<nr>` within the range given. If no range
+is given, this will calculate the standard deviation of the whole column. If <nr> is not
+given, this calculates the standard deviation for the column the cursor is on. Note, that
+the delimiter will be stripped away from each value and also empty values won't be considered.
+
                                                             *:CSVDupColumn*
-3.29 Duplicate columns                                       *DupColumn_CSV*
+3.31 Duplicate columns                                       *DupColumn_CSV*
 ----------------------
 If you want to add duplicate an existing column you can use the
 `:CSVDupColumn` or `:DupColumn` command: >

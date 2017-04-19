@@ -1454,6 +1454,74 @@ fu! <sid>AvgColumn(list) "{{{3
         endif
     endif
 endfu
+fu! <sid>VarianceColumn(list, is_population) "{{{3
+    if empty(a:list)
+        return 0
+    else
+        let cnt = 0
+        let sum = has("float") ? 0.0 : 0
+        let avg = <sid>AvgColumn(a:list)
+        for item in a:list
+            if empty(item)
+                continue
+            endif
+            let nr = matchstr(item, '-\?\d\(.*\d\)\?$')
+            let format1 = '^-\?\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
+            let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
+            try
+                let nr = substitute(nr, format1, '', '')
+                if has("float") && s:nr_format[1] != '.'
+                    let nr = substitute(nr, format2, '.', '')
+                endif
+            catch
+                let nr = 0
+            endtry
+            let sum += pow((has("float") ? (str2float(nr)-avg) : ((nr + 0)-avg)), 2)
+            let cnt += 1
+        endfor
+        if(a:is_population == 0)
+            let cnt = cnt-1
+        endif
+        if has("float")
+            return printf("%.2f", sum/cnt)
+        else
+            return sum/(cnt)
+        endif
+    endif
+endfu
+
+fu! <sid>SmplVarianceColumn(list) "{{{2
+    if empty(a:list)
+        return 0
+    else
+        return <sid>VarianceColumn(a:list, 0)
+    endif
+endfu
+
+fu! <sid>PopVarianceColumn(list) "{{{2
+    if empty(a:list)
+        return 0
+    else
+        return <sid>VarianceColumn(a:list, 1)
+    endif
+endfu
+
+fu! <sid>SmplStdDevColumn(list) "{{{2
+    if empty(a:list)
+        return 0
+    else
+        return sqrt(str2float(<sid>VarianceColumn(a:list, 0)))
+    endif
+endfu
+
+fu! <sid>PopStdDevColumn(list) "{{{2
+    if empty(a:list)
+        return 0
+    else
+        return sqrt(str2float(<sid>VarianceColumn(a:list, 1)))
+    endif
+endfu
+
 fu! <sid>MaxColumn(list) "{{{3
     " Sum a list of values, but only consider the digits within each value
     " parses the digits according to the given format (if none has been
@@ -2115,6 +2183,18 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("ArrangeColumn",
         \ ':call <sid>ArrangeCol(<line1>, <line2>, <bang>0, -1, <q-args>)',
         \ '-range -bang -nargs=?')
+    call <sid>LocalCmd("SmplVarCol",
+        \ ':echo csv#EvalColumn(<q-args>, "<sid>SmplVarianceColumn", <line1>,<line2>)',
+        \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd("PopVarCol",
+        \ ':echo csv#EvalColumn(<q-args>, "<sid>PopVarianceColumn", <line1>,<line2>)',
+        \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd("SmplStdCol",
+        \ ':echo csv#EvalColumn(<q-args>, "<sid>SmplStdDevColumn", <line1>,<line2>)',
+        \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd("PopStdCol",
+        \ ':echo csv#EvalColumn(<q-args>, "<sid>SmplStdDevColumn", <line1>,<line2>)',
+        \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
     call <sid>LocalCmd("UnArrangeColumn",
         \':call <sid>PrepUnArrangeCol(<line1>, <line2>)',
         \ '-range')

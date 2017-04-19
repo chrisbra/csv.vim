@@ -1,6 +1,7 @@
 # Changelog 
 
 ## 0.32 (unreleased)
+- Add Standard Deviation and Variance to available column calculations
 - Remove old Vim 7.3 workarounds (plugin needs now a Vim version 7.4)
 - allow to align columns differently (right/left or center align) for
   `ArrangeColumn_CSV` (suggested by Giorgio Robino, thanks!)
