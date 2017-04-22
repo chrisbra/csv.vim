@@ -42,6 +42,8 @@ works differently.
   * [Count Values inside a Column](#count-values-inside-a-column)
   * [Maximum/Minimum value of a Column](#maximumminimum-value-of-a-column)
   * [Average value of a Column](#average-value-of-a-column)
+  * [Variance of a Column](#variance-of-a-column)
+  * [Standard Deviation of a Column](#standard-deviation-of-a-column)
   * [Duplicate columns](#duplicate-columns)
 - [CSV Configuration](#csv-configuration)
   * [Delimiter](#delimiter)
@@ -1031,13 +1033,43 @@ You can let Vim output the value of a column using the `:CSVAvgCol` command
 
 This outputs the result of the column `<nr>` within the range given. If no range
 is given, this will calculate the average value of the whole column. If <nr> is not
-given, this calculates the sum for the column the cursor is on. Note, that the
+given, this calculates the average for the column the cursor is on. Note, that the
 delimiter will be stripped away from each value and also empty values won't be
 considered.
 
 For the `[/format/]` part, see `MaxCol_CSV`.
 
 See also `csv-aggregate-functions`
+
+## Variance of a Column
+
+```vim
+:[range]PopVarianceCol [nr] [/format/]
+```
+
+```vim
+:[range]SmplVarianceCol [nr] [/format/]
+```
+
+This outputs the result of the column `<nr>` within the range given. If no range
+is given, this will calculate the statistical variance of the whole column. If <nr> is not
+given, this calculates the variance for the column the cursor is on. Note, that the delimiter
+will be stripped away from each value and also empty values won't be considered.
+
+## Standard Deviation of a Column
+
+```vim
+:[range]PopStdCol [nr] [/format/]
+```
+
+```vim
+:[range]SmplStdCol [nr] [/format/]
+```
+
+This outputs the result of the column `<nr>` within the range given. If no range
+is given, this will calculate the standard deviation of the whole column. If <nr> is not
+given, this calculates the standard deviation for the column the cursor is on. Note, that
+the delimiter will be stripped away from each value and also empty values won't be considered.
 
 ## Duplicate columns
 
