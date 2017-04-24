@@ -2973,7 +2973,7 @@ fu! CSVSum(col, fmt, first, last) "{{{3
     if empty(last)
         let last = line('$')
     endif
-    return csv#EvalColumn(a:col, '<sid>AvgColumn', first, last)
+    return csv#EvalColumn(a:col, '<sid>SumColumn', first, last)
 endfu
 fu! CSVMax(col, fmt, first, last) "{{{3
     let first = a:first
