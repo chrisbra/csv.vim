@@ -45,6 +45,7 @@ works differently.
   * [Variance of a Column](#variance-of-a-column)
   * [Standard Deviation of a Column](#standard-deviation-of-a-column)
   * [Duplicate columns](#duplicate-columns)
+  * [Column_width](#column-width)
 - [CSV Configuration](#csv-configuration)
   * [Delimiter](#delimiter)
   * [Column](#column)
@@ -69,6 +70,7 @@ works differently.
   * [CSVMax(col, fmt, startline, endline)](#csvmaxcol-fmt-startline-endline)
   * [CSVMin(col, fmt, startline, endline)](#csvmincol-fmt-startline-endline)
   * [CSVAvg(col, fmt, startline, endline)](#csvavgcol-fmt-startline-endline)
+  * [CSVWidth()](#csvwidth)
 - [CSV Tips and Tricks](#csv-tips-and-tricks)
   * [Statusline](#statusline)
   * [Slow CSV plugin](#slow-csv-plugin)
@@ -1086,6 +1088,15 @@ the cursor is, but you can add as first argument `<column>` which column will be
 
 Additionally, you can also provide a `<count>` to copy several columns at once.
 
+## Column width
+
+If you want to know the width of all columns, you can use the `:CSVColumnWidth` command:
+
+```vim
+:CSVColumnWidth
+```
+This will output the width of each column at the bottom. See also the [CSVWidth()](#csvwidth) function.
+
 # CSV Configuration
 
 The CSV plugin tries to automatically detect the field delimiter for your
@@ -1518,6 +1529,10 @@ Returns the 10 smallest values for column col.
 ## CSVAvg(col, fmt, startline, endline)
 
 Returns the average value for column col. 
+
+## CSVWidth()
+
+Returns a list with the width of each column.
 
 # CSV Tips and Tricks
 

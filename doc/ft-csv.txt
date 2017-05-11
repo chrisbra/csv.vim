@@ -41,6 +41,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.29 Variance of a Column...................|VarCol_CSV|
     3.30 Standard Deviation of a Column.........|StdDevCol_CSV|
     3.31 Duplicate columns......................|DupColumn_CSV|
+    3.32 Column width...........................|ColumnWidth_CSV|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -60,9 +61,12 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     5.1 CSVPat()................................|CSVPat()|
     5.2 CSVField()..............................|CSVField()|
     5.3 CSVCol()................................|CSVCol()|
-    5.4 CSVCount()..............................|CSVCount()|
-    5.4 CSVMax()................................|CSVMax()|
-    5.4 CSVMin()................................|CSVMin()|
+    5.4 CSVSum()................................|CSVSum()|
+    5.5 CSVCount()..............................|CSVCount()|
+    5.6 CSVMax()................................|CSVMax()|
+    5.7 CSVMin()................................|CSVMin()|
+    5.8 CSVAvg()................................|CSVAvg()|
+    5.9 CSVWidth()..............................|CSVWidth()|
 6. CSV Tips and Tricks..........................|csv-tips|
     6.1 Statusline..............................|csv-stl|
     6.2 Slow CSV plugin.........................|csv-slow|
@@ -1015,6 +1019,17 @@ to which the command applies. By default it will duplicate the column on which
 the cursor is, but you can add as first argument which column will be duplicated.
 
 Additionally, you can also provide a count to copy several columns at once.
+
+                                                        *ColumnWidth_CSV*
+3.32 Column Width                                       *:CSVColumnWidth*
+-----------------
+If you want to know the width of each column, you can use the `:CSVColumnWidth` command: >
+
+    :CSVColumnWidth 
+
+This will output the width for each column at the bottom. See also
+|CSVWidth()| function
+
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
 
@@ -1404,6 +1419,10 @@ Returns the 10 smallest values for column col.
 5.8 CSVAvg(col, fmt, startline, endline)                         *CSVAvg()*
 ------------------------------------------------------
 Returns the average value for column col. 
+
+5.9 CSVWidth()                                                  *CSVWidth()*
+------------------------------------------------------
+Returns a list with the width for each column.
 
 ==============================================================================
 6. CSV Tips and Tricks						*csv-tips*
