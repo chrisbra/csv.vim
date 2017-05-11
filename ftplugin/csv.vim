@@ -2030,7 +2030,7 @@ fu! <sid>InitCSVFixedWidth() "{{{3
             let &l:cc=_cc
             redraw!
             return
-        elseif char == "\<CR>" || char == "\n" || char == "\r"  " Enter
+        elseif char == "\<CR>" || char == "\n" || char == "\r" || char == 13  " Enter
             let Dict[tcc] = 1
             break
         elseif char == char2nr('?')
