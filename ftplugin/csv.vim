@@ -3030,7 +3030,21 @@ endfu
 fu! CSVWidth() "{{{3
     " does not work with fixed width columns
     if exists("b:csv_fixed_width_cols")
-        let width = copy(b:csv_fixed_width_cols)
+        let c = getline(1,'$')
+        let c = map(c, 'substitute(v:val, ".", "x", "g")')
+        let c = map(c, 'strlen(v:val)+0')
+        let max = max(c)
+        let temp = copy(b:csv_fixed_width_cols)
+        let width = []
+        let y=1
+        " omit the first item, since the starting position is not very useful
+        for i in temp[1:]
+            let length=i-y
+            let y=i
+            call add(width, length)
+        endfor
+        " Add width for last column
+        call add(width, max-y+1)
     else
         call <sid>CalculateColumnWidth('')
         let width=map(copy(b:col_width), 'v:val-1')
