@@ -122,6 +122,8 @@
 - Small improvements on `:CSVTable` and `:NewDelimiter` command
 - <Up> and <Down> should skip folds (like in normal Vi mode, suggested by
   Kamaraju Kusuma, thanks!)
+- Do not remap keys in visual mode (reported by jeffzemla in 
+  https://github.com/chrisbra/csv.vim/issues/111, thanks!)
 
 ## 0.30 Mar 27, 2014
 - `:CSVSubstitute` should substitute all matches in a column, when 'g' flag is
