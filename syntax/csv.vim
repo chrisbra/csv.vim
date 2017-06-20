@@ -150,8 +150,8 @@ fu! <sid>DoSyntaxDefinitions() "{{{3
         call <sid>HiLink("CSVColumnOdd", "Normal")
         call <sid>HiLink("CSVColumnEven", "Normal")
     else
-        call <sid>HiLink("CSVColumnOdd", "DiffAdd")
-        call <sid>HiLink("CSVColumnEven","DiffChange")
+        call <sid>HiLink("CSVColumnOdd", "String")
+        call <sid>HiLink("CSVColumnEven","Statement")
     endif
 endfun
 
