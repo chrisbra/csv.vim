@@ -521,7 +521,7 @@ only does that at most 10 times).
 
 3.17 Normal mode commands					 *csv-mapping*
 -------------------------
-The csv filetype plugin redefines the following keys as:
+The csv filetype plugin redefines the following keys (in normal Mode) as:
 
 <C-Right> or L or W	Move [count] field forwards
 
