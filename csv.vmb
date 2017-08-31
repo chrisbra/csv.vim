@@ -2,7 +2,7 @@
 UseVimball
 finish
 ftplugin/csv.vim	[[[1
-3079
+3140
 " Filetype plugin for editing CSV files. "{{{1
 " Author:  Christian Brabandt <cb@256bit.org>
 " Version: 0.31
@@ -2239,6 +2239,8 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("AvgCol",
         \ ':echo csv#EvalColumn(<q-args>, "<sid>AvgColumn", <line1>,<line2>)',
         \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd('SumRow', ':call csv#SumCSVRow(<q-count>, <q-args>)',
+        \ '-nargs=? -range')
     call <sid>LocalCmd("ConvertData",
         \ ':call <sid>PrepareDoForEachColumn(<line1>,<line2>,<bang>0)',
         \ '-bang -nargs=? -range=%')
@@ -2832,7 +2834,17 @@ fu! <sid>SameFieldRegion() "{{{3
     exe printf(':norm! %dGV%dG',limit[0],limit[1])
 endfu
 
-
+fu! <sid>GetCells(list) "{{{3
+    " returns the content of the cells
+    let column=a:list
+    " Delete delimiter
+    call map(column, 'substitute(v:val, b:delimiter . "$", "", "g")')
+    " Revmoe trailing whitespace
+    call map(column, 'substitute(v:val, ''^\s\+$'', "", "g")')
+    " Remove leading whitespace
+    call map(column, 'substitute(v:val, ''^\s\+'', "", "g")')
+    return column
+endfu
 fu! CSV_CloseBuffer(buffer) "{{{3
     " Setup by SetupAutoCmd autocommand
     try
@@ -2887,12 +2899,7 @@ fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
     endif
 
     let column = <sid>CopyCol('', col, '')[start : stop]
-    " Delete delimiter
-    call map(column, 'substitute(v:val, b:delimiter . "$", "", "g")')
-    " Revmoe trailing whitespace
-    call map(column, 'substitute(v:val, ''^\s\+$'', "", "g")')
-    " Remove leading whitespace
-    call map(column, 'substitute(v:val, ''^\s\+'', "", "g")')
+    let column = <sid>GetCells(column)
     " Delete empty values
     " Leave this up to the function that does something
     " with each value
@@ -2944,6 +2951,60 @@ fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
 endfu
 " return field index (x,y) with leading/trailing whitespace and trailing
 " delimiter stripped (only when a:0 is not given)
+fu! csv#SumCSVRow(line, nr) "{{{3
+    let ln = a:line
+    if a:line == -1 
+        let ln = line('.')
+    elseif a:line > line('$')
+        call <sid>Warn("Invalid count specified")
+        return
+    endif
+    let line=getline(ln)
+    " Filter comments out
+    let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
+    if line =~ pat
+        call <sid>Warn("Invalid count specified")
+        return
+    endif
+    let func='<sid>SumColumn'
+    let cells=split(line, b:col.'\zs')
+    let cells=<sid>GetCells(cells)
+    " parse the optional number format
+    let format = matchstr(a:nr, '/[^/]*/')
+    call <sid>NumberFormat()
+    let save = winsaveview()
+    if !empty(format)
+        try
+            let s = []
+            " parse the optional number format
+            let str = matchstr(format, '/\zs[^/]*\ze/', 0, start)
+            let s = matchlist(str, '\(.\)\?:\(.\)\?')[1:2]
+            if empty(s)
+                " Number format wrong
+                call <sid>Warn("Numberformat wrong, needs to be /x:y/!")
+                return
+            endif
+            if !empty(s[0])
+                let s:nr_format[0] = s[0]
+            endif
+            if !empty(s[1])
+                let s:nr_format[1] = s[1]
+            endif
+        endtry
+    endif
+    try
+        let result=call(function(func), [cells])
+        echo printf("Sum of line %d: %s", ln, result)
+    catch
+        " Evaluation of expression failed
+        echohl Title
+        echomsg "Evaluating the Sum failed for line ". ln
+        echohl Normal
+    finally
+        call winrestview(save)
+    endtry
+endfu
+
 fu! CSVField(x, y, ...) "{{{3
     if &ft != 'csv'
         return
@@ -3083,7 +3144,7 @@ unlet s:cpo_save
 " Vim Modeline " {{{2
 " vim: set foldmethod=marker et sw=0 sts=-1 ts=4:
 doc/ft-csv.txt	[[[1
-1642
+1655
 *ft-csv.txt*	For Vim version 7.4	Last Change: Thu, 15 Jan 2015
 
 Author:		Christian Brabandt <cb@256bit.org>
@@ -4116,6 +4177,17 @@ If you want to know the width of each column, you can use the `:CSVColumnWidth` 
 This will output the width for each column at the bottom. See also
 |CSVWidth()| function
 
+3.33 Sum of Numbers in a Row	                   				*SumRow_CSV*
+----------------------------
+You can let Vim output the sum of a field in a row using the `:CSVASumRow` command >
+
+    :[range]SumRow [/format/]
+
+This outputs the sum of the row [range]. If no range is given, this will
+calculate the sum for the current row. Note, that the delimiter will be
+stripped away from each value and also empty values won't be considered.
+
+For the [/format/] part, see |MaxCol_CSV|.
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
 
@@ -4726,6 +4798,8 @@ Index;Value1;Value2~
 7. CSV Changelog					       *csv-changelog*
 
 see CHANGELOG.md in root directory of the plugin.
+
+# vim:ft=help
 syntax/csv.vim	[[[1
 171
 " A simple syntax highlighting, simply alternate colors between two
