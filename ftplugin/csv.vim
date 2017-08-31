@@ -2828,6 +2828,17 @@ fu! <sid>SameFieldRegion() "{{{3
 endfu
 
 
+fu! <sid>GetCells(list) "{{{3
+    " returns the content of the cells
+    let column=a:list
+    " Delete delimiter
+    call map(column, 'substitute(v:val, b:delimiter . "$", "", "g")')
+    " Revmoe trailing whitespace
+    call map(column, 'substitute(v:val, ''^\s\+$'', "", "g")')
+    " Remove leading whitespace
+    call map(column, 'substitute(v:val, ''^\s\+'', "", "g")')
+    return column
+endfu
 fu! CSV_CloseBuffer(buffer) "{{{3
     " Setup by SetupAutoCmd autocommand
     try
@@ -2882,12 +2893,7 @@ fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
     endif
 
     let column = <sid>CopyCol('', col, '')[start : stop]
-    " Delete delimiter
-    call map(column, 'substitute(v:val, b:delimiter . "$", "", "g")')
-    " Revmoe trailing whitespace
-    call map(column, 'substitute(v:val, ''^\s\+$'', "", "g")')
-    " Remove leading whitespace
-    call map(column, 'substitute(v:val, ''^\s\+'', "", "g")')
+    let column = <sid>GetCells(column)
     " Delete empty values
     " Leave this up to the function that does something
     " with each value
