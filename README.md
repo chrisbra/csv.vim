@@ -309,7 +309,8 @@ The command `:DeleteColumn` or `:CSVDeleteColumn` can be used to delete a specif
 :DeleteColumn 2
 ```
 
-will delete column 2.
+will delete column 2. If you use `:DeleteColumn 2-3` columns 2 and 3 will be
+deleted.
 
 If you don't specify a column number, it will delete the column on which the
 cursor is. Alternatively, you can also specify a search string. The plugin

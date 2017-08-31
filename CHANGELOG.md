@@ -92,6 +92,11 @@
   has been used (reported by Xavier Laviron in #100, thanks!)
 - Check that the pattern actually matches for `:CSVDeleteCol /pattern` before
   reporting that a column has been deleted (reported by cometsong in #101, thanks!)
+- Allow to delete a range of columns usine `:DeleteColumn 2-3` (suggested by klaernie in
+  https://github.com/chrisbra/csv.vim/issues/105, thanks!)
+- New command `:SumRow` to display the sum of a row  (suggested by kozross in
+  https://github.com/chrisbra/csv.vim/issues/116, thanks!)
+
 
 ## 0.31 Jan 15, 2015
 - supports for Vim 7.3 dropped

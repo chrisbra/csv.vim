@@ -334,8 +334,8 @@ fu! <sid>SearchColumn(arg) "{{{3
 endfu
 fu! <sid>DeleteColumn(arg) "{{{3
     let _wsv = winsaveview()
+    let i = 0
     if a:arg =~ '^[/]'
-        let i = 0
         let pat = a:arg[1:]
         call cursor(1,1)
         while search(pat, 'cW')
@@ -343,6 +343,14 @@ fu! <sid>DeleteColumn(arg) "{{{3
             sil call <sid>DelColumn('')
             let i+=1
         endw
+    elseif a:arg =~ '-'
+        let list=split(a:arg, '-')
+        call cursor(1,1)
+        for col in range(list[1], list[0], -1)
+            " delete backwards, so that the column numbers do not change
+            sil call <sid>DelColumn(col)
+            let i+=1
+        endfor
     else
         let i = 1
         sil call <sid>DelColumn(a:arg)
