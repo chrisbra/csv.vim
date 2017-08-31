@@ -1030,6 +1030,17 @@ If you want to know the width of each column, you can use the `:CSVColumnWidth` 
 This will output the width for each column at the bottom. See also
 |CSVWidth()| function
 
+3.33 Sum of Numbers in a Row	                   				*SumRow_CSV*
+----------------------------
+You can let Vim output the sum of a field in a row using the `:CSVASumRow` command >
+
+    :[range]SumRow [/format/]
+
+This outputs the sum of the row [range]. If no range is given, this will
+calculate the sum for the current row. Note, that the delimiter will be
+stripped away from each value and also empty values won't be considered.
+
+For the [/format/] part, see |MaxCol_CSV|.
 ==============================================================================
 4. CSV Configuration					 *csv-configuration*
 
@@ -1640,3 +1651,5 @@ Index;Value1;Value2~
 7. CSV Changelog					       *csv-changelog*
 
 see CHANGELOG.md in root directory of the plugin.
+
+# vim:ft=help

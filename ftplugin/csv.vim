@@ -2234,6 +2234,8 @@ fu! <sid>CommandDefinitions() "{{{3
     call <sid>LocalCmd("AvgCol",
         \ ':echo csv#EvalColumn(<q-args>, "<sid>AvgColumn", <line1>,<line2>)',
         \ '-nargs=? -range=% -complete=custom,<sid>SortComplete')
+    call <sid>LocalCmd('SumRow', ':call csv#SumCSVRow(<q-count>, <q-args>)',
+        \ '-nargs=? -range')
     call <sid>LocalCmd("ConvertData",
         \ ':call <sid>PrepareDoForEachColumn(<line1>,<line2>,<bang>0)',
         \ '-bang -nargs=? -range=%')
@@ -2827,7 +2829,6 @@ fu! <sid>SameFieldRegion() "{{{3
     exe printf(':norm! %dGV%dG',limit[0],limit[1])
 endfu
 
-
 fu! <sid>GetCells(list) "{{{3
     " returns the content of the cells
     let column=a:list
@@ -2945,6 +2946,60 @@ fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
 endfu
 " return field index (x,y) with leading/trailing whitespace and trailing
 " delimiter stripped (only when a:0 is not given)
+fu! csv#SumCSVRow(line, nr) "{{{3
+    let ln = a:line
+    if a:line == -1 
+        let ln = line('.')
+    elseif a:line > line('$')
+        call <sid>Warn("Invalid count specified")
+        return
+    endif
+    let line=getline(ln)
+    " Filter comments out
+    let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
+    if line =~ pat
+        call <sid>Warn("Invalid count specified")
+        return
+    endif
+    let func='<sid>SumColumn'
+    let cells=split(line, b:col.'\zs')
+    let cells=<sid>GetCells(cells)
+    " parse the optional number format
+    let format = matchstr(a:nr, '/[^/]*/')
+    call <sid>NumberFormat()
+    let save = winsaveview()
+    if !empty(format)
+        try
+            let s = []
+            " parse the optional number format
+            let str = matchstr(format, '/\zs[^/]*\ze/', 0, start)
+            let s = matchlist(str, '\(.\)\?:\(.\)\?')[1:2]
+            if empty(s)
+                " Number format wrong
+                call <sid>Warn("Numberformat wrong, needs to be /x:y/!")
+                return
+            endif
+            if !empty(s[0])
+                let s:nr_format[0] = s[0]
+            endif
+            if !empty(s[1])
+                let s:nr_format[1] = s[1]
+            endif
+        endtry
+    endif
+    try
+        let result=call(function(func), [cells])
+        echo printf("Sum of line %d: %s", ln, result)
+    catch
+        " Evaluation of expression failed
+        echohl Title
+        echomsg "Evaluating the Sum failed for line ". ln
+        echohl Normal
+    finally
+        call winrestview(save)
+    endtry
+endfu
+
 fu! CSVField(x, y, ...) "{{{3
     if &ft != 'csv'
         return

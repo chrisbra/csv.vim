@@ -45,7 +45,8 @@ works differently.
   * [Variance of a Column](#variance-of-a-column)
   * [Standard Deviation of a Column](#standard-deviation-of-a-column)
   * [Duplicate columns](#duplicate-columns)
-  * [Column_width](#column-width)
+  * [Column width](#column-width)
+  * [Sum of Numbers in a row](#sum-of-numbers-in-a-row)
 - [CSV Configuration](#csv-configuration)
   * [Delimiter](#delimiter)
   * [Column](#column)
@@ -1073,6 +1074,7 @@ is given, this will calculate the standard deviation of the whole column. If <nr
 given, this calculates the standard deviation for the column the cursor is on. Note, that
 the delimiter will be stripped away from each value and also empty values won't be considered.
 
+For the `[/format/]` part, see `MaxCol_CSV`.
 ## Duplicate columns
 
 If you want to add duplicate an existing column you can use the
@@ -1096,6 +1098,20 @@ If you want to know the width of all columns, you can use the `:CSVColumnWidth` 
 :CSVColumnWidth
 ```
 This will output the width of each column at the bottom. See also the [CSVWidth()](#csvwidth) function.
+
+## Sum of Numbers in a row
+
+You can let Vim output the sum of a field in a row using the `:CSVASumRow` command:
+
+```vim
+    :[line]SumRow [/format/]
+```
+
+This outputs the sum of the row `[line]`. If no line is given, this will
+calculate the sum for the current row. Note, that the delimiter will be
+stripped away from each value and also empty values won't be considered.
+
+For the `[/format/]` part, see `MaxCol_CSV`.
 
 # CSV Configuration
 
