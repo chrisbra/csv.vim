@@ -660,7 +660,7 @@ how your columns need to be converted. Again, Vim asks you for how to do that:
 This time, you can use '%s' expandos. They tell Vim, that they need to be
 replaced by the actual content of your file. It does by going from the first
 column in your file and replacing it with the corresponding %s in that order.
-If there are less '%s' expandos then columns in your file, Vim will skip the
+If there are less '%s' expandos than columns in your file, Vim will skip the
 columns, that are not used. Again If the variable g:csv_convert is already
 defined, Vim will already show you its' content as default value which you can
 confirm by pressing Enter.
