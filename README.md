@@ -112,34 +112,33 @@ To have Vim automatically detect csv files, you need to do the following.
 	  To create this directory, you can do:
 
 	  ```vim
-	:!mkdir ~/.vim
+		:!mkdir ~/.vim
 	  ```
 	  for Unix and
 
 	  ```vim
-	:!mkdir ~/vimfiles
+		:!mkdir ~/vimfiles
 	  ```
 	  for Windows.
 
    2. In that directory you create a file that will detect csv files.
 
-	```vim
+```vim
+if exists("did_load_csvfiletype")
+  finish
+endif
+let did_load_csvfiletype=1
 
-	if exists("did_load_csvfiletype")
-	  finish
-	endif
-	let did_load_csvfiletype=1
+augroup filetypedetect
+  au! BufRead,BufNewFile *.csv,*.dat	setfiletype csv
+augroup END
+```
 
-	augroup filetypedetect
-	  au! BufRead,BufNewFile *.csv,*.dat	setfiletype csv
-	augroup END
+You save this file as "filetype.vim" in your user runtime diretory:
 
-	```
-	You save this file as "filetype.vim" in your user runtime diretory:
-
-	```vim
-	:w ~/.vim/filetype.vim
-	```
+```vim
+:w ~/.vim/filetype.vim
+```
    3. To be able to use your new filetype.vim detection, you need to restart
 	  Vim. Vim will then  load the csv filetype plugin for all files whose
 	  names end with .csv.
