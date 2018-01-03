@@ -3137,8 +3137,10 @@ fu! CSV_WCol(...) "{{{3
 endfun
 
 " Initialize Plugin "{{{2
-let b:csv_start = exists("b:csv_start") ? b:csv_start : 1
-let b:csv_end   = exists("b:csv_end") ? b:csv_end : line('$')
+" useful for configuring how many lines to analyze,
+" set if you notice a slowdown
+let b:csv_start = get(g:, 'csv_start', 1)
+let b:csv_end   = get(g:, 'csv_end', line('$'))
 
 call <SID>Init(b:csv_start, b:csv_end)
 let &cpo = s:cpo_save

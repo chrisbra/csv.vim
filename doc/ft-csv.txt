@@ -57,6 +57,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     4.10 Number format..........................|csv-nrformat|
     4.11 Move folded lines......................|csv-move-folds|
     4.12 Using Comments.........................|csv-comments|
+    4.13 Size and performance considerations....|csv-size|
 5. Functions....................................|CSV-Functions|
     5.1 CSVPat()................................|CSVPat()|
     5.2 CSVField()..............................|CSVField()|
@@ -1371,6 +1372,24 @@ set the variable `g:csv_disable_fdt` in your |.vimrc| >
 
     :let g:csv_disable_fdt = 1
 
+4.13 Size and performance considerations                            *csv-size*
+----------------------------------------
+By default, the csv plugin will analyze the whole file to determine which
+delimiter to use. Beside specifying the the actual delimiter to use
+(|csv-delimiter|) you can restrict analyzing the plugin to consider only a
+certain part of the file. This should make loading huge csv files a log
+faster. To only consider the first 100 rows set the `g:csv_start` and
+`g:csv_end` variables in your |.vimrc| like this >
+
+  :let g:csv_start = 1
+  :let g:csv_end = 100
+
+Also note, you can use the Large File plugin
+(http://www.drchip.org/astronaut/vim/index.html#LARGEFILE) which however will
+disable syntax highlighting and the filetype commands for very large csv files
+(by default larger than 100 MB).
+
+See also |csv-slow|
 ==============================================================================
 5. Functions                                                    *CSV-Functions*
 

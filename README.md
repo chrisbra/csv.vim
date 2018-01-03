@@ -62,6 +62,7 @@ works differently.
   * [Number format](#number-format)
   * [Move folded lines](#move-folded-lines)
   * [Using comments](#using-comments)
+  * [Size and performance considerations](#size-and-performance-considerations)
 - [Functions](#functions)
   * [CSVPat()](#csvpat)
   * [CSVField(x,y[, orig])](#csvfieldxy-orig)
@@ -1481,6 +1482,27 @@ set the variable `g:csv_disable_fdt` in your `.vimrc`
 ```vim
 :let g:csv_disable_fdt = 1
 ```
+
+## Size and performance considerations
+
+By default, the csv plugin will analyze the whole file to determine which
+delimiter to use. Beside specifying the the actual delimiter to use
+(see also `csv-delimiter`) you can restrict analyzing the plugin to consider only a
+certain part of the file. This should make loading huge csv files a log
+faster. To only consider the first 100 rows set the `g:csv_start` and
+`g:csv_end` variables in your `.vimrc` like this
+
+```vim
+:let g:csv_start = 1
+:let g:csv_end = 100
+```
+
+Also note, you can use the [Large File
+plugin](http://www.drchip.org/astronaut/vim/index.html#LARGEFILE) which however
+will disable syntax highlighting and the filetype commands for very large csv
+files (by default larger than 100 MB).
+
+See also `csv-slow`
 
 # Functions
 
