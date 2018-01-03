@@ -83,6 +83,24 @@ works differently.
 
 # Installation
 
+## Using a plugin manager
+
+This plugin follows the standard runtime path structure, and as such it can be installed with a variety of plugin managers:
+
+| Plugin Manager | Install with... |
+| ------------- | ------------- |
+| [Pathogen][1] | `git clone https://github.com/chrisbra/csv.vim ~/.vim/bundle/csv`<br/>Remember to run `:Helptags` to generate help tags |
+| [NeoBundle][2] | `NeoBundle 'chrisbra/csv.vim'` |
+| [Vundle][3] | `Plugin 'chrisbra/csv.vim'` |
+| [VAM][4] | `call vam#ActivateAddons([ 'csv' ])` |
+| [Plug][5] | `Plug 'chrisbra/csv.vim'` |
+| [Dein][6] | `call dein#add('chrisbra/csv.vim')` |
+| [minpac][7] | `call minpac#add('chrisbra/csv.vim')` |
+| pack feature (native Vim 8 package feature)| `git clone https://github.com/chrisbra/csv.vim ~/.vim/pack/dist/start/csv`<br/>Remember to run `:helptags` to generate help tags |
+| manual | copy all of the files into your `~/.vim` directory (see below)|
+
+## Manual installation
+
 In order to have vim automatically detect csv files, you need to have
 `ftplugins` enabled (e.g. by having this line in your `.vimrc` file:
 
@@ -1797,3 +1815,11 @@ Index | Value | Value2
 --- | --- | ---
 1 | 100 | 3 | 300.00
 2 | 20 | 4 | 80.00
+
+[1]: https://github.com/tpope/vim-pathogen
+[2]: https://github.com/Shougo/neobundle.vim
+[3]: https://github.com/VundleVim/Vundle.vim
+[4]: https://github.com/MarcWeber/vim-addon-manager
+[5]: https://github.com/junegunn/vim-plug
+[6]: https://github.com/Shougo/dein.vim
+[7]: https://github.com/k-takata/minpac/
