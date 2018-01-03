@@ -13,6 +13,8 @@ works differently.
 
 # Table of Contents
 - [Installation](#installation)
+  * [Using a Plugin Manager](#using-a-plugin-manager)
+  * [Manual Installation](##manual-installation)
 - [Commands](#commands)
   * [WhatColumn](#whatcolumn)
   * [NrColumns](#nrcolumns)
