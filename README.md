@@ -354,7 +354,7 @@ that holds a small fraction of the csv file. This is useful, if the first line
 contains some kind of a heading and you want always to display it. This works
 similar to fixing a certain line at the top. As optional argument, you can
 give the number of columns from the top, that shall be displayed. By default,
-1 is used (You can define youre own default by setting the b:csv_headerline
+1 is used (You can define your own default by setting the b:csv_headerline
 variable, see [CSV Header lines](#csv-header-lines)). Use the '!' to close this window. So this 
 
 ```vim
