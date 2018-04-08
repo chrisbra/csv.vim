@@ -229,8 +229,8 @@ fu! <sid>DoAutoCommands() "{{{3
         HiColumn!
     endif
     " undo autocommand:
-    let b:undo_ftplugin .= '| exe "sil! au! CSV_HI CursorMoved <buffer> "'
-    let b:undo_ftplugin .= '| exe "sil! aug! CSV_HI" |exe "sil! HiColumn!"'
+    let b:undo_ftplugin .= '| exe "sil! au! CSV_HI'.bufnr('').' CursorMoved <buffer> "'
+    let b:undo_ftplugin .= '| exe "sil! aug! CSV_HI'.bufnr('').'" |exe "sil! HiColumn!"'
 
     if has("gui_running") && !exists("#CSV_Menu#FileType")
         augroup CSV_Menu
