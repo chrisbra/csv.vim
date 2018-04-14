@@ -1162,8 +1162,19 @@ If you changed the delimiter, you should reinitialize the plugin using
 [CSVInit](#csvinit)
 
 Note: the delimiter will be used to generate a regular expression that matches
-a column. Therefore, you need to escape special characters. So instead of '^'
-use '\\^'.
+a column. Internally the plugin uses the very-nomagic setting for the
+delimiter, so escaping is not neccessary.
+
+If you want to override which delimiters are probed automatically, set the
+`g:csv_delim_test` variable like this:
+
+```vim
+:let g:csv_delim_test = ',;|'
+```
+
+This will only make the plugin test the possible delimiters ',', ';' and '|'.
+This will also make the automatic detection a bit faster, since it does not
+need to test that many delimiters.
 
 ## Column
 

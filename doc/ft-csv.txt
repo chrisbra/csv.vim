@@ -1049,13 +1049,15 @@ For the [/format/] part, see |MaxCol_CSV|.
 
 The CSV plugin tries to automatically detect the field delimiter for your
 file, cause although often the file is called CSV (comma separated values), a
-semicolon is actually used. The column separator is stored in the buffer-local
-variable b:delimiter. This delimiter is heavily used, because you need
-it to define a column. Almost all commands use this variable therefore.
+semicolon is actually used. By default the plugin tries the following
+delimiters: ',', ';', '|', '\t', '^', ':'. 
+The column separator is stored in the buffer-local variable b:delimiter. This
+delimiter is heavily used, because you need it to define a column. Almost all
+commands use this variable therefore.
 
-4.1 Delimiter							*csv-delimiter*
+4.1 Delimiter				              	*csv-delimiter*
 -------------
-To override the automatic detection of the plugin and define the separator
+To override the automatic detection of the delimiter and define the separator
 manually, use: >
 
     :let g:csv_delim=','
@@ -1070,8 +1072,16 @@ If you changed the delimiter, you should reinitialize the plugin using
 |InitCSV|
 
 Note: the delimiter will be used to generate a regular expression that matches
-a column. Therefore, you need to escape special characters. So instead of '^'
-use '\^'.
+a column. Internally the plugin uses the very-nomagic setting for the
+delimiter, so escaping is not neccessary.
+
+If you want to override which delimiters are probed automatically, set the
+g:csv_delim_test variable like this: >
+        :let g:csv_delim_test = ',;|'
+
+This will only make the plugin test the possible delimiters ',', ';' and '|'.
+This will also make the automatic detection a bit faster, since it does not
+need to test that many delimiters.
 
 4.2 Column							*csv-column*
 ----------

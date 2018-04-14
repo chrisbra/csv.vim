@@ -64,7 +64,7 @@ fu! <sid>Init(start, end, ...) "{{{3
     " Determine default Delimiter
     if !keep
         if !exists("g:csv_delim")
-            let b:delimiter=<SID>GetDelimiter(a:start, a:end)
+            let b:delimiter=<SID>GetDelimiter(a:start, a:end, get(g:, 'csv_delim_test', ''))
         else
             let b:delimiter=g:csv_delim
         endif
@@ -440,12 +440,21 @@ fu! <sid>HiCol(colnr, bang) "{{{3
         exe ":2match " . s:hiGroup . ' /' . pat . '/'
     endif
 endfu
-fu! <sid>GetDelimiter(first, last) "{{{3
+fu! <sid>GetDelimiter(first, last, ...) "{{{3
     if !exists("b:csv_fixed_width_cols")
         let _cur = getpos('.')
         let _s   = @/
         " delimiters to try matching in the file
-        let Delim= {0: ',', 1:  ';', 2: '|', 3: '	', 4: '\^', 5: ':'}
+        if len(a:000) && !empty(a:1)
+            let j=0
+            let Delim={}
+            for i in split(a:1, '\zs')
+                let Delim[j] = i
+                let j+=1
+            endfor
+        else
+            let Delim= {0: ',', 1:  ';', 2: '|', 3: '	', 4: '^', 5: ':'}
+        endif
         let temp = {}
         let last = a:last > line('$') ? line('$') : a:last
         let first = a:first > line('$') ? line('$') : a:first
@@ -454,7 +463,8 @@ fu! <sid>GetDelimiter(first, last) "{{{3
         "set nolz
         for i in values(Delim)
             redir => temp[i]
-            exe ":silent! :". first. ",". last. "s/" . i . "/&/nge"
+            " use very non-magic
+            exe ":silent! :". first. ",". last. 's/\V' . i . "/&/nge"
             redir END
         endfor
         let &lz = _lz
