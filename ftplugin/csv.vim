@@ -45,7 +45,7 @@ fu! <sid>Warn(mess) "{{{3
     echohl Normal
 endfu
 
-fu! <sid>Init(startline, endline, ...) "{{{3
+fu! <sid>Init(start, end, ...) "{{{3
     " if a:1 is set, keep the b:delimiter
     let keep = exists("a:1") && a:1
     " Hilight Group for Columns
@@ -64,7 +64,7 @@ fu! <sid>Init(startline, endline, ...) "{{{3
     " Determine default Delimiter
     if !keep
         if !exists("g:csv_delim")
-            let b:delimiter=<SID>GetDelimiter(a:startline, a:endline)
+            let b:delimiter=<SID>GetDelimiter(a:start, a:end)
         else
             let b:delimiter=g:csv_delim
         endif
@@ -447,12 +447,14 @@ fu! <sid>GetDelimiter(first, last) "{{{3
         " delimiters to try matching in the file
         let Delim= {0: ',', 1:  ';', 2: '|', 3: '	', 4: '\^', 5: ':'}
         let temp = {}
+        let last = a:last > line('$') ? line('$') : a:last
+        let first = a:first > line('$') ? line('$') : a:first
         " :silent :s does not work with lazyredraw
         let _lz  = &lz
-        set nolz
-        for i in  values(Delim)
+        "set nolz
+        for i in values(Delim)
             redir => temp[i]
-            exe "silent! ". a:first. ",". a:last. "s/" . i . "/&/nge"
+            exe ":silent! :". first. ",". last. "s/" . i . "/&/nge"
             redir END
         endfor
         let &lz = _lz
