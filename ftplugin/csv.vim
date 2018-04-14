@@ -444,7 +444,8 @@ fu! <sid>GetDelimiter(first, last) "{{{3
     if !exists("b:csv_fixed_width_cols")
         let _cur = getpos('.')
         let _s   = @/
-        let Delim= {0: ';', 1:  ',', 2: '|', 3: '	', 4: '\^'}
+        " delimiters to try matching in the file
+        let Delim= {0: ',', 1:  ';', 2: '|', 3: '	', 4: '\^', 5: ':'}
         let temp = {}
         " :silent :s does not work with lazyredraw
         let _lz  = &lz
