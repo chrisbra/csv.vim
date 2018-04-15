@@ -460,7 +460,7 @@ fu! <sid>GetDelimiter(first, last, ...) "{{{3
         let first = a:first > line('$') ? line('$') : a:first
         " :silent :s does not work with lazyredraw
         let _lz  = &lz
-        "set nolz
+        set nolz
         for i in values(Delim)
             redir => temp[i]
             " use very non-magic

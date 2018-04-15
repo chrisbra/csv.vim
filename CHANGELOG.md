@@ -96,6 +96,9 @@
   https://github.com/chrisbra/csv.vim/issues/105, thanks!)
 - New command `:SumRow` to display the sum of a row  (suggested by kozross in
   https://github.com/chrisbra/csv.vim/issues/116, thanks!)
+- Allow to specify what delimiters to automatically detect using the `g:csv_delim_test` variable
+- Use `g:csv_start` and `g_csv_end` to specify how many lines to use when detecting
+  the delimiter (default: all lines)
 
 
 ## 0.31 Jan 15, 2015
