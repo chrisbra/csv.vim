@@ -718,6 +718,8 @@ Now Vim will fold away all lines, that don't have the same value in this
 particular row. Note, that leading blanks and the delimiter is removed and the
 value is used literally when comparing with other values. If you press <Space>
 on the value, all fields having the same value will be folded away.
+Pressing <BS> will remove the last item from the dynamic filter. To remove all
+filters, keep pressing <BS> until no more filters are present.
 
 The way this is done is, that the value from the column is extracted and a
 regular expression for that field is generated from it. In the end this
