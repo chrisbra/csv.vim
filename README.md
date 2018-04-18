@@ -214,11 +214,11 @@ don't enter a column, the current column will be used.
 
 ## HiColumn
 
-`:HiColumn` or `:CSVHiColumn` <nr> can be used to highlight Column <nr>.
+`:HiColumn` or `:CSVHiColumn` `<nr>` can be used to highlight Column `<nr>`.
 Currently the plugin uses the WildMenu Highlight Group. If you would like to
 change this, you need to define the variable `g:csv_hiGroup`.
 
-If you do not specify a <nr>, HiColumn will highlight the column on which the
+If you do not specify a `<nr>`, HiColumn will highlight the column on which the
 cursor is. Use 
 
 ```vim
@@ -250,7 +250,7 @@ calculate the width of each column so that they can be correctly aligned. If
 no column width has been calculated before, the width will be calculated, even
 if the '!' has not been given.
 
-If <Row> is given, will use the Row, to calculate the width, else will
+If `<Row>` is given, will use the Row, to calculate the width, else will
 calculate the maximum of at least the first 10,000 rows to calculate the
 width. The limit of 10,000 is set to speed up the processing and can be
 overriden by setting the "b:csv_arrange_use_all_rows" variable (see below).
@@ -481,8 +481,8 @@ command
 :[range]SumCol [nr] [/format/]
 ```
 
-This outputs the result of the column <nr> within the range given. If no range
-is given, this will calculate the sum of the whole column. If <nr> is not
+This outputs the result of the column `<nr>` within the range given. If no range
+is given, this will calculate the sum of the whole column. If `<nr>` is not
 given, this calculates the sum for the column the cursor is on. Note, that the
 delimiter will be stripped away from each value and also empty values won't be
 considered.
@@ -629,7 +629,7 @@ is equival to a single backslash '\', e.g. \K would run the lookup function on
 the word under the cursor and \J would join this line with the previous line.
 
 If you want to prevent the mapping of keys, simply set the global variable
-g:csv_nomap_<key> to 1, e.g. to prevent mapping of <CR> in csv files, put 
+`g:csv_nomap_<key>` to 1, e.g. to prevent mapping of `<CR>` in csv files, put 
 
 ```vim
 let g:csv_nomap_cr = 1
@@ -768,22 +768,22 @@ Now you can copy it into your database, or further manipulate it.
 
 If you are on a value and only want to see lines that have the same value in
 this column, you can dynamically filter the file and fold away all lines not
-matching the value in the current column. To do so, simply press <CR> (Enter).
+matching the value in the current column. To do so, simply press `<CR>` (Enter).
 Now Vim will fold away all lines, that don't have the same value in this
 particular row. Note, that leading blanks and the delimiter is removed and the
 value is used literally when comparing with other values. If you press `<Space>`
 on the value, all fields having the same value will be folded away.
-Pressing <BS> will remove the last item from the dynamic filter. To remove all
-filters, keep pressing <BS> until no more filters are present.
+Pressing `<BS>` will remove the last item from the dynamic filter. To remove all
+filters, keep pressing `<BS>` until no more filters are present.
 
 The way this is done is, that the value from the column is extracted and a
 regular expression for that field is generated from it. In the end this
 regular expression is used for folding the file.
 
-A subsequent <CR> or <Space> on another value, will add this value to the
+A subsequent `<CR>` or `<Space>` on another value, will add this value to the
 current applied filter (this is like using the logical AND between the
 currently active filter and the new value). To remove the last item from the
-filter, press <BS> (backspace). If all items from the filter are removed,
+filter, press `<BS>` (backspace). If all items from the filter are removed,
 folding will be disabled.
 
 If some command messes up the folding, you can use [`zX`](http://vimhelp.appspot.com/fold.txt.html#zX) to have the folding
@@ -809,7 +809,7 @@ This means, there are two filters active. The current active filter is on
 column 7 (column name is Price) and all values that match 23.10 will be folded
 away AND all values that don't match a value of 10 in the QTY column will also
 be folded away.
-When removing one item from the filter by pressing <BS>, it will always remove
+When removing one item from the filter by pressing `<BS>`, it will always remove
 the last item (highest number in NR column) from the active filter values.
 
 Note, that depending on your csv file and the number of filters you used,
@@ -1014,8 +1014,8 @@ You can let Vim output the 10 maximum/minimum values of a column using the
 :[range]MinCol [nr][distinct] [/format/]
 ```
 
-This outputs the result of the column <nr> within the range given. If no range
-is given, this will calculate the max value of the whole column. If <nr> is not
+This outputs the result of the column `<nr>` within the range given. If no range
+is given, this will calculate the max value of the whole column. If `<nr>` is not
 given, this calculates the sum for the column the cursor is on. Note, that the
 delimiter will be stripped away from each value and also empty values won't be
 considered.
@@ -1058,7 +1058,7 @@ You can let Vim output the value of a column using the `:CSVAvgCol` command
 ```
 
 This outputs the result of the column `<nr>` within the range given. If no range
-is given, this will calculate the average value of the whole column. If <nr> is not
+is given, this will calculate the average value of the whole column. If `<nr>` is not
 given, this calculates the average for the column the cursor is on. Note, that the
 delimiter will be stripped away from each value and also empty values won't be
 considered.
@@ -1078,7 +1078,7 @@ See also [Defining custom aggregate functions](#defining-custom-aggregate-functi
 ```
 
 This outputs the result of the column `<nr>` within the range given. If no range
-is given, this will calculate the statistical variance of the whole column. If <nr> is not
+is given, this will calculate the statistical variance of the whole column. If `<nr>` is not
 given, this calculates the variance for the column the cursor is on. Note, that the delimiter
 will be stripped away from each value and also empty values won't be considered.
 
@@ -1093,7 +1093,7 @@ will be stripped away from each value and also empty values won't be considered.
 ```
 
 This outputs the result of the column `<nr>` within the range given. If no range
-is given, this will calculate the standard deviation of the whole column. If <nr> is not
+is given, this will calculate the standard deviation of the whole column. If `<nr>` is not
 given, this calculates the standard deviation for the column the cursor is on. Note, that
 the delimiter will be stripped away from each value and also empty values won't be considered.
 
@@ -1428,10 +1428,10 @@ This means, you can now use those 5 keys to configure the fixed-width columns:
 
 Key | Effect
 --- | ---
-`<Cursor>` | Use Cursor Left (<Left>) and Cursor Right (<Right>) to move the highlighting bar.
-`<Space>` | If you press <Space>, this column will be fixed and remain highlighted and there will be another bar, you can move using the Cursor keys. This means this column will be considered to be the border between 2 fixed with columns.
+`<Cursor>` | Use Cursor Left (`<Left>`) and Cursor Right (`<Right>`) to move the highlighting bar.
+`<Space>` | If you press `<Space>`, this column will be fixed and remain highlighted and there will be another bar, you can move using the Cursor keys. This means this column will be considered to be the border between 2 fixed with columns.
 `<ESC>` | Abort
-`<BS>` | Press the backspace key, to remove the last column you fixed with the <Space> key.
+`<BS>` | Press the backspace key, to remove the last column you fixed with the `<Space>` key.
 `<CR>` | Use Enter to finish the wizard. This will use all fixed columns to define the fixed width columns of your csv file. The plugin will be initialized and syntax highlighting should appear.
 
 Note: This only works, if your Vim has the 'colorcolumn' option available
@@ -1559,7 +1559,7 @@ the [`/`](http://vimhelp.appspot.com/pattern.txt.html#%2F) or [`:s`](http://vimh
 :s/<C-R>=CSVPat(3, 'foobar')<cr>/baz
 ```
 
-where the <C-R> means pressing Control followed by R followed by =
+where the `<C-R>` means pressing Control followed by R followed by =
 (see [`c_CTRL-R_=`](http://vimhelp.appspot.com/cmdline.txt.html#c_CTRL-R_%3D)). A prompt will apear, with the '=' as the first character
 on which you can enter expressions.
 
