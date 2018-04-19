@@ -75,6 +75,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     6.4 Autocommand on opening/closing files....|csv-arrange-autocmd|
     6.5 CSV Syntax error........................|csv-syntax-error|
     6.6 Calculating new column values...........|csv-calculate-column|
+    6.7 Using the result of an evaluation.......|b:csv_result|
 7. CSV Changelog................................|csv-changelog|
 
 ==============================================================================
@@ -919,7 +920,7 @@ for every match ('g' flag) and asks for confirmation ('c' flag).
 Substitutes in each column starting from the third each number and appends the
 EURO suffix to it.
 
-3.26 Count Values inside a Column      				 *CountCol_CSV*
+3.26 Count Values inside a Column      				 *Count_CSV*
 ---------------------------------
 You can let Vim output the number of values inside a column using the `:CSVCountCol` 
 command >
@@ -930,8 +931,9 @@ This outputs the number of [distinct] values visible in the column [nr]
 If [distinct] is not given, count's all values. Note, header rows and folded
 rows won't be counted.
 
-See also |csv-aggregate-functions|
+The result is also available in the buffer-local variable `b:csv_result`.
 
+See also |csv-aggregate-functions|
 
                                                                 *MinCol_CSV*
 3.27 Maximum/Minimum value of a Column 				*MaxCol_CSV*
@@ -971,6 +973,8 @@ Note, if you Vim is compiled without floating point number format (|+float|),
 Vim will only aggregate the integer part and therefore won't use the 'y'
 argument in the /format/ specifier.
 
+The result is also available in the buffer-local variable `b:csv_result`.
+
 3.28 Average value of a Column 				*AvgCol_CSV*
 ------------------------------
 You can let Vim output the value of a column using the `:CSVAvgCol` command >
@@ -984,6 +988,8 @@ delimiter will be stripped away from each value and also empty values won't be
 considered.
 
 For the [/format/] part, see |MaxCol_CSV|.
+
+The result is also available in the buffer-local variable `b:csv_result`.
 
 See also |csv-aggregate-functions|
 
@@ -999,6 +1005,8 @@ is given, this will calculate the statistical variance of the whole column. If <
 given, this calculates the variance for the column the cursor is on. Note, that the delimiter
 will be stripped away from each value and also empty values won't be considered.
 
+The result is also available in the buffer-local variable `b:csv_result`.
+
 3.30 Standard Deviation of a Column 				*StdDevCol_CSV*
 ___________________________________
 
@@ -1010,6 +1018,8 @@ This outputs the result of the column `<nr>` within the range given. If no range
 is given, this will calculate the standard deviation of the whole column. If <nr> is not
 given, this calculates the standard deviation for the column the cursor is on. Note, that
 the delimiter will be stripped away from each value and also empty values won't be considered.
+
+The result is also available in the buffer-local variable `b:csv_result`.
 
                                                             *:CSVDupColumn*
 3.31 Duplicate columns                                       *DupColumn_CSV*
@@ -1680,6 +1690,17 @@ Note: Enter as single line. The result will be this: >
 Index;Value1;Value2~
 1;100;3;300.00 `
 2;20;4;80.00 `
+
+6.7 Using the result of an evaluation in insert mode              *b:csv_result*
+----------------------------------------------------
+The result of the last evaluation like e.g. |SumCol_CSV| will be available in
+the buffer-local variable `b:csv_result`. This allows to easily enter the
+result in a new new cell while in insert mode, using |i_CTRL-R|(e.g. in insert
+mode press Ctrl-R followed by "=b:csv_result<enter>".
+
+You can also easily copy and paste it into e.g. the system clipboard using >
+        :let @+=b:csv_result
+
 ==============================================================================
 7. CSV Changelog					       *csv-changelog*
 

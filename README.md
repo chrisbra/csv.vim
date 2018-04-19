@@ -82,6 +82,7 @@ works differently.
   * [Autocommand on opening/closing files](#autocommand-on-openingclosing-files)
   * [Syntax error when opening a CSV file](#syntax-error-when-opening-a-csv-file)
   * [Calculate new columns](#calculate-new-columns)
+  * [Use the result of an evaluation in insert mode](#use-the-result-of-an-evaluation-in-insert-mode)
 
 # Installation
 
@@ -1001,8 +1002,9 @@ This outputs the number of [distinct] values visible in the column [nr]
 If [distinct] is not given, count's all values. Note, header rows and folded
 rows won't be counted.
 
-See also [Defining custom aggregate functions](#defining-custom-aggregate-functions)
+The result is also available in the buffer-local variable `b:csv_result`.
 
+See also [Defining custom aggregate functions](#defining-custom-aggregate-functions)
 
 ## Maximum/Minimum value of a Column
 
@@ -1047,6 +1049,8 @@ Note, if you Vim is compiled without floating point number format ([`+float`](ht
 Vim will only aggregate the integer part and therefore won't use the 'y'
 argument in the /format/ specifier.
 
+The result is also available in the buffer-local variable `b:csv_result`.
+
 See also [Defining custom aggregate functions](#defining-custom-aggregate-functions)
 
 ## Average value of a Column
@@ -1065,6 +1069,8 @@ considered.
 
 For the `[/format/]` part, see [Maximum/Minimum value of a Column](#maximumminimum-value-of-a-column).
 
+The result is also available in the buffer-local variable `b:csv_result`.
+
 See also [Defining custom aggregate functions](#defining-custom-aggregate-functions)
 
 ## Variance of a Column
@@ -1082,6 +1088,8 @@ is given, this will calculate the statistical variance of the whole column. If `
 given, this calculates the variance for the column the cursor is on. Note, that the delimiter
 will be stripped away from each value and also empty values won't be considered.
 
+The result is also available in the buffer-local variable `b:csv_result`.
+
 ## Standard Deviation of a Column
 
 ```vim
@@ -1098,6 +1106,8 @@ given, this calculates the standard deviation for the column the cursor is on. N
 the delimiter will be stripped away from each value and also empty values won't be considered.
 
 For the `[/format/]` part, see [Maximum/Minimum value of a Column](#maximumminimum-value-of-a-column).
+
+The result is also available in the buffer-local variable `b:csv_result`.
 
 ## Duplicate columns
 
@@ -1832,6 +1842,19 @@ Index | Value | Value2
 --- | --- | ---
 1 | 100 | 3 | 300.00
 2 | 20 | 4 | 80.00
+
+## Use the result of an evaluation in insert mode
+
+The result of the last evaluation like e.g. `:SumCol` will be available in
+the buffer-local variable `b:csv_result`. This allows to easily enter the
+result in a new new cell while in insert mode, using `i_CTRL-R` (e.g. in insert
+mode press Ctrl-R followed by "=b:csv_result".
+
+You can also easily copy and paste it into e.g. the system clipboard using
+
+```vim
+  :let @+=b:csv_result
+```
 
 [1]: https://github.com/tpope/vim-pathogen
 [2]: https://github.com/Shougo/neobundle.vim

@@ -99,6 +99,8 @@
 - Allow to specify what delimiters to automatically detect using the `g:csv_delim_test` variable
 - Use `g:csv_start` and `g_csv_end` to specify how many lines to use when detecting
   the delimiter (default: all lines)
+- Make `b:csv_result` available as result of last evaluation (Sum, Max, Deviation, etc..)
+  (suggested by serrussel in https://github.com/chrisbra/csv.vim/issues/127 thanks!)
 
 
 ## 0.31 Jan 15, 2015

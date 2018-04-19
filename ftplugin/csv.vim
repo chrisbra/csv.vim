@@ -1415,6 +1415,7 @@ fu! <sid>SumColumn(list) "{{{3
     " specified, assume POSIX format (without thousand separator) If Vim has
     " does not support floats, simply sum up only the integer part
     if empty(a:list)
+        let b:csv_result = '0'
         return 0
     else
         let sum = has("float") ? 0.0 : 0
@@ -1436,17 +1437,20 @@ fu! <sid>SumColumn(list) "{{{3
             let sum += (has("float") ? str2float(nr) : (nr + 0))
         endfor
         if has("float")
+            let b:csv_result = string(float2nr(sum))
             if float2nr(sum) == sum
                 return float2nr(sum)
             else
                 return printf("%.2f", sum)
             endif
         endif
+        let b:csv_result = string(sum)
         return sum
     endif
 endfu
 fu! <sid>AvgColumn(list) "{{{3
     if empty(a:list)
+        let b:csv_result = '0'
         return 0
     else
         let cnt = 0
@@ -1470,8 +1474,10 @@ fu! <sid>AvgColumn(list) "{{{3
             let cnt += 1
         endfor
         if has("float")
-            return printf("%.2f", sum/cnt)
+            let b:csv_result = printf("%.2f", sum/cnt)
+            return b:csv_result
         else
+            let b:csv_result = printf("%s", sum/cnt)
             return sum/cnt
         endif
     endif
@@ -1505,8 +1511,10 @@ fu! <sid>VarianceColumn(list, is_population) "{{{3
             let cnt = cnt-1
         endif
         if has("float")
-            return printf("%.2f", sum/cnt)
+            let b:csv_result = printf("%.2f", sum/cnt)
+            return b:csv_result
         else
+            let b:csv_result = printf("%s", sum/cnt)
             return sum/(cnt)
         endif
     endif
@@ -1514,6 +1522,7 @@ endfu
 
 fu! <sid>SmplVarianceColumn(list) "{{{2
     if empty(a:list)
+        let b:csv_result = '0'
         return 0
     else
         return <sid>VarianceColumn(a:list, 0)
@@ -1522,6 +1531,7 @@ endfu
 
 fu! <sid>PopVarianceColumn(list) "{{{2
     if empty(a:list)
+        let b:csv_result = '0'
         return 0
     else
         return <sid>VarianceColumn(a:list, 1)
@@ -1530,24 +1540,30 @@ endfu
 
 fu! <sid>SmplStdDevColumn(list) "{{{2
     if empty(a:list)
+        let b:csv_result = '0'
         return 0
     else
-        return sqrt(str2float(<sid>VarianceColumn(a:list, 0)))
+        let result = sqrt(str2float(<sid>VarianceColumn(a:list, 0)))
+        let b:csv_result = string(result)
+        return result
     endif
 endfu
 
 fu! <sid>PopStdDevColumn(list) "{{{2
     if empty(a:list)
+        let b:csv_result = '0'
         return 0
     else
-        return sqrt(str2float(<sid>VarianceColumn(a:list, 1)))
+        let result = sqrt(str2float(<sid>VarianceColumn(a:list, 1)))
+        let b:csv_result = string(result)
+        return result
     endif
 endfu
 
 fu! <sid>MaxColumn(list) "{{{3
     " Sum a list of values, but only consider the digits within each value
     " parses the digits according to the given format (if none has been
-    " specified, assume POSIX format (without thousand separator) If Vim has
+    " specified, assume POSIX format (without thousand separator) If Vim
     " does not support floats, simply sum up only the integer part
     if empty(a:list)
         return 0
@@ -2954,6 +2970,7 @@ fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
     endif
     try
         let result=call(function(a:func), [column])
+        let b:csv_result = string(result)
         return result
     catch
         " Evaluation of expression failed
@@ -3155,6 +3172,7 @@ endfun
 " set if you notice a slowdown
 let b:csv_start = get(g:, 'csv_start', 1)
 let b:csv_end   = get(g:, 'csv_end', line('$'))
+let b:csv_result = ''
 
 call <SID>Init(b:csv_start, b:csv_end)
 let &cpo = s:cpo_save
