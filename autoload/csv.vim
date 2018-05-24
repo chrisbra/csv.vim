@@ -18,9 +18,15 @@ if !s:csv_numeric_sort "{{{2
 endif
 " Function definitioncsv# "{{{1
 fu! csv#CSVArrangeCol(first, last, bang, limit) range "{{{2
-    if &ft =~? 'csv'
-        call csv#ArrangeCol(a:first, a:last, a:bang, a:limit)
+    " call csv#ArrangeCol(a:first, a:last, a:bang, a:limit)
+    " if &ft !~? 'csv'
+    if !exists("b:csv_cmt")
+        let b:csv_start = get(g:, 'csv_start', 1)
+        let b:csv_end   = get(g:, 'csv_end', line('$'))
+        let b:csv_result = ''
+        call csv#Init(b:csv_start, b:csv_end)
     endif
+    call csv#ArrangeCol(a:first, a:last, a:bang, a:limit)
 endfu
 
 " Script specific functions "{{{2
