@@ -13,7 +13,7 @@ if exists("g:csv_autocmd_arrange")
 	    aug CSV_Edit
 		au!
 		au BufReadPost,BufWritePost *.csv,*.dat,*.tsv,*.tab :exe
-			    \ printf(":call CSVArrangeCol(1, %d, 0, %d)",
+			    \ printf(":call csv#CSVArrangeCol(1, %d, 0, %d)",
 			    \ line('$'), get(g:, 'csv_autocmd_arrange_size', -1))
 		au BufWritePre *.csv,*.dat,*.tsv,*.tab :sil %UnArrangeColumn
 	    aug end
@@ -44,7 +44,7 @@ fu! <sid>Table(bang, line1, line2, delim)
 
     if line1 == line2
 	" use the current paragraph
-	let line1 = line("'{") + 1 
+	let line1 = line("'{") + 1
 	let line2 = line("'}") - 1
     endif
 
@@ -88,7 +88,7 @@ fu! <sid>Table(bang, line1, line2, delim)
 	call winrestview(_b)
     endtry
 endfu
-    
+
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
