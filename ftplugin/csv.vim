@@ -595,9 +595,7 @@ fu! <sid>ColWidth(colnr, ...) "{{{3
             for item in b:csv_list
                 call add(tlist, get(item, a:colnr-1, ''))
             endfor
-            " do not strip leading whitespace
-            call map(tlist, 'substitute(v:val, ".", "x", "g")')
-            call map(tlist, 'strlen(v:val)')
+            call map(tlist, 'strdisplaywidth(v:val)')
             return max(tlist)
         catch
             throw "ColWidth-error"
