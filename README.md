@@ -937,6 +937,12 @@ leftaligned.
 
 Note: Each row must contain exactly as many fields as columns.
 
+This command is available as default plugin. To disable this feature, set the 
+variable g:csv_disable_table_command to 1:
+```vim
+    :let g:csv_disable_table_command = 1
+```
+
 ## Add new empty columns
 
 If you want to add new empty columns to your file you can use the
