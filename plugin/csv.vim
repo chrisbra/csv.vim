@@ -1,4 +1,4 @@
-" Plugin folklore
+" Plugin folklore START "{{{1
 if get(g:, 'loaded_csv', 0)
     finish
 endif
@@ -6,6 +6,8 @@ let g:loaded_csv = 1
 let s:cpo_save = &cpo
 set cpo&vim
 
+" CSV Plugin functions "{{{1
+" CSVDoBufLoadAutocmd "{{{2
 fu! s:CSVDoBufLoadAutocmd()
     " Visually arrange columns when opening a csv file
     " do not check filetype here, it might be too late, rather use the
@@ -16,7 +18,7 @@ fu! s:CSVDoBufLoadAutocmd()
         au BufWritePre *.csv,*.dat,*.tsv,*.tab call s:CSVArrange(0)
     aug end
 endfu
-
+" CSVArrange "{{{2
 fu! s:CSVArrange(arrange)
     if !get(g:, 'csv_autocmd_arrange', 0)
         return
@@ -27,10 +29,10 @@ fu! s:CSVArrange(arrange)
         call csv#PrepUnArrangeCol(1, line('$'))
     endif
 endfu
-
+" Create Autocommand "{{{2
 call s:CSVDoBufLoadAutocmd()
 
-" CSV Table command and functions
+" CSV Table command and functions "{{{2
 if !get(g:, 'csv_disable_table_command', 0)
     com! -range -bang -nargs=? CSVTable call <sid>Table(<bang>0, <line1>, <line2>, <q-args>)
 
@@ -99,8 +101,8 @@ if !get(g:, 'csv_disable_table_command', 0)
         endtry
     endfu
 endif
-
-" Reset cpo setting
+" Plugin folklore END {{{1
+" Reset cpo setting "{{{2
 let &cpo = s:cpo_save
 unlet s:cpo_save
 " Vim Modeline " {{{2
