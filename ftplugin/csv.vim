@@ -18,11 +18,6 @@ let b:did_ftplugin = 1
 
 let s:cpo_save = &cpo
 set cpo&vim
-fu! <sid>DetermineSID()
-    let s:SID = matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_DetermineSID$')
-endfu
-call s:DetermineSID()
-delf s:DetermineSID
 
 " Initialize Plugin "{{{2
 " useful for configuring how many lines to analyze,
@@ -37,4 +32,3 @@ unlet s:cpo_save
 
 " Vim Modeline " {{{2
 " vim: set foldmethod=marker et sw=0 sts=-1 ts=4:
-
