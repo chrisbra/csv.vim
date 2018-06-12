@@ -1,8 +1,8 @@
-if exists('g:loaded_csv') && g:loaded_csv
+" Plugin folklore
+if get(g:, 'loaded_csv', 0)
   finish
 endif
 let g:loaded_csv = 1
-
 let s:cpo_save = &cpo
 set cpo&vim
 
@@ -89,5 +89,6 @@ fu! <sid>Table(bang, line1, line2, delim)
   endtry
 endfu
 
+" Reset cpo setting
 let &cpo = s:cpo_save
 unlet s:cpo_save
