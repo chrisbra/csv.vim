@@ -1773,7 +1773,7 @@ fu! csv#PrepareFolding(add, match)  "{{{3
     " Fold settingcsv#
     call csv#LocalSettings('fold')
     " Don't put spaces between the arguments!
-    exe 'setl foldexpr=<snr>' . csv#SID . '_FoldValue(v:lnum,b:csv_filter)'
+    exe 'setl foldexpr=csv#FoldValue(v:lnum,b:csv_filter)'
 
     " Move folded area to the bottom, so there is only on consecutive
     " non-folded area
@@ -1852,7 +1852,7 @@ fu! csv#OutputFilters(bang) "{{{3
             call csv#Warn("No filters defined currently!")
             return
         else
-            exe 'setl foldexpr=<snr>' . csv#SID . '_FoldValue(v:lnum,b:csv_filter)'
+            exe 'setl foldexpr=csv#FoldValue(v:lnum,b:csv_filter)'
         endif
     endif
 endfu
@@ -2956,7 +2956,7 @@ fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
     if !empty(distinct)
       let s:additional.distinct=1
     endif
-    if function(a:func) is# function("\<snr>".csv#SID."_MaxColumn")
+    if function(a:func) is# function("csv#MaxColumn")
       let s:additional.ismax = a:1
     endif
     try
