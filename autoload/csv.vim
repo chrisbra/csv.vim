@@ -659,13 +659,11 @@ fu! csv#ArrangeCol(first, last, bang, limit, ...) range "{{{3
         call csv#Warn("No column data detected, aborting ArrangeCol command!")
         return
     endif
+    let ro=&ro
     if &ro
        " Just in case, to prevent the Warning
        " Warning: W10: Changing read-only file
-       let ro = 1
        setl noro
-    else
-       let ro = 0
     endif
     let s:count = 0
     let _stl  = &stl
