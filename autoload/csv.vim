@@ -117,6 +117,15 @@ fu! csv#Init(start, end, ...) "{{{3
         let b:col_noend = g:csv_col
     endif
 
+    " Enable vartabs for tab delimited files
+    if b:delimiter=="\t" && has("vartabs")&& !exists("b:csv_fixed_width_cols")
+        if get(b:, 'col_width', []) ==# []
+            call csv#CalculateColumnWidth('')
+        endif
+        let &l:vts=join(b:col_width, ',')
+        let g:csv_no_conceal=1
+    endif
+
     " set filetype specific options
     call csv#LocalSettings('all')
 

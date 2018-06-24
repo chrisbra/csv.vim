@@ -92,6 +92,9 @@ works differently. For instructions on installing this file, type
 :help add-local-help |add-local-help| inside Vim. For a screenshot, of
 how the plugin can be used, see http://www.256bit.org/~chrisbra/csv.gif
 
+It will make use of the |+vartabs| feature for tab delimited files to arrange
+them automatically.
+
 ==============================================================================
 2. Installation						*csv-installation*
 
