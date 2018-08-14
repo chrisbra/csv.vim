@@ -319,7 +319,7 @@ fu! csv#SearchColumn(arg) "{{{3
         call csv#Warn("There exists no column " . colnr)
         return 1
     endif
-    let @/ = csv#GetPat(colnr, maxcolnr, '\%('.pat. '\)', 1)
+    let @/ = csv#GetPat(colnr, maxcolnr, '\%(.\{-\}'.pat. '\)', 1)
     try
         " force redraw, so that the search pattern isn't shown
         exe "norm! n\<c-l>"
