@@ -61,11 +61,9 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
 
     " Try a simple highlighting, if the defaults from the ftplugin
     " don't exist
-    let s:col  = exists("b:col") && !empty(b:col) ? b:col  : s:col_def
-    let s:col_end  = exists("b:col_end") && !empty(b:col_end) ? b:col_end
-        \ : s:col_def_end
-    let s:del  = exists("b:delimiter") && !empty(b:delimiter) ? b:delimiter
-        \ : s:del_def
+    let s:col  = get(b:, 'col', s:col_def)
+    let s:col_end  = get(b:, 'col_end', s:col_def_end)
+    let s:del  = get(b:, 'delimiter', s:del_def)
     let s:cmts = b:csv_cmt[0]
     let s:cmte = len(b:csv_cmt) == 2 ? b:csv_cmt[1] : ''
     " Make the file start at the first actual CSV record (issue #71)
