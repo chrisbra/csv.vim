@@ -2222,7 +2222,7 @@ fu! csv#CommandDefinitions() "{{{3
         \ '-nargs=? -complete=custom,csv#SortComplete')
     call csv#LocalCmd("ArrangeColumn",
         \ ':call csv#ArrangeCol(<line1>, <line2>, <bang>0, -1, <q-args>)',
-        \ '-range -bang -nargs=?')
+        \ '-range -bang -bar -nargs=?')
     call csv#LocalCmd("SmplVarCol",
         \ ':echo csv#EvalColumn(<q-args>, "csv#SmplVarianceColumn", <line1>,<line2>)',
         \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
@@ -2237,7 +2237,7 @@ fu! csv#CommandDefinitions() "{{{3
         \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
     call csv#LocalCmd("UnArrangeColumn",
         \':call csv#PrepUnArrangeCol(<line1>, <line2>)',
-        \ '-range')
+        \ '-bar -range')
     call csv#LocalCmd("CSVInit", ':call csv#Init(<line1>,<line2>,<bang>0)',
         \ '-bang -range=%')
     call csv#LocalCmd('Header',
