@@ -630,7 +630,7 @@ fu! csv#ArrangeCol(first, last, bang, limit, ...) range "{{{3
     if a:bang || !empty(row)
         if a:bang && exists("b:col_width")
           " Unarrange, so that if csv_arrange_align has changed
-          " it will be adjusted automaticaly
+          " it will be adjusted automatically
           call csv#PrepUnArrangeCol(a:first, a:last)
         endif
         " Force recalculating the Column width

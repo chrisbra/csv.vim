@@ -288,7 +288,7 @@ reasons, it won't be considered.
 
 Note, arranging the columns can be very slow on large files or many columns (see
 [Slow CSV plugin](#slow-csv-plugin) on how to increase performance for this command). For large files,
-calculating the column width can take long and take a consierable amount of
+calculating the column width can take long and take a considerable amount of
 memory. Therefore, the csv plugin will at most check 10.000 lines for the
 width. Set the variable b:csv_arrange_use_all_rows to 1 to use all records: 
 
@@ -307,7 +307,7 @@ additional redraws are needed).
 
 Note: this command does not work for fixed width columns [Fixed width columns](#fixed-width-columns)
 
-See also [Autocommand on opening/closing files](#autocommand-on-openingclosing-files) on how to have vim automaticaly arrange a CSV
+See also [Autocommand on opening/closing files](#autocommand-on-openingclosing-files) on how to have vim automatically arrange a CSV
 file upon entering it.
 
 ## UnArrangeColumn
@@ -974,7 +974,7 @@ If you want to substitute only in specific columns, you can use the
 ```
 
 This means in the range and within the given columns replace pattern by
-string. This works bascially like the [`:s`](http://vimhelp.appspot.com/change.txt.html#%3As) command, except that you MUST use
+string. This works basically like the [`:s`](http://vimhelp.appspot.com/change.txt.html#%3As) command, except that you MUST use
 forward slashes / to delimit the command. The optional part `[column/]` can
 take either the form of an address or if you leave it out, substitution will
 only happen in the current column. Additionally, you can use the `1,5/` form
