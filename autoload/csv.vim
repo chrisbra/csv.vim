@@ -441,6 +441,11 @@ fu! csv#HiCol(colnr, bang) "{{{3
     endif
 endfu
 fu! csv#GetDelimiter(first, last, ...) "{{{3
+    " This depends on the locale. Hopefully it works
+	let lang=v:lang
+	if lang isnot# 'C'
+		sil lang mess C
+	endif
     if !exists("b:csv_fixed_width_cols")
         let _cur = getpos('.')
         let _s   = @/
@@ -468,9 +473,12 @@ fu! csv#GetDelimiter(first, last, ...) "{{{3
             redir END
         endfor
         let &lz = _lz
-        let Delim = map(temp, 'matchstr(substitute(v:val, "\n", "", ""), "^\\d\\+")')
+        let Delim = map(temp, 'matchstr(substitute(v:val, "\n", "", ""), "^\\s*\\d\\+")')
         let Delim = filter(temp, 'v:val=~''\d''')
         let max   = max(values(temp))
+        if lang != 'C'
+            exe "sil lang mess" lang
+        endif
 
         let result=[]
         call setpos('.', _cur)
