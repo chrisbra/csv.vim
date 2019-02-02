@@ -575,6 +575,11 @@ Key | Effect
 `<Space>` | Dynamically fold all lines away, that match the value in the current column. See [Dynamic filters](#dynamic-filters)
 `<BS>` | Remove last item from the dynamic filter. See [Dynamic filters](#dynamic-filters)
 
+The upwards and downwards motions try to keep the cursor in the relative
+position within the cell when changing lines. That is not a guaranteed to work
+and will fail if the upper/lower cell is of a different width than the
+starting cell.
+
 Note how the mapping of 'H' differs from 'E'
 
 H step fields backwards but also stops at where the content of the columns

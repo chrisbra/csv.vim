@@ -1050,6 +1050,7 @@ fu! csv#MoveCol(forward, line, ...) "{{{3
     let maxcol=csv#MaxColumns(line('.'))
     let cpos=getpos('.')[2]
     if !exists("b:csv_fixed_width_cols")
+        let curwidth=CSVWidth()
         call search(b:col, 'bc', line('.'))
     endif
     let spos=getpos('.')[2]
@@ -1142,7 +1143,9 @@ fu! csv#MoveCol(forward, line, ...) "{{{3
         " leave the column (if the next column is shorter)
         if !exists("b:csv_fixed_width_cols")
             let a    = getpos('.')
-            let a[2]+= cpos-spos
+            if CSVWidth() == curwidth
+                let a[2]+= cpos-spos
+            endif
         else
             let a    = getpos('.')
             let a[2] = cpos
@@ -1153,7 +1156,9 @@ fu! csv#MoveCol(forward, line, ...) "{{{3
         " Move to the correct screen column
         if !exists("b:csv_fixed_width_cols")
             let a    = getpos('.')
-            let a[2]+= cpos-spos
+            if CSVWidth() == curwidth
+                let a[2]+= cpos-spos
+            endif
         else
             let a    = getpos('.')
             let a[2] = cpos

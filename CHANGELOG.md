@@ -106,6 +106,9 @@
   C locale to parse the output of the `:s/<del>/<del>/nge` command
 - Calculate Max columns per current line for Movements correctly
   (https://github.com/chrisbra/csv.vim/issues/141)
+- Adjust positions within cell after movement only if starting and
+  end cells have the same width, document this as best effort approach.
+  (https://github.com/chrisbra/csv.vim/issues/139)
 
 ## 0.31 Jan 15, 2015
 - supports for Vim 7.3 dropped
