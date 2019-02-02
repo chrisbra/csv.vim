@@ -1047,7 +1047,7 @@ fu! csv#MoveCol(forward, line, ...) "{{{3
     " direction but still stop at a different position
     " see :h csv-mapping-H
     let colnr=csv#WColumn()
-    let maxcol=csv#MaxColumns()
+    let maxcol=csv#MaxColumns(line('.'))
     let cpos=getpos('.')[2]
     if !exists("b:csv_fixed_width_cols")
         call search(b:col, 'bc', line('.'))

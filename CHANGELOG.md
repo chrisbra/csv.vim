@@ -104,6 +104,8 @@
 - Make plugin autoloadable (https://github.com/chrisbra/csv.vim/pull/130 done by jeetsukumaran, thanks!)
 - Determining the delimiter automatically depends on the locale, therefore use explicitly the
   C locale to parse the output of the `:s/<del>/<del>/nge` command
+- Calculate Max columns per current line for Movements correctly
+  (https://github.com/chrisbra/csv.vim/issues/141)
 
 ## 0.31 Jan 15, 2015
 - supports for Vim 7.3 dropped
