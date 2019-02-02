@@ -1118,7 +1118,7 @@ fu! csv#MoveCol(forward, line, ...) "{{{3
                 if colnr > 0
                     call csv#MoveCol(-1, line('.'))
                 else
-                    sil! norm! 0
+                    norm! 0
                 endif
             endw
             if (exists("a:1") && a:1)
