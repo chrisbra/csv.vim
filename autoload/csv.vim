@@ -1110,7 +1110,7 @@ fu! csv#MoveCol(forward, line, ...) "{{{3
         call search(pat, 'W')
     elseif a:forward < 0
         if colnr > 0 || cpos == spos
-            call search('.\ze'.pat, 'bWe')
+            call search(pat, 'bWe')
             let stime=localtime()
             while getpos('.')[2] == cpos && csv#Timeout(stime) " make sure loop terminates
                 " cursor didn't move, move cursor one cell to the left

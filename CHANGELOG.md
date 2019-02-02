@@ -111,6 +111,8 @@
   (https://github.com/chrisbra/csv.vim/issues/139)
 - Do not beep on custom movements commands
   (https://github.com/chrisbra/csv.vim/issues/140)
+- Make H/L work consistently with regards to empty cells
+  (https://github.com/chrisbra/csv.vim/issues/138)
 
 ## 0.31 Jan 15, 2015
 - supports for Vim 7.3 dropped
