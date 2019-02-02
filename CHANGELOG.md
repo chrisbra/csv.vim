@@ -109,6 +109,8 @@
 - Adjust positions within cell after movement only if starting and
   end cells have the same width, document this as best effort approach.
   (https://github.com/chrisbra/csv.vim/issues/139)
+- Do not beep on custom movements commands
+  (https://github.com/chrisbra/csv.vim/issues/140)
 
 ## 0.31 Jan 15, 2015
 - supports for Vim 7.3 dropped

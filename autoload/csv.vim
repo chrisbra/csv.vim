@@ -1114,11 +1114,11 @@ fu! csv#MoveCol(forward, line, ...) "{{{3
             let stime=localtime()
             while getpos('.')[2] == cpos && csv#Timeout(stime) " make sure loop terminates
                 " cursor didn't move, move cursor one cell to the left
-                norm! h
+                sil! norm! h
                 if colnr > 0
                     call csv#MoveCol(-1, line('.'))
                 else
-                    norm! 0
+                    sil! norm! 0
                 endif
             endw
             if (exists("a:1") && a:1)
