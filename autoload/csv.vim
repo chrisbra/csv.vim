@@ -579,6 +579,7 @@ fu! csv#ColWidth(colnr, ...) "{{{3
     " Internal function
     let width=20 "Fallback (wild guess)
     let tlist=[]
+    let skipfirst=get(g:, 'csv_skipfirst', 0)
 
     if !exists("b:csv_fixed_width_cols")
         if !exists("b:csv_list")
@@ -593,7 +594,7 @@ fu! csv#ColWidth(colnr, ...) "{{{3
                     call csv#Warn('File too large, only checking the first 10000 rows for the width')
                 endif
             endif
-            let b:csv_list=getline(1,last)
+            let b:csv_list=getline(skipfirst+1,last)
             let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
             call filter(b:csv_list, 'v:val !~ pat')
             call filter(b:csv_list, '!empty(v:val)')

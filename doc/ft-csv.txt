@@ -289,6 +289,16 @@ Note: this command does not work for fixed width columns |csv-fixedwidth|
 See also |csv-arrange-autocmd| on how to have vim automatically arrange a CSV
 file upon entering it.
 
+By default, all lines in the file are considered to calculate the column width.
+If you want to ignore some lines at the beginning of the file, set the global
+variable g:csv_skipfirst to the number of lines to be ignored, e.g. the first
+line of the file can be ignored with >
+
+    :let g:csv_skipfirst = 1
+<
+Then use the '!' to force recalculation of column width when applying 
+:ArrangeColumn
+
                                                         *:CSVUnArrangeColumn*
 3.6 UnArrangeColumn                                    *UnArrangeColumn_CSV*
 -----------------
