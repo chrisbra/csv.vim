@@ -1,4 +1,4 @@
-# Introduction
+# Introduction [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/chrisbra)
 
 This plugin is used for handling column separated data with Vim. Usually those
 files are called csv files and use the ',' as delimiter, though sometimes they
