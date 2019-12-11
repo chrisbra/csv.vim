@@ -1497,9 +1497,13 @@ Returns the 10 smallest values for column col.
 ------------------------------------------------------
 Returns the average value for column col. 
 
-5.9 CSVWidth()                                                  *CSVWidth()*
+5.9 CSVWidth([silent])                                             *CSVWidth()*
 ------------------------------------------------------
-Returns a list with the width for each column.
+Returns a list with the width for each column. If the first argument is given
+and non-zero, do not output warning message about the number of records used
+to calculate the width (else it might output something like:
+  CSV: File too large, only checking the first 10000 rows for the width
+), default: 1
 
 ==============================================================================
 6. CSV Tips and Tricks						*csv-tips*
