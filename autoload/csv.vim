@@ -120,7 +120,7 @@ fu! csv#Init(start, end, ...) "{{{3
     " Enable vartabs for tab delimited files
     if b:delimiter=="\t" && has("vartabs")&& !exists("b:csv_fixed_width_cols")
         if get(b:, 'col_width', []) ==# []
-            call csv#CalculateColumnWidth(line('$'))
+            call csv#CalculateColumnWidth(line('$'), 1)
         endif
         let &l:vts=join(b:col_width, ',')
         let g:csv_no_conceal=1
@@ -668,7 +668,7 @@ fu! csv#ArrangeCol(first, last, bang, limit, ...) range "{{{3
     endif
 
     if !exists("b:col_width")
-        call csv#CalculateColumnWidth(row)
+        call csv#CalculateColumnWidth(row, 1)
     endif
 
     " abort on empty file
