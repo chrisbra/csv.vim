@@ -634,7 +634,7 @@ fu! csv#ArrangeCol(first, last, bang, limit, ...) range "{{{3
     endif
     let cur=winsaveview()
     " Force recalculation of Column width
-    let row = exists("a:1") ? a:1 : ''
+    let row = exists("a:1") ? a:1 : line('$')
     if a:bang || !empty(row)
         if a:bang && exists("b:col_width")
           " Unarrange, so that if csv_arrange_align has changed
