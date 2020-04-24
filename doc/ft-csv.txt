@@ -1697,6 +1697,16 @@ comes after the :filetype plugin (|:filetype-plugin-on|) statement in your
 
 Alternatively, you can simply call |InitCSV| and ignore the error.
 
+Note: It could also be caused by lazy loading feature by a vim plugin
+manager. For example this line might also cause it: >
+
+  Plug 'https://github.com/chrisbra/csv.vim',  { 'for' : 'csv' }
+<
+
+The fix would then be: >
+
+  Plug 'https://github.com/chrisbra/csv.vim'
+
 6.6 Calculate new columns               *csv-calculate-column*
 -------------------------
 Suppose you have a table like this:

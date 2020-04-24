@@ -1830,6 +1830,17 @@ comes after the :filetype plugin ([`:filetype-plugin-on`](http://vimhelp.appspot
 
 Alternatively, you can simply call [CSVInit](#csvinit) and ignore the error.
 
+Note: It could also be caused by lazy loading feature by a vim plugin
+manager. For example this line might also cause it:
+
+```vim
+  Plug 'https://github.com/chrisbra/csv.vim',  { 'for' : 'csv' }
+```
+The fix would then be:
+```vim
+  Plug 'https://github.com/chrisbra/csv.vim'
+```
+
 ## Calculate new columns
 
 Suppose you have a table like this:
