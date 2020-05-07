@@ -614,9 +614,11 @@ is equival to a single backslash '\', e.g. \K would run the lookup function on
 the word under the cursor and \J would join this line with the previous line.
 
 If you want to prevent the mapping of keys, simply set the global variable
-g:csv_nomap_<key> to 1, e.g. to prevent mapping of <CR> in csv files, put >
+g:csv_nomap_<key> to 1, (remove the special characters `<>` and replace `-` by
+`_`), e.g. to prevent mapping of <CR> and <C-Left> in csv files, put >
 
     let g:csv_nomap_cr = 1
+    let g:csv_nomap_c_left = 1
 <
 into your |.vimrc|. Note, the keyname must be lower case.
 
