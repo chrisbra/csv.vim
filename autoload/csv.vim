@@ -502,7 +502,7 @@ fu! csv#WColumn(...) "{{{3
     " Return on which column the cursor is
     let _cur = getpos('.')
     if !exists("b:csv_fixed_width_cols")
-        if line('.') > 1 && mode('') != 'n'
+        if line('.') > 1 && mode('') != 'n' && empty(getline('.')[0:col('.')-1])
             " in insert mode, get line from above, just in case the current
             " line is empty
             let line = getline(line('.')-1)
