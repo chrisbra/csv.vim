@@ -9,7 +9,7 @@ This is a filetype plugin for CSV files. It was heavily influenced by
 the [Vim Wiki Tip667](http://vim.wikia.com/wiki/VimTip667), though it
 works differently. 
 
-It will make use of the [vartab](http://vimhelp.appspot.com/options.txt.html#'vartabstop') feature for tab delimited files.
+It will make use of the [vartabs](https://vimhelp.org/options.txt.html#%27vartabstop%27) feature for tab delimited files.
 
 ![Screenshot](http://www.256bit.org/~chrisbra/csv.gif)
 
