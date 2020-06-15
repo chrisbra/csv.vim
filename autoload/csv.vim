@@ -2261,7 +2261,7 @@ fu! csv#CommandDefinitions() "{{{3
         \ ':echo csv#EvalColumn(<q-args>, "csv#SmplStdDevColumn", <line1>,<line2>)',
         \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
     call csv#LocalCmd("PopStdCol",
-        \ ':echo csv#EvalColumn(<q-args>, "csv#SmplStdDevColumn", <line1>,<line2>)',
+        \ ':echo csv#EvalColumn(<q-args>, "csv#PopStdDevColumn", <line1>,<line2>)',
         \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
     call csv#LocalCmd("UnArrangeColumn",
         \':call csv#PrepUnArrangeCol(<line1>, <line2>)',

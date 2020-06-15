@@ -1021,9 +1021,9 @@ See also |csv-aggregate-functions|
 3.29 Variance of a Column 				*VarCol_CSV*
 _________________________
 
-    :[range]PopVarianceCol [nr] [/format/]
+    :[range]PopVarCol [nr] [/format/]
 
-    :[range]SmplVarianceCol [nr] [/format/]
+    :[range]SmplVarCol [nr] [/format/]
 
 This outputs the result of the column `<nr>` within the range given. If no range
 is given, this will calculate the statistical variance of the whole column. If <nr> is not
