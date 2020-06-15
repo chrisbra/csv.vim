@@ -1541,7 +1541,7 @@ fu! csv#VarianceColumn(list, is_population) "{{{3
             let cnt = cnt-1
         endif
         if has("float")
-            let b:csv_result = printf("%.2f", sum/cnt)
+            let b:csv_result = printf("%." . get(b:, 'csv_accuracy', get(g:, 'csv_accuracy', 2)) . "f", sum/cnt)
             return b:csv_result
         else
             let b:csv_result = printf("%s", sum/cnt)
