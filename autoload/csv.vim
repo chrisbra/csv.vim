@@ -1505,10 +1505,10 @@ fu! csv#AvgColumn(list) "{{{3
         endfor
         if has("float")
             let b:csv_result = printf("%.2f", sum/cnt)
-            return b:csv_result
+            return str2float(b:csv_result)
         else
             let b:csv_result = printf("%s", sum/cnt)
-            return sum/cnt
+            return b:csv_result + 0
         endif
     endif
 endfu
