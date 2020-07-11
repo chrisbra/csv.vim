@@ -856,6 +856,15 @@ This tells you, that the the value '10' in column 3 occurs 50% of the time
 (exactly 20 times) and the other 2 values '2' and '5' occur only 10 times, so
 25% of the time.
 
+In addition, a second argument may be used to specify the number of top values.
+So 
+
+```vim
+:Analyze 3 10
+```
+
+outputs the the distribution of the top 10 values in column 3, respectively.
+
 ## Vertical Folding
 
 Sometimes, you want to hide away certain columns to better view only certain
