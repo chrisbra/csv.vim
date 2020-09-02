@@ -1448,7 +1448,7 @@ fu! csv#SumColumn(list) "{{{3
         let b:csv_result = '0'
         return 0
     else
-        let sum = has("float") ? 0.0 : 0
+        let sum = 0.0
         for item in a:list
             if empty(item)
                 continue
@@ -1458,33 +1458,25 @@ fu! csv#SumColumn(list) "{{{3
             let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
             try
                 let nr = substitute(nr, format1, '', '')
-                if has("float") && s:nr_format[1] != '.'
+                if s:nr_format[1] != '.'
                     let nr = substitute(nr, format2, '.', '')
                 endif
             catch
-                let nr = 0
+                let nr = '0'
             endtry
-            let sum += (has("float") ? str2float(nr) : (nr + 0))
+            let sum += str2float(nr)
         endfor
-        if has("float")
-            let b:csv_result = string(float2nr(sum))
-            if float2nr(sum) == sum
-                return float2nr(sum)
-            else
-                return printf("%.2f", sum)
-            endif
-        endif
-        let b:csv_result = string(sum)
-        return sum
+        let b:csv_result = sum
+        return printf("%.2f", sum)
     endif
 endfu
 fu! csv#AvgColumn(list) "{{{3
     if empty(a:list)
         let b:csv_result = '0'
-        return 0
+        return 0.0
     else
         let cnt = 0
-        let sum = has("float") ? 0.0 : 0
+        let sum = 0.0
         for item in a:list
             if empty(item)
                 continue
@@ -1494,30 +1486,25 @@ fu! csv#AvgColumn(list) "{{{3
             let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
             try
                 let nr = substitute(nr, format1, '', '')
-                if has("float") && s:nr_format[1] != '.'
+                if s:nr_format[1] != '.'
                     let nr = substitute(nr, format2, '.', '')
                 endif
             catch
-                let nr = 0
+                let nr ='0'
             endtry
-            let sum += (has("float") ? str2float(nr) : (nr + 0))
+            let sum += str2float(nr)
             let cnt += 1
         endfor
-        if has("float")
-            let b:csv_result = printf("%.2f", sum/cnt)
-            return str2float(b:csv_result)
-        else
-            let b:csv_result = printf("%s", sum/cnt)
-            return b:csv_result + 0
-        endif
+        let b:csv_result = printf("%.2f", sum/cnt)
+        return sum/cnt
     endif
 endfu
 fu! csv#VarianceColumn(list, is_population) "{{{3
     if empty(a:list)
-        return 0
+        return 0.0
     else
         let cnt = 0
-        let sum = has("float") ? 0.0 : 0
+        let sum = 0.0
         let avg = csv#AvgColumn(a:list)
         for item in a:list
             if empty(item)
@@ -1528,64 +1515,64 @@ fu! csv#VarianceColumn(list, is_population) "{{{3
             let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
             try
                 let nr = substitute(nr, format1, '', '')
-                if has("float") && s:nr_format[1] != '.'
+                if s:nr_format[1] != '.'
                     let nr = substitute(nr, format2, '.', '')
                 endif
             catch
-                let nr = 0
+                let nr = '0'
             endtry
-            let sum += pow((has("float") ? (str2float(nr)-avg) : ((nr + 0)-avg)), 2)
+            let nr = str2float(nr)
+            let sum += pow((nr-avg), 2)
             let cnt += 1
         endfor
         if(a:is_population == 0)
             let cnt = cnt-1
         endif
-        if has("float")
-            let b:csv_result = printf("%." . get(b:, 'csv_accuracy', get(g:, 'csv_accuracy', 2)) . "f", sum/cnt)
-            return b:csv_result
-        else
-            let b:csv_result = printf("%s", sum/cnt)
-            return sum/(cnt)
-        endif
+        let b:csv_result = sum/cnt
+        return b:csv_result
     endif
 endfu
 
 fu! csv#SmplVarianceColumn(list) "{{{2
+    unlet! b:csv_result
     if empty(a:list)
-        let b:csv_result = '0'
-        return 0
+        let b:csv_result = 0.0
+        return 0.0
     else
         return csv#VarianceColumn(a:list, 0)
     endif
 endfu
 
 fu! csv#PopVarianceColumn(list) "{{{2
+    unlet! b:csv_result
     if empty(a:list)
-        let b:csv_result = '0'
-        return 0
+        let b:csv_result = 0.0
+        return 0.0
     else
         return csv#VarianceColumn(a:list, 1)
     endif
 endfu
 
 fu! csv#SmplStdDevColumn(list) "{{{2
+    unlet! b:csv_result
     if empty(a:list)
-        let b:csv_result = '0'
-        return 0
+        let b:csv_result = 0.0
+        return 0.0
     else
-        let result = sqrt(str2float(csv#VarianceColumn(a:list, 0)))
-        let b:csv_result = string(result)
+        let result = sqrt(csv#VarianceColumn(a:list, 0))
+        let b:csv_result = result
         return result
     endif
 endfu
 
 fu! csv#PopStdDevColumn(list) "{{{2
+    unlet! b:csv_result
     if empty(a:list)
-        let b:csv_result = '0'
-        return 0
+        let b:csv_result = 0.0
+        return 0.0
     else
-        let result = sqrt(str2float(csv#VarianceColumn(a:list, 1)))
-        let b:csv_result = string(result)
+        let result = sqrt(csv#VarianceColumn(a:list, 1))
+        let b:csv_result = result
         return result
     endif
 endfu
@@ -1608,13 +1595,13 @@ fu! csv#MaxColumn(list) "{{{3
             let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
             try
                 let nr = substitute(nr, format1, '', '')
-                if has("float") && s:nr_format[1] != '.'
+                if s:nr_format[1] != '.'
                     let nr = substitute(nr, format2, '.', '')
                 endif
             catch
-                let nr = 0
+                let nr = '0'
             endtry
-            call add(result, has("float") ? str2float(nr) : nr+0)
+            call add(result, str2float(nr))
         endfor
         let result = sort(result, s:csv_numeric_sort ? 'n' : 'csv#CSVSortValues')
         let ind = len(result) > 9 ? 9 : len(result)
@@ -1993,10 +1980,7 @@ fu! csv#AnalyzeColumn(...) "{{{3
         call filter(res, 'v:val =~ ''^''.join(max_items, ''\|'').''$''')
     endif
 
-    if has("float")
-        let  title="Nr\tCount\t % \tValue"
-    else
-        let  title="Nr\tCount\tValue"
+    let  title="Nr\tCount\t % \tValue"
     endif
     echohl Title
     echo printf("%s", title)
@@ -2012,12 +1996,8 @@ fu! csv#AnalyzeColumn(...) "{{{3
                 else
                     let k = key
                 endif
-                if has("float")
-                    echo printf("%02d\t%02d\t%2.0f%%\t%.50s", i, res[key],
-                        \ ((res[key] + 0.0)/qty)*100, k)
-                else
-                    echo printf("%02d\t%02d\t%.50s", i, res[key], k)
-                endif
+                echo printf("%02d\t%02d\t%2.0f%%\t%.50s", i, res[key],
+                    \ ((res[key] + 0.0)/qty)*100, k)
                 call remove(res,key)
                 let i+=1
             else
