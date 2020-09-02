@@ -2928,6 +2928,11 @@ fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
         call csv#Warn("File is no CSV file!")
         return
     endif
+    " Need a Vim with floating point feature
+    if !has("float")
+        call csv#Warn("Your Vim is missing floating point feature!")
+        return
+    endif
     let save = winsaveview()
     call csv#CheckHeaderLine()
     let nr = matchstr(a:nr, '^\-\?\d\+')
