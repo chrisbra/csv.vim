@@ -1167,6 +1167,13 @@ manually, use:
 to let the comma be the delimiter. This sets the buffer local delimiter
 variable b:delimiter.
 
+You can also set default delimiter to prevent a warning if no delimiter can
+be detected:
+
+```vim
+:let g:csv_default_delim=','
+```
+
 If your file does not consist of delimited columns, but rather is a fixed
 width csv file, see [Fixed width columns](#fixed-width-columns) for configuring the plugin appropriately.
 
