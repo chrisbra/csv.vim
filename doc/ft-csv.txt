@@ -1441,7 +1441,7 @@ set the variable `g:csv_disable_fdt` in your |.vimrc| >
 By default, the csv plugin will analyze the whole file to determine which
 delimiter to use. Beside specifying the the actual delimiter to use
 (|csv-delimiter|) you can restrict analyzing the plugin to consider only a
-certain part of the file. This should make loading huge csv files a log
+certain part of the file. This should make loading huge csv files a lot
 faster. To only consider the first 100 rows set the `g:csv_start` and
 `g:csv_end` variables in your |.vimrc| like this >
 
