@@ -1985,7 +1985,6 @@ fu! csv#AnalyzeColumn(...) "{{{3
     endif
 
     let  title="Nr\tCount\t % \tValue"
-    endif
     echohl Title
     echo printf("%s", title)
     echohl Normal
