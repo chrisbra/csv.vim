@@ -523,15 +523,17 @@ If you want to check the file for duplicate records, use the command
 `:Duplicate` or `:CSVDuplicate`: 
 
 ```vim
-:Duplicate columnlist
+:Duplicate [columnlist]
 ```
 
 Columnlist needs to be a numeric comma-separated list of all columns that you
 want to check. You can also use a range like '2-5' which means the plugin
-should check columns 2,3,4 and 5.
+should check columns 2,3,4 and 5. If no columnlist ist given, will use the
+current column.
 
 If the plugin finds a duplicate records, it outputs its line number (but it
-only does that at most 10 times).
+only does that at most 10 times). You can find the message also in the message
+history using `:mess`.
 
 ## Normal mode commands
 
