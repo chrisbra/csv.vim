@@ -1191,7 +1191,7 @@ endfun
 fu! csv#Sort(bang, line1, line2, colnr) range "{{{3
     " :Sort command
     let wsv  = winsaveview()
-    let flag = matchstr(a:colnr, '[nixo]')
+    let flag = matchstr(a:colnr, '[nixof]')
     call csv#CheckHeaderLine()
     let line1 = a:line1
     let line2 = a:line2

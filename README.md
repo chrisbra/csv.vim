@@ -426,11 +426,15 @@ While this command
 :1,10Sort! 3
 ```
 
-reverses the order based on column 3.
+reverses the order based on column 3. If you want numeric sort on floatng
+points, you can use:
+```vim
+:2,$Sort 3f
+```
 
 The column number can be optionally followed by any of the flags [i], [n],
 [x] and [o] for [i]gnoring case, sorting by [n]umeric, he[x]adecimal
-or [o]ctal value.
+[o]ctal or [f]loat value.
 
 When no column number is given, it will sort by the column, on which the
 cursor is currently.
