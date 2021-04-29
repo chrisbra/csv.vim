@@ -58,6 +58,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     4.11 Move folded lines......................|csv-move-folds|
     4.12 Using Comments.........................|csv-comments|
     4.13 Size and performance considerations....|csv-size|
+    4.14 Map `B` instead of `E` to jump back to previous column...|csv-bind-B|
 5. Functions....................................|CSV-Functions|
     5.1 CSVPat()................................|CSVPat()|
     5.2 CSVField()..............................|CSVField()|
@@ -1460,6 +1461,24 @@ disable syntax highlighting and the filetype commands for very large csv files
 (by default larger than 100 MB).
 
 See also |csv-slow|
+                                                                    *g:csv_bind_B*
+                                                                    *csv-bind-B*
+4.14 Map `B` instead of `E` to jump back to previous column             *csv-bind*
+-------------------------------------------------------
+
+Mapping E to go back a cell has no logic ; this feature lets the user choose
+to map B instead with the `g:csv_bind_B` variable (boolean) defined anywhere
+in his vim configuration. If it is not set, falls back to mapping E to
+previous column. Added by @lapingenieur (https://github.com/lapingenieur ;
+email: lapingenieur@gmail.com).
+
+Exemple : I want to remap `B` to go to the previous column (comma) instead of `E`
+>
+    let g:csv_bind_B = 1
+<
+If you don't want this feature, you can just leave this variable without
+defining it : the script will automatically map `E`
+
 ==============================================================================
 5. Functions                                                    *CSV-Functions*
 
