@@ -67,7 +67,7 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     let s:cmts = get(get(b:, 'csv_cmt', ['']), 0)
     let s:cmte = len(get(b:, 'csv_cmt', [])) == 2 ? b:csv_cmt[1] : ''
     " Make the file start at the first actual CSV record (issue #71)
-    if !exists("b:csv_headerline")
+    if !exists("b:csv_headerline") && !empty(s:cmts)
         let cmts    = <sid>Esc(s:cmts, '')
         let pattern = '\%^\(\%('.cmts.'.*\n\)\|\%(\s*\n\)\)\+'
         let start = search(pattern, 'nWe', 10)
