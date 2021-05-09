@@ -64,8 +64,8 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     let s:col  = get(b:, 'col', s:col_def)
     let s:col_end  = get(b:, 'col_end', s:col_def_end)
     let s:del  = get(b:, 'delimiter', s:del_def)
-    let s:cmts = get(b:, 'csv_cmt', '')
-    let s:cmte = len(get(b:, 'csv_cmt', []) == 2 ? b:csv_cmt[1] : ''
+    let s:cmts = get(get(b:, 'csv_cmt', ['']), 0)
+    let s:cmte = len(get(b:, 'csv_cmt', [])) == 2 ? b:csv_cmt[1] : ''
     " Make the file start at the first actual CSV record (issue #71)
     if !exists("b:csv_headerline")
         let cmts    = <sid>Esc(s:cmts, '')
