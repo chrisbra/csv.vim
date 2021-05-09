@@ -83,6 +83,7 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     if line('$') > 1 && (!exists("b:col") || empty(b:col))
         " check for invalid pattern, ftplugin hasn't been loaded yet
         call <sid>Warning("Invalid column pattern, using default pattern " . s:col_def)
+        call <sid>Warning("Or ftplugin hasn't been sourced before the syntax script")
     endif
 endfu
 
