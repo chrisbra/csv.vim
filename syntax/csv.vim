@@ -20,7 +20,7 @@ fu! <sid>Warning(msg) "{{{3
     echohl Normal
 endfu
 
-fu! <sid>Esc(val, char) "{{{3 
+fu! <sid>Esc(val, char) "{{{3
     if empty(a:val)
         return a:val
     endif
@@ -32,7 +32,7 @@ fu! <sid>CheckSaneSearchPattern() "{{{3
     let s:col_def = '\%([^' . s:del_def . ']*' . s:del_def . '\|$\)'
     let s:col_def_end = '\%([^' . s:del_def . ']*' . s:del_def . '\)'
 
-    " First: 
+    " First:
     " Check for filetype plugin. This syntax script relies on the filetype
     " plugin, else, it won't work properly.
     redir => s:a |sil filetype | redir end
@@ -91,7 +91,7 @@ endfu
 fu! <sid>DoHighlight() "{{{3
     if has("conceal") && !exists("g:csv_no_conceal") &&
         \ !exists("b:csv_fixed_width_cols")
-        exe "syn match CSVDelimiter /" . s:col_end . 
+        exe "syn match CSVDelimiter /" . s:col_end .
             \ '/ms=e,me=e contained conceal cchar=' .
             \ (&enc == "utf-8" ? "│" : '|')
         hi def link CSVDelimiter Conceal
@@ -118,7 +118,7 @@ fu! <sid>DoHighlight() "{{{3
     else
         for i in range(len(b:csv_fixed_width_cols))
             let pat = '/\%' . b:csv_fixed_width_cols[i] . 'v.*' .
-                \ ((i == len(b:csv_fixed_width_cols)-1) ? '/' : 
+                \ ((i == len(b:csv_fixed_width_cols)-1) ? '/' :
                 \ '\%' . b:csv_fixed_width_cols[i+1] . 'v/')
 
             let group  = "CSVColumn" . (i%2 ? "Odd"  : "Even" )
@@ -154,7 +154,7 @@ fu! <sid>DoSyntaxDefinitions() "{{{3
     endif
 endfun
 
-" Main: {{{2 
+" Main: {{{2
 " Make sure, we are using a sane, valid pattern for syntax
 " highlighting
 call <sid>CheckSaneSearchPattern()
