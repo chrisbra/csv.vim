@@ -218,6 +218,15 @@ fu! csv#LocalSettings(type) "{{{3
     endif
 endfu
 
+fu! csv#RemoveAutoHighlight() "{{{3
+    exe "aug CSV_HI".bufnr('')
+        exe "au! CursorMoved <buffer=".bufnr('').">"
+    aug end
+    exe "aug! CSV_HI".bufnr('')
+    " Remove any existing highlighting
+    HiColumn!
+endfu
+
 fu! csv#DoAutoCommands() "{{{3
     " Highlight column, on which the cursor is
     if exists("g:csv_highlight_column") && g:csv_highlight_column =~? 'y'
@@ -229,12 +238,7 @@ fu! csv#DoAutoCommands() "{{{3
         " Set highlighting for column, on which the cursor is currently
         HiColumn
     else
-        exe "aug CSV_HI".bufnr('')
-            exe "au! CursorMoved <buffer=".bufnr('').">"
-        aug end
-        exe "aug! CSV_HI".bufnr('')
-        " Remove any existing highlighting
-        HiColumn!
+        call csv#RemoveAutoHighlight()
     endif
     " undo autocommand:
     let b:undo_ftplugin .= '| exe "sil! au! CSV_HI'.bufnr('').' CursorMoved <buffer> "'
@@ -2053,6 +2057,7 @@ fu! csv#InitCSVFixedWidth() "{{{3
     endif
     " Turn off syntax highlighting
     syn clear
+    call csv#RemoveAutoHighlight()
     let max_line = line('$') > 10 ? 10 : line('$')
     let t = getline(1, max_line)
     let max_len = max(map(t, 'len(split(v:val, ''\zs''))'))
