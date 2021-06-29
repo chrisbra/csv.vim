@@ -1,6 +1,7 @@
 # Changelog 
 
 ## 0.32 (unreleased)
+- do not grow column width on successive ':ArrangeColumn' calls (#146, #160)
 - Correctly use numeric sort with 'N' flag
 - Better documentation for fixedwidth wizard (#190)
 - Make backwards motion work better for fixedwidth columns (#189)

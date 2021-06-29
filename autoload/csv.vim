@@ -898,7 +898,7 @@ fu! csv#Columnize(field) "{{{3
         return result
     else
         " right align
-        return printf("%*S", width+1 ,  a:field)
+        return printf("%*S", width ,  a:field)
     endif
 endfun
 fu! csv#GetColPat(colnr, zs_flag) "{{{3
