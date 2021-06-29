@@ -912,15 +912,15 @@ fu! csv#GetColPat(colnr, zs_flag) "{{{3
                 let pat='\%' . b:csv_fixed_width_cols[-1] . 'v.*'
             else
             let pat='\%' . b:csv_fixed_width_cols[(a:colnr - 1)] .
-            \ 'c.\{-}\%' .   b:csv_fixed_width_cols[a:colnr] . 'v'
+            \ 'c.*\%<' .   (b:csv_fixed_width_cols[a:colnr] + 1) . 'v'
             endif
         endif
     elseif !exists("b:csv_fixed_width_cols")
         let pat=b:col
     else
-        let pat='\%' . b:csv_fixed_width_cols[0] . 'v.\{-}' .
+        let pat='\%' . b:csv_fixed_width_cols[0] . 'v.*' .
             \ (len(b:csv_fixed_width_cols) > 1 ?
-            \ '\%' . b:csv_fixed_width_cols[1] . 'v' :
+            \ '\%<' . (b:csv_fixed_width_cols[1] + 1) . 'v' :
             \ '')
     endif
     return pat . (a:zs_flag ? '\zs' : '')
@@ -1115,7 +1115,12 @@ fu! csv#MoveCol(forward, line, ...) "{{{3
                 let pat=csv#GetColPat(1, 0)
             else
                 " Move backwards
-                let pat=csv#GetColPat(maxcol, 0)
+                if cpos == 1 && (exists("a:1") && a:1)
+                    " H move to previous line
+                    let pat=csv#GetColPat(maxcol, 0)
+                else
+                    let pat='\%1v'
+                endif
             endif
         endif
     else
@@ -1149,9 +1154,13 @@ fu! csv#MoveCol(forward, line, ...) "{{{3
                 " of a field.
                 let epos = getpos('.')
                 if getline('.')[col('.')-1] == ' '
-                    call search('\S', 'W', line('.'))
-                    if getpos('.')[2] > spos
-                        call setpos('.', epos)
+                    if !exists("b:csv_fixed_width_cols")
+                        call search('\S', 'W', line('.'))
+                        if getpos('.')[2] > spos
+                            call setpos('.', epos)
+                        endif
+                    elseif cpos > b:csv_fixed_width_cols[colnr]
+                        call search('\%'. b:csv_fixed_width_cols[colnr]. 'v', 'W', line('.'))
                     endif
                 endif
             endif
