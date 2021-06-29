@@ -1,6 +1,9 @@
 # Changelog 
 
 ## 0.32 (unreleased)
+- Correctly use numeric sort with 'N' flag
+- Better documentation for fixedwidth wizard (#190)
+- Make backwards motion work better for fixedwidth columns (#189)
 - Add Standard Deviation and Variance to available column calculations
 - Remove old Vim 7.3 workarounds (plugin needs now a Vim version 7.4)
 - allow to align columns differently (right/left or center align) for
