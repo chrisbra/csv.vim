@@ -1340,6 +1340,9 @@ This defines that each column starts at multiples of 4. Be sure, to issue
 this command in the buffer, that contains your file, otherwise, it won't
 have an effect, since this is a buffer-local option (|local-option|)
 
+This means, your CSV file consists of 6 fixed width columns and the last one
+starts at column 21 and goes till the end of the line.
+
 After setting this variable, you should reinitialize the plugins using
 |InitCSV|
 
@@ -1364,9 +1367,13 @@ This means, you can now use those 5 keys to configure the fixed-width columns:
    <ESC>    Abort
    <BS>     Press the backspace key, to remove the last column you fixed with
             the <Space> key.
-   <CR>     Use Enter to finish the wizard. This will use all fixed columns
-            to define the fixed width columns of your csv file. The plugin
+   <CR>     Use Enter to finish the wizard. This marks the current position 
+            and finishes the wizard. It will use all define marks which
+            define the width of each separate column of your "csv" file. The plugin
             will be initialized and syntax highlighting should appear.
+
+You should not need to mark the last column. Vim will automatically determine the
+last column from the spaces that is left after the latest mark.
 
 Note: This only works, if your Vim has the 'colorcolumn' option available
 (This won't work with Vim < 7.3 and also not with a Vim without +syntax
