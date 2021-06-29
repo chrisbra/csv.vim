@@ -2210,7 +2210,7 @@ fu! csv#CSVMappings() "{{{3
         call csv#Map('nnoremap', '<C-Right>', ':<C-U>call csv#MoveCol(1, line("."))<CR>')
         call csv#Map('nnoremap', 'L', ':<C-U>call csv#MoveCol(1, line("."))<CR>')
         try
-            if g:csv_bind_B == 1
+            if get(g:, 'csv_bind_B', 0) == 1
                 call csv#Map('nnoremap', 'B', ':<C-U>call csv#MoveCol(-1, line("."))<CR>')
             else
                 call csv#Map('nnoremap', 'E', ':<C-U>call csv#MoveCol(-1, line("."))<CR>')
