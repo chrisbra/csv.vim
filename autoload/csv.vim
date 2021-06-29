@@ -549,6 +549,9 @@ fu! csv#WColumn(...) "{{{3
     call setpos('.',_cur)
     return ret
 endfu
+fu! csv#ValidComment() "{{{3
+    return b:csv_cmt != ['', ''] && !empty(b:csv_cmt[0])
+endfu
 fu! csv#MaxColumns(...) "{{{3
     let this_col = exists("a:1")
     "return maximum number of columns in first 10 lines
@@ -561,8 +564,10 @@ fu! csv#MaxColumns(...) "{{{3
             endif
 
             " Filter comments out
-            let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
-            call filter(l, 'v:val !~ pat')
+            if csv#ValidComment()
+                let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
+                call filter(l, 'v:val !~ pat')
+            endif
             if !empty(l) || this_col
                 break
             else
@@ -606,8 +611,10 @@ fu! csv#ColWidth(colnr, row, silent) "{{{3
                 endif
             endif
             let b:csv_list=getline(skipfirst+1,last)
-            let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
-            call filter(b:csv_list, 'v:val !~ pat')
+            if csv#ValidComment()
+                let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
+                call filter(b:csv_list, 'v:val !~ pat')
+            endif
             call filter(b:csv_list, '!empty(v:val)')
             call map(b:csv_list, 'split(v:val, b:col.''\zs'')')
         endif
@@ -1255,8 +1262,10 @@ fu! csv#CopyCol(reg, col, cnt) "{{{3
         endfor
     endif
     " Filter comments out
-    let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
-    call filter(a, 'v:val !~ pat')
+    if csv#ValidComment()
+        let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
+        call filter(a, 'v:val !~ pat')
+    endif
 
     if !exists("b:csv_fixed_width_cols")
         call map(a, 'split(v:val, ''^'' . b:col . ''\zs'')[col-1:cnt_cols]')
@@ -1297,10 +1306,9 @@ fu! csv#MoveColumn(start, stop, ...) range "{{{3
     endif
 
     " Swap line by line, instead of reading the whole range into memory
-
     for i in range(a:start, a:stop)
         let content = getline(i)
-        if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+        if b:csv_cmt != ['',''] && content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
             " skip comments
             continue
         endif
@@ -1368,13 +1376,9 @@ fu! csv#DupColumn(start, stop, ...) range "{{{3
     " skipping comment lines (we could do it with a single :s statement,
     " but that would fail for the first and last column.
 
-    let commentpat = '\%(\%>'.(a:start-1).'l\V'.
-                \ escape(b:csv_cmt[0], '\\').'\m\)'. '\&\%(\%<'.
-                \ (a:stop+1). 'l\V'. escape(b:csv_cmt[0], '\\'). '\m\)'
-
     for i in range(a:start, a:stop)
         let content = getline(i)
-        if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+        if csv#ValidComment() && content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
             " skip comments
             continue
         endif
@@ -1438,10 +1442,12 @@ fu! csv#AddColumn(start, stop, ...) range "{{{3
     " skipping comment lines (we could do it with a single :s statement,
     " but that would fail for the first and last column.
 
-    let commentpat = '\%(\%>'.(a:start-1).'l\V'.
-                \ escape(b:csv_cmt[0], '\\').'\m\)'. '\&\%(\%<'.
-                \ (a:stop+1). 'l\V'. escape(b:csv_cmt[0], '\\'). '\m\)'
-    if search(commentpat)
+    if b:csv_cmt != ['','']
+        let commentpat = '\%(\%>'.(a:start-1).'l\V'.
+                    \ escape(b:csv_cmt[0], '\\').'\m\)'. '\&\%(\%<'.
+                    \ (a:stop+1). 'l\V'. escape(b:csv_cmt[0], '\\'). '\m\)'
+    endif
+    if !empty(commentpat) && search(commentpat)
         for i in range(a:start, a:stop)
             let content = getline(i)
             if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
@@ -1681,7 +1687,7 @@ fu! csv#DoForEachColumn(start, stop, bang) range "{{{3
         endif
         let t = g:csv_convert
         let line = getline(item)
-        if line =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+        if b:csv_cmt!=['',''] && line =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
             " Filter comments out
             call add(result, line)
             continue
@@ -1745,7 +1751,7 @@ fu! csv#FoldValue(lnum, filter) "{{{3
     for item in values(a:filter)
         " always fold comments away
         let content = getline(a:lnum)
-        if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+        if b:csv_cmt != ['',''] && content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
             return 1
         elseif eval('content' .  (item.match ? '!~' : '=~') . 'item.pat')
             let result += 1
@@ -1907,7 +1913,7 @@ fu! csv#GetColumn(line, col, strip) "{{{3
     " Return Column content at a:line, a:col
     let a=getline(a:line)
     " Filter comments out
-    if a =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+    if csv#ValidComment() && a =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
         return ''
     endif
 
@@ -2441,7 +2447,7 @@ fu! csv#NewDelimiter(newdelimiter, firstl, lastl) "{{{3
     let line=a:firstl
     while line <= a:lastl
         " Don't change delimiter for comments
-        if getline(line) =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+        if csv#ValidComment() && getline(line) =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
             let line+=1
             continue
         endif
@@ -2486,7 +2492,7 @@ fu! csv#DuplicateRows(columnlist) "{{{3
         let i = 1
         let content = getline(line)
         " Skip comments
-        if content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
+        if csv#ValidComment() && content =~ '^\s*\V'. escape(b:csv_cmt[0], '\\')
             continue
         endif
         let cols = split(content, b:col. '\zs')
@@ -2542,7 +2548,11 @@ fu! csv#Transpose(line1, line2) "{{{3
         let TrailingDelim = getline(1) =~ b:delimiter.'$'
     endif
 
-    let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
+    if b:csv_cmt != ['','']
+        let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
+    else
+        let pat = ''
+    endif
 
     try
         let columns = csv#MaxColumns(a:line1)
@@ -2554,7 +2564,7 @@ fu! csv#Transpose(line1, line2) "{{{3
     let matrix  = []
     for line in range(a:line1, a:line2)
         " Filter comments out
-        if getline(line) =~ pat
+        if !empty(pat) && getline(line) =~ pat
             continue
         endif
         let r   = []
@@ -3043,10 +3053,12 @@ fu! csv#SumCSVRow(line, nr) "{{{3
     endif
     let line=getline(ln)
     " Filter comments out
-    let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
-    if line =~ pat
-        call csv#Warn("Invalid count specified")
-        return
+    if csv#ValidComment()
+        let pat = '^\s*\V'. escape(b:csv_cmt[0], '\\')
+        if line =~ pat
+            call csv#Warn("Invalid count specified")
+            return
+        endif
     endif
     let func='csv#SumColumn'
     let cells=split(line, b:col.'\zs')
