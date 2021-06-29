@@ -10,7 +10,7 @@
 " Some ideas are taken from the wiki http://vim.wikia.com/wiki/VimTip667
 " though, implementation differs.
 
-let s:csv_numeric_sort = v:version > 704 || v:version == 704 && has("patch341")
+let s:csv_numeric_sort = v:version > 704 || v:version == 704 && has("patch951")
 if !s:csv_numeric_sort "{{{2
   fu! csv#CSVSortValues(i1, i2) "{{{3
     return (a:i1+0) == (a:i2+0) ? 0 : (a:i1+0) > (a:i2+0) ? 1 : -1
@@ -535,7 +535,7 @@ fu! csv#WColumn(...) "{{{3
         let temp=getpos('.')[2]
         let j=1
         let ret = 1
-        for i in sort(b:csv_fixed_width_cols, s:csv_numeric_sort ? 'n' : 'csv#CSVSortValues')
+        for i in sort(b:csv_fixed_width_cols, s:csv_numeric_sort ? 'N' : 'csv#CSVSortValues')
             if temp >= i
                 let ret = j
             endif
@@ -1607,7 +1607,7 @@ fu! csv#MaxColumn(list) "{{{3
             endtry
             call add(result, str2float(nr))
         endfor
-        let result = sort(result, s:csv_numeric_sort ? 'n' : 'csv#CSVSortValues')
+        let result = sort(result, s:csv_numeric_sort ? 'N' : 'csv#CSVSortValues')
         let ind = len(result) > 9 ? 9 : len(result)
         if has_key(get(s:, 'additional', {}), 'distinct') && s:additional['distinct']
           if exists("*uniq")
@@ -1975,7 +1975,7 @@ fu! csv#AnalyzeColumn(...) "{{{3
         let res[item]+=1
     endfor
 
-    let max_items = reverse(sort(values(res), s:csv_numeric_sort ? 'n' : 'csv#CSVSortValues'))
+    let max_items = reverse(sort(values(res), s:csv_numeric_sort ? 'N' : 'csv#CSVSortValues'))
     " What about the minimum 5 items?
     let count_items = keys(res)
     if len(max_items) > topn
@@ -2114,8 +2114,8 @@ fu! csv#InitCSVFixedWidth() "{{{3
     endw
     let b:csv_fixed_width_cols=[]
     let tcc=0
-    let b:csv_fixed_width_cols = sort(keys(Dict), s:csv_numeric_sort ? 'n' : 'csv#CSVSortValues')
-    let b:csv_fixed_width = join(sort(keys(Dict), s:csv_numeric_sort ? 'n' : 'csv#CSVSortValues'), ',')
+    let b:csv_fixed_width_cols = sort(keys(Dict), s:csv_numeric_sort ? 'N' : 'csv#CSVSortValues')
+    let b:csv_fixed_width = join(sort(keys(Dict), s:csv_numeric_sort ? 'N' : 'csv#CSVSortValues'), ',')
     call csv#Init(1, line('$'))
 
     let &l:cc=_cc
