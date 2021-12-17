@@ -248,7 +248,7 @@ If you would like all columns to be visually arranged, you can use the
 
 Beware, that this will change your file and depending on the size of
 your file may slow down Vim significantly. This is highly experimental.
-:ArrangeCommand will try to vertically align all columns by their maximum
+:ArrangeColumns will try to vertically align all columns by their maximum
 column size. While the command is run, a progressbar in the statusline 'stl'
 will be shown.
 
