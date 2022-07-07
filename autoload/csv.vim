@@ -2196,15 +2196,13 @@ fu! csv#MoveOver(outer) "{{{3
         " previous field, move back to original position
 "        call cursor(_wsv.lnum, _wsv.col)
 "    endif
-    let _s = @/
     if last
-        exe "sil! norm! v$h" . (outer_field ? "" : "h") . (&sel ==# 'exclusive' ? "l" : '')
+        exe "sil! norm! v$h" . (outer_field ? "" : "h") . (&sel ==# 'exclusive' ? "l" : '') . '$ _'
     else
-        exe "sil! norm! v/." . b:col . "\<cr>h" . (outer_field ? "" : "h") . (&sel ==# 'exclusive' ? "l" : '')
+        exe "sil! norm! v/." . b:col . "\<cr>h" . (outer_field ? "" : "h") . (&sel ==# 'exclusive' ? "l" : '') . '/ _'
     endif
     let _wsv.col = col('.')-1
     call winrestview(_wsv)
-    let @/ = _s
 endfu
 fu! csv#CSVMappings() "{{{3
     if !exists("g:no_plugin_maps") && !exists("g:no_csv_maps")
