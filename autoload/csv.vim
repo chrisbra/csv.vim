@@ -1020,7 +1020,7 @@ fu! csv#SplitHeaderLine(lines, bang, hor) "{{{3
         " disable airline
         let w:airline_disabled = 1
         let win = winnr()
-        setl scrollbind buftype=nowrite bufhidden=wipe noswapfile nobuflisted
+        setl scrollbind buftype=nofile bufhidden=wipe noswapfile nobuflisted
         noa wincmd p
         let b:csv_SplitWindow = win
         aug CSV_Preview
