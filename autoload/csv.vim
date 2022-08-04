@@ -930,6 +930,11 @@ fu! csv#GetColPat(colnr, zs_flag) "{{{3
 endfu
 fu! csv#SetupAutoCmd(window,bufnr) "{{{3
     " Setup QuitPre autocommand to quit cleanly
+    if a:bufnr == 0
+        " something went wrong, 
+        " how can this happen?
+        return
+    endif
     aug CSV_QuitPre
         au!
         exe "au QuitPre * call CSV_CloseBuffer(".winbufnr(a:window).")"
