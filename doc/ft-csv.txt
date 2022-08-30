@@ -243,7 +243,7 @@ overriden by setting the "b:csv_arrange_use_all_rows" variable (see below).
 
 If [range] is not given, it defaults to the current line.
 
-							*csv_arrange_align*
+                                                  *csv_arrange_align*
 By default, the columns will be right-aligned. If you want a different
 alignment you need to specify this through the b:csv_arrange_align variable.
 This is a string of flags ('r': right align, 'l': left align, 'c': center
@@ -262,12 +262,17 @@ And this: >
 
     :let b:csv_arrange_align = 'l*'
 
-Will left align all columns.
+Will left align all columns. The CSV plugin uses the `g:csv_arrange_align`
+variable as a fallback, if `b:csv_arrange_align` does not exists. So if you
+always want to have left alignment, you simply set this variable in your
+|.vimrc| file: >
+
+    :let g:csv_arrange_align='l*'
 
 If you change the alignment parameter, you need to use the "!" attribute, the
 next time you run the |:ArrangeCol| command, otherwise for performance
 reasons, it won't be considered.
-
+                                              *csv_arrange_use_all_rows*
 Note, arranging the columns can be very slow on large files or many columns (see
 |csv-slow| on how to increase performance for this command). For large files,
 calculating the column width can take long and take a considerable amount of
@@ -278,6 +283,7 @@ width. Set the variable b:csv_arrange_use_all_rows to 1 to use all records: >
 <
 (this could however in the worst case lead to a crash).
 
+                                                *csv_no_progress*
 To disable the statusline progressbar set the variable g:csv_no_progress: >
 
     :let g:csv_no_progress = 1
@@ -290,6 +296,7 @@ Note: this command does not work for fixed width columns |csv-fixedwidth|
 See also |csv-arrange-autocmd| on how to have vim automatically arrange a CSV
 file upon entering it.
 
+                                                *csv_skipfirst*
 By default, all lines in the file are considered to calculate the column width.
 If you want to ignore some lines at the beginning of the file, set the global
 variable g:csv_skipfirst to the number of lines to be ignored, e.g. the first

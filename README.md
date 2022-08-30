@@ -285,7 +285,14 @@ And this:
 ```vim
 :let b:csv_arrange_align = 'l*'
 ```
-will left align all columns.
+will left align all columns. The CSV plugin uses the `g:csv_arrange_align`
+variable as a fallback, if `b:csv_arrange_align` does not exists. So if you
+always want to have left alignment, you simply set this variable in your
+.vimrc file:
+
+```vim
+:let g:csv_arrange_align='l*'
+```
 
 If you change the alignment parameter, you need to use the "!" attribute, the
 next time you run the `:ArrangeCol` command, otherwise for performance

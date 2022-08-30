@@ -822,8 +822,8 @@ fu! csv#Columnize(field) "{{{3
     let colnr = s:columnize_count % s:max_cols
     let width = get(b:col_width, colnr, 20)
     let align = 'r'
-    if exists('b:csv_arrange_align')
-        let align=b:csv_arrange_align
+    if exists('b:csv_arrange_align') || exists('g:csv_arrange_align')
+        let align=get(b:, 'csv_arrange_align', g:csv_arrange_align)
         let indx=match(align, '\*')
         if indx > 0
             let align = align[0:(indx-1)]. repeat(align[indx-1], len(b:col_width)-indx)
