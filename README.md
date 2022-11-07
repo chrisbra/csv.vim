@@ -1324,7 +1324,7 @@ more memory than [`'maxmempattern'`](http://vimhelp.appspot.com/options.txt.html
 ## Concealing
 
 The CSV plugin comes with a function to syntax highlight csv files. Basically
-allt it does is highlight the columns and the header line.
+all it does is highlight the columns and the header line.
 
 By default, the delimiter will not be displayed, if Vim supports [`conceal`](http://vimhelp.appspot.com/syntax.txt.html#conceal) of
 syntax items and instead draws a vertical line. If you don't want that, simply
