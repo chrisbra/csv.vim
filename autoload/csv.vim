@@ -478,12 +478,16 @@ fu! csv#GetDelimiter(first, last, ...) "{{{3
         " :silent :s does not work with lazyredraw
         let _lz  = &lz
         set nolz
+	" substitute without output when cmdheight=0
+        let _cmdheight = &cmdheight
+        set cmdheight=1
         for i in values(Delim)
             redir => temp[i]
             " use very non-magic
             exe ":silent! :". first. ",". last. 's/\V' . i . "/&/nge"
             redir END
         endfor
+	let &cmdheight = _cmdheight
         let &lz = _lz
         let Delim = map(temp, 'matchstr(substitute(v:val, "\n", "", ""), "^\\s*\\d\\+")')
         let Delim = filter(temp, 'v:val=~''\d''')
