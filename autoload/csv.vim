@@ -244,7 +244,6 @@ fu! csv#DoAutoCommands() "{{{3
     let b:undo_ftplugin .= '| exe "sil! au! CSV_HI'.bufnr('').' CursorMoved <buffer> "'
     let b:undo_ftplugin .= '| call csv#RemoveAutoHighlight()'
     let b:undo_ftplugin = 'exe "sil! HiColumn!" |' . b:undo_ftplugin
-
     if has("gui_running") && !exists("#CSV_Menu#FileType")
         augroup CSV_Menu
             au!
@@ -455,6 +454,10 @@ fu! csv#HiCol(colnr, bang) "{{{3
     elseif !a:bang
         exe ":2match " . s:hiGroup . ' /' . pat . '/'
     endif
+    " Remove Highlighting once switching away from the buffer
+    exe "aug CSV_HI".bufnr('')
+        exe "au BufWinLeave <buffer=".bufnr('')."> call csv#RemoveAutoHighlight()"
+    aug end
 endfu
 fu! csv#GetDelimiter(first, last, ...) "{{{3
     " This depends on the locale. Hopefully it works
