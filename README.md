@@ -457,11 +457,12 @@ If you need to copy a specific column, you can use the command `:CSVColumn` or
 `:Column` 
 
 ```vim
-:[N]Column [a]
+:[N]Column[!] [a]
 ```
 
 Copy column N into register a. This will copy all the values, that are
 not folded-away ([Dynamic filters](#dynamic-filters)) and skip comments.
+If the bang (`!`) attribute is given, skips the Header Lines.
 
 If you don't specify N, the column of the current cursor position is used.
 If no register is given, the default register

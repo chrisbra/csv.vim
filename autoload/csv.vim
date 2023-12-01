@@ -881,7 +881,7 @@ fu! csv#Columnize(field) "{{{3
         if get(s:decimal_column, colnr, 0) == 0
             call csv#CheckHeaderLine()
             call csv#NumberFormat()
-            let data = csv#CopyCol('', colnr+1, '')[s:csv_fold_headerline : -1]
+            let data = csv#CopyCol('', colnr+1, '', 0)[s:csv_fold_headerline : -1]
             let pat1 = escape(s:nr_format[1], '.').'\zs[^'.s:nr_format[1].']*\ze'.
                         \ (has_delimiter ? b:delimiter : '').'$'
             let pat2 = '\d\+\ze\%(\%('.escape(s:nr_format[1], '.'). '\d\+\)\|'.
@@ -1015,9 +1015,9 @@ fu! csv#SplitHeaderLine(lines, bang, hor) "{{{3
             setl scrollopt=ver scrollbind cursorbind
             noa 0
             if a:lines[-1:] is? '!'
-                let a=csv#CopyCol('',a:lines,'')
+                let a=csv#CopyCol('',a:lines,'', 0)
             else
-                let a=csv#CopyCol('',1, a:lines-1)
+                let a=csv#CopyCol('',1, a:lines-1, 0)
             endif
             " Does it make sense to use the preview window?
             "vert sil! pedit |wincmd w | enew!
@@ -1254,7 +1254,7 @@ fu! csv#Sort(bang, line1, line2, colnr) range "{{{3
         \' r'. flag. ' /' . pat . '/'
     call winrestview(wsv)
 endfun
-fu! csv#CopyCol(reg, col, cnt) "{{{3
+fu! csv#CopyCol(reg, col, cnt, bang) "{{{3
     " Return Specified Column into register reg
     let col = a:col == "0" ? csv#WColumn() : a:col+0
     let mcol = csv#MaxColumns()
@@ -1268,11 +1268,18 @@ fu! csv#CopyCol(reg, col, cnt) "{{{3
         let cnt_cols = col + a:cnt - 1
     endif
     let a = []
+		let first = 1
+		call csv#CheckHeaderLine()
+    if a:bang && first <= s:csv_fold_headerline
+        " don't take the header line into consideration
+        let first = s:csv_fold_headerline + 1
+    endif
+
     " Don't get lines, that are currently filtered away
     if !exists("b:csv_filter") || empty(b:csv_filter)
-        let a=getline(1, '$')
+        let a=getline(first, '$')
     else
-        for line in range(1, line('$'))
+        for line in range(first, line('$'))
             if foldlevel(line)
                 continue
             else
@@ -2000,7 +2007,7 @@ fu! csv#AnalyzeColumn(...) "{{{3
 
     " Initialize csv#fold_headerline
     call csv#CheckHeaderLine()
-    let data = csv#CopyCol('', colnr, '')[s:csv_fold_headerline : -1]
+    let data = csv#CopyCol('', colnr, '', 0)[s:csv_fold_headerline : -1]
     let qty = len(data)
     let res = {}
     for item in data
@@ -2279,7 +2286,7 @@ fu! csv#CommandDefinitions() "{{{3
     call csv#LocalCmd("AvgCol", ':echo csv#EvalColumn(<q-args>, "csv#AvgColumn", <line1>,<line2>)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
     call csv#LocalCmd("CSVFixed", ':call csv#InitCSVFixedWidth()', '')
     call csv#LocalCmd("CSVInit", ':call csv#Init(<line1>,<line2>,<bang>0)', '-bang -range=%')
-    call csv#LocalCmd("Column", ':call csv#CopyCol(empty(<q-reg>)?''"'':<q-reg>,<q-count>,<q-args>)', '-count -register -nargs=?')
+    call csv#LocalCmd("Column", ':call csv#CopyCol(empty(<q-reg>)?''"'':<q-reg>,<q-count>,<q-args>, <bang>0)', '-bang -count -register -nargs=?')
     call csv#LocalCmd("ConvertData", ':call csv#PrepareDoForEachColumn(<line1>,<line2>,<bang>0)', '-bang -nargs=0 -range=%')
     call csv#LocalCmd("CountCol", ':echo csv#EvalColumn(<q-args>, "csv#CountColumn", <line1>,<line2>)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
     call csv#LocalCmd("DeleteColumn", ':call csv#DeleteColumn(<q-args>)', '-nargs=? -complete=custom,csv#SortComplete')
@@ -2953,7 +2960,7 @@ fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
         let stop  += s:csv_fold_headerline
     endif
 
-    let column = csv#CopyCol('', col, '')[start : stop]
+    let column = csv#CopyCol('', col, '', 0)[start : stop]
     let column = csv#GetCells(column)
     " Delete empty values
     " Leave this up to the function that does something
@@ -3072,7 +3079,7 @@ fu! CSVField(x, y, ...) "{{{3
     let orig = !empty(a:0)
     let y = (y < 0 ? 0 : y)
     let x = (x > (csv#MaxColumns()) ? (csv#MaxColumns()) : x)
-    let col = csv#CopyCol('',x,'')
+    let col = csv#CopyCol('',x,'',0)
     if !orig
     " remove leading and trainling whitespace and the delimiter
         return matchstr(col[y], '^\s*\zs.\{-}\ze\s*'.b:delimiter.'\?$')
