@@ -1700,7 +1700,7 @@ fu! csv#DoForEachColumn(start, stop, bang) range "{{{3
     endif
 
     for item in range(a:start, a:stop, 1)
-        if foldlevel(line)
+        if foldlevel(item)
           " Filter out folded lines (from dynamic filter)
           continue
         endif
@@ -1733,7 +1733,7 @@ fu! csv#DoForEachColumn(start, stop, bang) range "{{{3
             endfor
         endif
         for j in range(1, columns, 1)
-            let t=substitute(t, '%s', fields[j-1], '')
+            let t=substitute(t, '%s', get(fields, j-1, ''), '')
         endfor
         call add(result, t)
     endfor
@@ -1752,7 +1752,7 @@ fu! csv#PrepareDoForEachColumn(start, stop, bang) range"{{{3
     let post = exists("g:csv_post_convert") ? g:csv_post_convert : ''
     let g:csv_post_convert=input('Post convert text: ', post)
     let convert = exists("g:csv_convert") ? g:csv_convert : ''
-    let g:csv_convert=input("Converted text, use %s for column input:\n", convert)
+    let g:csv_convert=input("How to convert data (use %s for column input):\n", convert)
     call csv#DoForEachColumn(a:start, a:stop, a:bang)
 endfun
 fu! csv#EscapeValue(val) "{{{3
@@ -2340,7 +2340,7 @@ fu! csv#CommandDefinitions() "{{{3
         \ '-nargs=? -range')
     call csv#LocalCmd("ConvertData",
         \ ':call csv#PrepareDoForEachColumn(<line1>,<line2>,<bang>0)',
-        \ '-bang -nargs=? -range=%')
+        \ '-bang -nargs=0 -range=%')
     call csv#LocalCmd("Filters", ':call csv#OutputFilters(<bang>0)',
         \ '-nargs=0 -bang')
     call csv#LocalCmd("Analyze", ':call csv#AnalyzeColumn(<f-args>)',

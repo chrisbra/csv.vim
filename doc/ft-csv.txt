@@ -646,9 +646,10 @@ g:no_plugin_maps or g:no_csv_maps is set, no key will be mapped.
 You can convert your CSV file to a different format with the `:ConvertData`
 or `:CSVConvertData` command >
 
-    ConvertData
+    :[range]ConvertData[!]
 
-Use the the ! attribute, to convert your data without the delimiter.
+Use the the bang ("!") attribute, to convert your data without the delimiter.
+If [range] is given, will only convert the lines in range.
 
 This command will interactively ask you for the definition of 3 variables.
 After which it will convert your csv file into a new format, defined by those
@@ -691,7 +692,7 @@ g:csv_post_convert is already defined, Vim will already show you its' content
 as default value which you can confirm by pressing Enter. Last, you define,
 how your columns need to be converted. Again, Vim asks you for how to do that:
 
-    Converted text, use %s for column input: `
+    How to convert data (use %s for column input): `
     <tr><td>%s</td><td>%s</td><td>%s</td></tr>
 
 This time, you can use '%s' expandos. They tell Vim, that they need to be
@@ -726,7 +727,7 @@ be done like this: >
 
 After inserting the data, commit it into the database.
 
-    Converted text, use %s for column input: `
+    How to convert data (use %s for column input): `
     Insert into table foobar values ('%s', '%s', %s); `
 
 Note, that the last argument is not included within single quotation marks,
@@ -739,7 +740,7 @@ After hitting Enter, a new Window will be opened, which might look like this:
     Insert into table foobar values('Bar', '1', 2011); `
     Commit; `
 
-Since the command was used with the bang attribute (!), the converted data
+Since the command was used with the bang attribute ("!"), the converted data
 doesn't include the column delimiters.
 
 Now you can copy it into your database, or further manipulate it.
