@@ -2273,100 +2273,45 @@ fu! csv#CSVMappings() "{{{3
     endif
 endfu
 fu! csv#CommandDefinitions() "{{{3
-    call csv#LocalCmd("WhatColumn", ':echo csv#WColumn(<bang>0)',
-        \ '-bang')
-    call csv#LocalCmd("NrColumns", ':call csv#NrColumns(<q-bang>)', '-bang')
-    call csv#LocalCmd("HiColumn", ':call csv#HiCol(<q-args>,<bang>0)',
-        \ '-bang -nargs=?')
-    call csv#LocalCmd("SearchInColumn",
-        \ ':call csv#SearchColumn(<q-args>)', '-nargs=*')
-    call csv#LocalCmd("DeleteColumn", ':call csv#DeleteColumn(<q-args>)',
-        \ '-nargs=? -complete=custom,csv#SortComplete')
-    call csv#LocalCmd("ArrangeColumn",
-        \ ':call csv#ArrangeCol(<line1>, <line2>, <bang>0, -1, <q-args>)',
-        \ '-range -bang -bar -nargs=?')
-    call csv#LocalCmd("SmplVarCol",
-        \ ':echo csv#EvalColumn(<q-args>, "csv#SmplVarianceColumn", <line1>,<line2>)',
-        \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
-    call csv#LocalCmd("PopVarCol",
-        \ ':echo csv#EvalColumn(<q-args>, "csv#PopVarianceColumn", <line1>,<line2>)',
-        \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
-    call csv#LocalCmd("SmplStdCol",
-        \ ':echo csv#EvalColumn(<q-args>, "csv#SmplStdDevColumn", <line1>,<line2>)',
-        \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
-    call csv#LocalCmd("PopStdCol",
-        \ ':echo csv#EvalColumn(<q-args>, "csv#PopStdDevColumn", <line1>,<line2>)',
-        \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
-    call csv#LocalCmd("UnArrangeColumn",
-        \':call csv#PrepUnArrangeCol(<line1>, <line2>)',
-        \ '-bar -range')
-    call csv#LocalCmd("CSVInit", ':call csv#Init(<line1>,<line2>,<bang>0)',
-        \ '-bang -range=%')
-    call csv#LocalCmd('Header',
-        \ ':call csv#SplitHeaderLine(<q-args>,<bang>0,1)',
-        \ '-nargs=? -bang')
-    call csv#LocalCmd('VHeader',
-        \ ':call csv#SplitHeaderLine(<q-args>,<bang>0,0)',
-        \ '-nargs=? -bang')
-    call csv#LocalCmd("HeaderToggle",
-        \ ':call csv#SplitHeaderToggle(1)', '')
-    call csv#LocalCmd("VHeaderToggle",
-        \ ':call csv#SplitHeaderToggle(0)', '')
-    call csv#LocalCmd("Sort",
-        \ ':call csv#Sort(<bang>0, <line1>,<line2>,<q-args>)',
-        \ '-nargs=* -bang -range=% -complete=custom,csv#SortComplete')
-    call csv#LocalCmd("Column",
-        \ ':call csv#CopyCol(empty(<q-reg>)?''"'':<q-reg>,<q-count>,<q-args>)',
-        \ '-count -register -nargs=?')
-    call csv#LocalCmd("MoveColumn",
-        \ ':call csv#MoveColumn(<line1>,<line2>,<f-args>)',
-        \ '-range=% -nargs=* -complete=custom,csv#SortComplete')
-    call csv#LocalCmd("SumCol",
-        \ ':echo csv#EvalColumn(<q-args>, "csv#SumColumn", <line1>,<line2>)',
-        \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
-    call csv#LocalCmd("MaxCol",
-        \ ':echo csv#EvalColumn(<q-args>, "csv#MaxColumn", <line1>,<line2>, 1)',
-        \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
-    call csv#LocalCmd("MinCol",
-        \ ':echo csv#EvalColumn(<q-args>, "csv#MaxColumn", <line1>,<line2>, 0)',
-        \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
-    call csv#LocalCmd("CountCol",
-        \ ':echo csv#EvalColumn(<q-args>, "csv#CountColumn", <line1>,<line2>)',
-        \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
-    call csv#LocalCmd("AvgCol",
-        \ ':echo csv#EvalColumn(<q-args>, "csv#AvgColumn", <line1>,<line2>)',
-        \ '-nargs=? -range=% -complete=custom,csv#SortComplete')
-    call csv#LocalCmd('SumRow', ':call csv#SumCSVRow(<q-count>, <q-args>)',
-        \ '-nargs=? -range')
-    call csv#LocalCmd("ConvertData",
-        \ ':call csv#PrepareDoForEachColumn(<line1>,<line2>,<bang>0)',
-        \ '-bang -nargs=0 -range=%')
-    call csv#LocalCmd("Filters", ':call csv#OutputFilters(<bang>0)',
-        \ '-nargs=0 -bang')
-    call csv#LocalCmd("Analyze", ':call csv#AnalyzeColumn(<f-args>)',
-        \ '-nargs=*' )
-    call csv#LocalCmd("VertFold", ':call csv#Vertfold(<bang>0,<q-args>)',
-        \ '-bang -nargs=? -range=% -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("AddColumn", ':call csv#AddColumn(<line1>,<line2>,<f-args>)', '-range=% -nargs=* -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("Analyze", ':call csv#AnalyzeColumn(<f-args>)', '-nargs=*' )
+    call csv#LocalCmd("ArrangeColumn", ':call csv#ArrangeCol(<line1>, <line2>, <bang>0, -1, <q-args>)', '-range -bang -bar -nargs=?')
+    call csv#LocalCmd("AvgCol", ':echo csv#EvalColumn(<q-args>, "csv#AvgColumn", <line1>,<line2>)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
     call csv#LocalCmd("CSVFixed", ':call csv#InitCSVFixedWidth()', '')
-    call csv#LocalCmd("NewRecord", ':call csv#NewRecord(<line1>,
-        \ <line2>, <q-args>)', '-nargs=? -range')
-    call csv#LocalCmd("NewDelimiter", ':call csv#NewDelimiter(<q-args>, 1, line(''$''))',
-        \ '-nargs=1')
-    call csv#LocalCmd("Duplicates", ':call csv#CheckDuplicates(<q-args>)',
-        \ '-nargs=? -complete=custom,csv#CompleteColumnNr')
-    call csv#LocalCmd('Transpose', ':call csv#Transpose(<line1>, <line2>)',
-        \ '-range=%')
-    call csv#LocalCmd('CSVTabularize', ':call csv#Tabularize(<bang>0,<line1>,<line2>)',
-        \ '-bang -range=%')
-    call csv#LocalCmd("AddColumn",
-        \ ':call csv#AddColumn(<line1>,<line2>,<f-args>)',
-        \ '-range=% -nargs=* -complete=custom,csv#SortComplete')
-    call csv#LocalCmd("DupColumn",
-        \ ':call csv#DupColumn(<line1>,<line2>,<f-args>)',
-        \ '-range=% -nargs=* -complete=custom,csv#SortComplete')
-    call csv#LocalCmd('Substitute', ':call csv#SubstituteInColumn(<q-args>,<line1>,<line2>)',
-        \ '-nargs=1 -range=%')
+    call csv#LocalCmd("CSVInit", ':call csv#Init(<line1>,<line2>,<bang>0)', '-bang -range=%')
+    call csv#LocalCmd("Column", ':call csv#CopyCol(empty(<q-reg>)?''"'':<q-reg>,<q-count>,<q-args>)', '-count -register -nargs=?')
+    call csv#LocalCmd("ConvertData", ':call csv#PrepareDoForEachColumn(<line1>,<line2>,<bang>0)', '-bang -nargs=0 -range=%')
+    call csv#LocalCmd("CountCol", ':echo csv#EvalColumn(<q-args>, "csv#CountColumn", <line1>,<line2>)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("DeleteColumn", ':call csv#DeleteColumn(<q-args>)', '-nargs=? -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("DupColumn", ':call csv#DupColumn(<line1>,<line2>,<f-args>)', '-range=% -nargs=* -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("Duplicates", ':call csv#CheckDuplicates(<q-args>)', '-nargs=? -complete=custom,csv#CompleteColumnNr')
+    call csv#LocalCmd("Filters", ':call csv#OutputFilters(<bang>0)', '-nargs=0 -bang')
+    call csv#LocalCmd("HeaderToggle", ':call csv#SplitHeaderToggle(1)', '')
+    call csv#LocalCmd("HiColumn", ':call csv#HiCol(<q-args>,<bang>0)', '-bang -nargs=?')
+    call csv#LocalCmd("MaxCol", ':echo csv#EvalColumn(<q-args>, "csv#MaxColumn", <line1>,<line2>, 1)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("MinCol", ':echo csv#EvalColumn(<q-args>, "csv#MaxColumn", <line1>,<line2>, 0)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("MoveColumn", ':call csv#MoveColumn(<line1>,<line2>,<f-args>)', '-range=% -nargs=* -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("NewDelimiter", ':call csv#NewDelimiter(<q-args>, 1, line(''$''))', '-nargs=1')
+    call csv#LocalCmd("NewRecord", ':call csv#NewRecord(<line1>, <line2>, <q-args>)', '-nargs=? -range')
+    call csv#LocalCmd("NrColumns", ':call csv#NrColumns(<q-bang>)', '-bang')
+    call csv#LocalCmd("PopStdCol", ':echo csv#EvalColumn(<q-args>, "csv#PopStdDevColumn", <line1>,<line2>)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("PopVarCol", ':echo csv#EvalColumn(<q-args>, "csv#PopVarianceColumn", <line1>,<line2>)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("SearchInColumn", ':call csv#SearchColumn(<q-args>)', '-nargs=*')
+    call csv#LocalCmd("SmplStdCol", ':echo csv#EvalColumn(<q-args>, "csv#SmplStdDevColumn", <line1>,<line2>)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("SmplVarCol", ':echo csv#EvalColumn(<q-args>, "csv#SmplVarianceColumn", <line1>,<line2>)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("Sort", ':call csv#Sort(<bang>0, <line1>,<line2>,<q-args>)', '-nargs=* -bang -range=% -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("SumCol", ':echo csv#EvalColumn(<q-args>, "csv#SumColumn", <line1>,<line2>)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("UnArrangeColumn", ':call csv#PrepUnArrangeCol(<line1>, <line2>)', '-bar -range')
+    call csv#LocalCmd("VHeaderToggle", ':call csv#SplitHeaderToggle(0)', '')
+    call csv#LocalCmd("VertFold", ':call csv#Vertfold(<bang>0,<q-args>)', '-bang -nargs=? -range=% -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("WhatColumn", ':echo csv#WColumn(<bang>0)', '-bang')
+    call csv#LocalCmd('CSVTabularize', ':call csv#Tabularize(<bang>0,<line1>,<line2>)', '-bang -range=%')
     call csv#LocalCmd('ColumnWidth', ':call csv#ColumnWidth()', '')
+    call csv#LocalCmd('Header', ':call csv#SplitHeaderLine(<q-args>,<bang>0,1)', '-nargs=? -bang')
+    call csv#LocalCmd('Substitute', ':call csv#SubstituteInColumn(<q-args>,<line1>,<line2>)', '-nargs=1 -range=%')
+    call csv#LocalCmd('SumRow', ':call csv#SumCSVRow(<q-count>, <q-args>)', '-nargs=? -range')
+    call csv#LocalCmd('Transpose', ':call csv#Transpose(<line1>, <line2>)', '-range=%')
+    call csv#LocalCmd('VHeader', ':call csv#SplitHeaderLine(<q-args>,<bang>0,0)', '-nargs=? -bang')
 endfu
 fu! csv#ColumnWidth()
     let w=CSVWidth()
