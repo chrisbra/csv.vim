@@ -2650,21 +2650,21 @@ fu! csv#Tabularize(bang, first, last) "{{{3
     endif
     let _c = winsaveview()
     " Table delimiter definition "{{{4
-    if !exists("s:td")
-        let s:td = {
-            \ 'hbar': (&enc =~# 'utf-8' ? '─' : '-'),
-            \ 'vbar': (&enc =~# 'utf-8' ? '│' : '|'),
-            \ 'scol': (&enc =~# 'utf-8' ? '├' : '|'),
-            \ 'ecol': (&enc =~# 'utf-8' ? '┤' : '|'),
-            \ 'ltop': (&enc =~# 'utf-8' ? '┌' : '+'),
-            \ 'rtop': (&enc =~# 'utf-8' ? '┐' : '+'),
-            \ 'lbot': (&enc =~# 'utf-8' ? '└' : '+'),
-            \ 'rbot': (&enc =~# 'utf-8' ? '┘' : '+'),
-            \ 'cros': (&enc =~# 'utf-8' ? '┼' : '+'),
-            \ 'dhor': (&enc =~# 'utf-8' ? '┬' : '-'),
-            \ 'uhor': (&enc =~# 'utf-8' ? '┴' : '-')
+		let use_unicode = &enc =~# 'utf-8' && get(g:, 'csv_table_use_ascii', 0) == 0
+		let s:td = {
+            \ 'hbar': (use_unicode ? '─' : '-'),
+            \ 'vbar': (use_unicode ? '│' : '|'),
+            \ 'scol': (use_unicode ? '├' : '|'),
+            \ 'ecol': (use_unicode ? '┤' : '|'),
+            \ 'ltop': (use_unicode ? '┌' : '+'),
+            \ 'rtop': (use_unicode ? '┐' : '+'),
+            \ 'lbot': (use_unicode ? '└' : '+'),
+            \ 'rbot': (use_unicode ? '┘' : '+'),
+            \ 'cros': (use_unicode ? '┼' : '+'),
+            \ 'dhor': (use_unicode ? '┬' : '-'),
+            \ 'uhor': (use_unicode ? '┴' : '-')
             \ }
-    endif "}}}4
+    "}}}4
     if match(getline(a:first), '^'.s:td.ltop) > -1
         " Already tabularized, done
         call csv#Warn("Looks already Tabularized, aborting!")

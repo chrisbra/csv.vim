@@ -939,8 +939,11 @@ In csv files, you can also use the :CSVTabularize command, in different
 filetypes you can use the :CSVTable command (and is available as plugin so it
 will be available for non-CSV filetypes).
 
-Set the variable g:csv_table_leftalign=1 if you want the columns to be
+Set the variable `g:csv_table_leftalign=1` if you want the columns to be
 leftaligned.
+
+Set the variable `g:csv_table_use_ascii=1` if you do not want to use unicode
+drawing characters.
 
 Note: Each row must contain exactly as many fields as columns.
 
