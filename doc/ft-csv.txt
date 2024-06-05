@@ -17,7 +17,7 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.5 ArrangeColumn...........................|ArrangeColumn_CSV|
     3.6 UnArrangeColumn.........................|UnArrangeColumn_CSV|
     3.7 DeleteColumn............................|DeleteColumn_CSV|
-    3.8 InitCSV.................................|InitCSV|
+    3.8 CSVInit.................................|CSVInit|
     3.9 Header..................................|Header_CSV|
     3.10 Sort...................................|Sort_CSV|
     3.11 CopyColumn.............................|Copy_CSV|
@@ -342,7 +342,7 @@ will then delete all columns that match the pattern: >
 will delete all columns where the pattern "foobar" matches.
 
                                                                 *:CSVInit*
-                                                                *:InitCSV*
+                                                     *:InitCSV-deprecated*
 3.8 CSVInit
 -----------
 Reinitialize the Plugin. Use this, if you have changed the configuration
@@ -1141,7 +1141,7 @@ If your file does not consist of delimited columns, but rather is a fixed
 width csv file, see |csv-fixedwidth| for configuring the plugin appropriately.
 
 If you changed the delimiter, you should reinitialize the plugin using
-|InitCSV|
+|CSVInit|
 
 Note: the delimiter will be used to generate a regular expression that matches
 a column. Internally the plugin uses the very-nomagic setting for the
@@ -1188,7 +1188,7 @@ To define your own regular expression, set the g:csv_col variable: >
 This defines a column as a field delimited by the comma (where no comma can be
 contained inside a field), similar to how |csv-strict| works.
 
-You should reinitialize the plugin afterwards |InitCSV|
+You should reinitialize the plugin afterwards |CSVInit|
 
 4.3 Highlighting Group                                         *csv-higroup*
 ----------------------
@@ -1199,7 +1199,7 @@ variable. You can e.g. define it in your |.vimrc|: >
 
     :let g:csv_hiGroup = "IncSearch"
 
-You need to restart Vim, if you have changed this variable or use |InitCSV|
+You need to restart Vim, if you have changed this variable or use |CSVInit|
 
 The |hl-Title| highlighting is used for the Header line that is created by the
 |Header_CSV| command. If you prefer a different highlighting, set the
@@ -1213,7 +1213,7 @@ variable: >
 
     unlet g:csv_hiHeader
 
-You should reinitialize the plugin afterwards |InitCSV|
+You should reinitialize the plugin afterwards |CSVInit|
 
 4.4 Strict Columns						*csv-strict*
 ------------------
@@ -1239,7 +1239,7 @@ You can disable the effect if you |unlet| the variable: >
 
     unlet g:csv_strict_columns
 
-You should reinitialize the plugin afterwards |InitCSV|
+You should reinitialize the plugin afterwards |CSVInit|
 
 For example when opening a CSV file you get the Error |E363|: pattern uses
 more memory than 'maxmempattern'. In this case, either increase the
@@ -1261,7 +1261,7 @@ and to disable it, simply unlet the variable >
 
     unlet g:csv_no_conceal
 
-You should reinitialize the plugin afterwards |InitCSV|
+You should reinitialize the plugin afterwards |CSVInit|
 Note: You can also set the 'conceallevel' option to control how the concealed
 chars will be displayed.
 
@@ -1307,7 +1307,7 @@ and to disable it again, simply unset the variable >
 
     unlet g:csv_nl
 
-It is a good idea to reinitialize the plugin afterwards |InitCSV|
+It is a good idea to reinitialize the plugin afterwards |CSVInit|
 
 Note, this might not work correctly in all cases. The syntax highlighting
 seems to change on cursor movements. This could possibly be a bug in the
@@ -1328,7 +1328,7 @@ and to disable it again, simply unset the variable >
 
     unlet g:csv_highlight_column
 
-It is a good idea to reinitialize the plugin afterwards |InitCSV|
+It is a good idea to reinitialize the plugin afterwards |CSVInit|
 
 4.8 Fixed width columns                                        *csv-fixedwidth*
 -----------------------
@@ -1356,7 +1356,7 @@ This means, your CSV file consists of 6 fixed width columns and the last one
 starts at column 21 and goes till the end of the line.
 
 After setting this variable, you should reinitialize the plugins using
-|InitCSV|
+|CSVInit|
 
                                                                     *CSVFixed*
 4.8.2 Setup using a Wizard
@@ -1454,7 +1454,7 @@ Which will use the '#' sign as comment leader like in many scripting
 languages.
 
 After setting this variable, you should reinitialize the plugins using
-|InitCSV|
+|CSVInit|
 
                                                             *csv-foldtext*
 By default, the csv plugin sets the 'foldtext' option. If you don't want this,
@@ -1757,7 +1757,7 @@ The easy way to fix it, is to make sure the :syntax on (|:syn-on|) statement
 comes after the :filetype plugin (|:filetype-plugin-on|) statement in your
 |.vimrc|
 
-Alternatively, you can simply call |InitCSV| and ignore the error.
+Alternatively, you can simply call |CSVInit| and ignore the error.
 
 Note: It could also be caused by lazy loading feature by a vim plugin
 manager. For example this line might also cause it: >
