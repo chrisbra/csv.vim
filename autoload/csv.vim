@@ -1468,6 +1468,7 @@ fu! csv#AddColumn(start, stop, ...) range "{{{3
     " skipping comment lines (we could do it with a single :s statement,
     " but that would fail for the first and last column.
 
+    let commentpat = ''
     if b:csv_cmt != ['','']
         let commentpat = '\%(\%>'.(a:start-1).'l\V'.
                     \ escape(b:csv_cmt[0], '\\').'\m\)'. '\&\%(\%<'.
