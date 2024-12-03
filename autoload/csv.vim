@@ -2897,10 +2897,8 @@ fu! csv#GetCells(list) "{{{3
     let column=a:list
     " Delete delimiter
     call map(column, 'substitute(v:val, b:delimiter . "$", "", "g")')
-    " Revmoe trailing whitespace
-    call map(column, 'substitute(v:val, ''^\s\+$'', "", "g")')
-    " Remove leading whitespace
-    call map(column, 'substitute(v:val, ''^\s\+'', "", "g")')
+    " Remove leading and trailing whitespace
+    call map(column, 'trim(v:val)')
     return column
 endfu
 fu! CSV_CloseBuffer(buffer) "{{{3
