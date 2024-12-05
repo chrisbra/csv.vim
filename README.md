@@ -1059,9 +1059,9 @@ uses the default thousands separator and ',' as the decimal separator and
 
 uses the Space as thousands separator and the '.' as decimal separator.
 
-If [distinct] is given, only returns the number of distinct values.
+If [distinct] is given, only unique values are returned.
 
-Note, if you Vim is compiled without floating point number format ([`+float`](http://vimhelp.appspot.com/various.txt.html#%2Bfloat)),
+Note, if your Vim is compiled without floating point number format ([`+float`](http://vimhelp.appspot.com/various.txt.html#%2Bfloat)),
 Vim will only aggregate the integer part and therefore won't use the 'y'
 argument in the /format/ specifier.
 

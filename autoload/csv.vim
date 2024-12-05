@@ -1489,6 +1489,19 @@ fu! csv#AddColumn(start, stop, ...) range "{{{3
     endif
     call winrestview(wsv)
 endfu
+fu! csv#ExtractValue(item) "{{{3
+    let formatThousands = '\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
+    let formatDecimal   = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
+    try
+        let nr = substitute(a:item, formatThousands, '', 'g')
+        if s:nr_format[1] != '.'
+            let nr = substitute(nr, formatDecimal, '.', '')
+        endif
+        return matchstr(nr, '\c\v^-?(0+|0?\.\d+|[1-9]\d*(\.\d+)?(e[+-]?\d+)?)$')
+    catch
+        return '0'
+    endtry
+endfu
 fu! csv#SumColumn(list) "{{{3
     " Sum a list of values, but only consider the digits within each value
     " parses the digits according to the given format (if none has been
@@ -1503,21 +1516,11 @@ fu! csv#SumColumn(list) "{{{3
             if empty(item)
                 continue
             endif
-            let nr = matchstr(item, '-\?\d\(.*\d\)\?$')
-            let format1 = '^-\?\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
-            let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
-            try
-                let nr = substitute(nr, format1, '', '')
-                if s:nr_format[1] != '.'
-                    let nr = substitute(nr, format2, '.', '')
-                endif
-            catch
-                let nr = '0'
-            endtry
+            let nr = csv#ExtractValue(item)
             let sum += str2float(nr)
         endfor
         let b:csv_result = sum
-        return printf("%.2f", sum)
+        return sum
     endif
 endfu
 fu! csv#AvgColumn(list) "{{{3
@@ -1531,17 +1534,7 @@ fu! csv#AvgColumn(list) "{{{3
             if empty(item)
                 continue
             endif
-            let nr = matchstr(item, '-\?\d\(.*\d\)\?$')
-            let format1 = '^-\?\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
-            let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
-            try
-                let nr = substitute(nr, format1, '', '')
-                if s:nr_format[1] != '.'
-                    let nr = substitute(nr, format2, '.', '')
-                endif
-            catch
-                let nr ='0'
-            endtry
+            let nr = csv#ExtractValue(item)
             let sum += str2float(nr)
             let cnt += 1
         endfor
@@ -1560,17 +1553,7 @@ fu! csv#VarianceColumn(list, is_population) "{{{3
             if empty(item)
                 continue
             endif
-            let nr = matchstr(item, '-\?\d\(.*\d\)\?$')
-            let format1 = '^-\?\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
-            let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
-            try
-                let nr = substitute(nr, format1, '', '')
-                if s:nr_format[1] != '.'
-                    let nr = substitute(nr, format2, '.', '')
-                endif
-            catch
-                let nr = '0'
-            endtry
+            let nr = csv#ExtractValue(item)
             let nr = str2float(nr)
             let sum += pow((nr-avg), 2)
             let cnt += 1
@@ -1634,40 +1617,29 @@ fu! csv#MaxColumn(list) "{{{3
     " does not support floats, simply sum up only the integer part
     if empty(a:list)
         return 0
-    else
-        let result = []
-        for item in a:list
-            if empty(item)
-                continue
-            endif
-            let nr = matchstr(item, '-\?\d\(.*\d\)\?$')
-            let format1 = '^-\?\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
-            let format2 = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
-            try
-                let nr = substitute(nr, format1, '', '')
-                if s:nr_format[1] != '.'
-                    let nr = substitute(nr, format2, '.', '')
-                endif
-            catch
-                let nr = '0'
-            endtry
-            call add(result, str2float(nr))
-        endfor
-        let result = sort(result, s:csv_numeric_sort ? 'N' : 'csv#CSVSortValues')
-        let ind = len(result) > 9 ? 9 : len(result)
-        if has_key(get(s:, 'additional', {}), 'distinct') && s:additional['distinct']
-          if exists("*uniq")
-            let result=uniq(result)
-          else
+    endif
+
+    let result = []
+    for item in a:list
+        if empty(item)
+            continue
+        endif
+        let nr = csv#ExtractValue(item)
+        call add(result, str2float(nr))
+    endfor
+    call sort(result, s:csv_numeric_sort ? 'n' : 'csv#CSVSortValues')
+    if get(s:additional, 'distinct', 0) == 1
+        if exists("*uniq")
+            call uniq(result)
+        else
             let l = {}
             for item in result
-              let l[item] = get(l, 'item', 0)
+                let l[item] = 0
             endfor
             let result = keys(l)
-          endif
         endif
-        return s:additional.ismax ? reverse(result)[:ind] : result[:ind]
     endif
+    return s:additional.ismax ? reverse(result)[:9] : result[:9]
 endfu
 fu! csv#CountColumn(list) "{{{3
     if empty(a:list)
