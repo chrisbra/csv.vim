@@ -1609,6 +1609,32 @@ fu! csv#PopStdDevColumn(list) "{{{2
         return result
     endif
 endfu
+fu! csv#Histogram(list) "{{{2
+    let list = map(a:list, {_,v -> str2float(csv#ExtractValue(v))})
+    let ticks = min([float2nr(sqrt(len(list))), 10])
+    let minValue = reduce(copy(list), {m,v -> v < m ? v : m})
+    let maxValue = reduce(copy(list), {m,v -> v > m ? v : m})
+    let s:step = (maxValue - minValue) / ticks
+    let s:magnitude = pow(10, floor(log10(s:step)))
+    let mantissa = filter([2,2.5,5,7.5,10], {k,v -> v >= (s:step / s:magnitude)})[0]
+    let s:step = s:magnitude * mantissa
+    let bins = {}
+    call foreach(list, 'let bins[floor(v:val/s:step)*s:step] = get(bins,floor(v:val/s:step)*s:step,0)+1')
+    let labelwidth = max(map(keys(bins), {_,v -> len(v)}))
+    let maxcount = max(values(bins))
+    let countwidth = float2nr(log10(maxcount)) + 1
+
+    let result = []
+    call add(result, repeat('-', &columns/2))
+    call add(result, 'Count = ' . len(list) . '  Min = ' . minValue . '  Max = ' . maxValue)
+    call add(result, repeat('-', &columns/2))
+    for label in sort(keys(bins),{x1,x2 -> 1.0*x1==1.0*x2 ? 0 : 1.0*x1<1.0*x2 ? -1 : 1})
+        let count = bins[label]
+        let width = maxcount < &columns / 2 ? count : float2nr(1.0 * count * (&columns/2) / maxcount)
+        call add(result, printf('≥ %*s| %*d|%s  %d', labelwidth, label, countwidth, count, repeat(get(g:, 'csv_histogram_cell', '▇'), width), count))
+    endfor
+    return join(result,"\n")
+endfu
 
 fu! csv#MaxColumn(list) "{{{3
     " Sum a list of values, but only consider the digits within each value
@@ -2267,6 +2293,7 @@ fu! csv#CommandDefinitions() "{{{3
     call csv#LocalCmd("Duplicates", ':call csv#CheckDuplicates(<q-args>)', '-nargs=? -complete=custom,csv#CompleteColumnNr')
     call csv#LocalCmd("Filters", ':call csv#OutputFilters(<bang>0)', '-nargs=0 -bang')
     call csv#LocalCmd("HeaderToggle", ':call csv#SplitHeaderToggle(1)', '')
+    call csv#LocalCmd("Histogram", ':echo csv#EvalColumn(<q-args>, "csv#Histogram", <line1>,<line2>)', '-range=%')
     call csv#LocalCmd("HiColumn", ':call csv#HiCol(<q-args>,<bang>0)', '-bang -nargs=?')
     call csv#LocalCmd("MaxCol", ':echo csv#EvalColumn(<q-args>, "csv#MaxColumn", <line1>,<line2>, 1)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
     call csv#LocalCmd("MinCol", ':echo csv#EvalColumn(<q-args>, "csv#MaxColumn", <line1>,<line2>, 0)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
