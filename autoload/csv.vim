@@ -1665,10 +1665,11 @@ fu! csv#HistogramCol(list) "{{{2
 endfu
 
 fu! csv#MaxColumn(list) "{{{3
-    " Sum a list of values, but only consider the digits within each value
-    " parses the digits according to the given format (if none has been
-    " specified, assume POSIX format (without thousand separator) If Vim
-    " does not support floats, simply sum up only the integer part
+    " Show top/bottom 10 in a list of values, but only consider the digits
+    " within each value parses the digits according to the given format (if
+    " none has been specified, assume POSIX format (without thousand
+    " separator) If Vim does not support floats, simply sum up only the
+    " integer part
     if empty(a:list)
         return 0
     endif
@@ -1705,7 +1706,7 @@ fu! csv#CountColumn(list) "{{{3
       else
         let l = {}
         for item in a:list
-          let l[item] =  get(l, 'item', 0) + 1
+          let l[item] = 0
         endfor
         return len(keys(l))
       endif
