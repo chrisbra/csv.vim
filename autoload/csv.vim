@@ -1610,6 +1610,16 @@ fu! csv#PopStdDevColumn(list) "{{{2
     endif
 endfu
 
+fu! csv#MedianCol(list) "{{{2
+    let list = sort(map(filter(a:list, {_,v -> !empty(v)}), {_,v -> str2float(csv#ExtractValue(v))}), 'n')
+    if empty(list)
+        return 0
+    endif
+
+    let i = len(list) / 2
+    return len(list) % 2 == 0 ? (list[i-1] + list[i]) / 2.0 : list[i]
+endfu
+
 fu! csv#HistogramCol(list) "{{{2
     let list = sort(map(filter(a:list, {_,v -> !empty(v)}), {_,v -> str2float(csv#ExtractValue(v))}), 'n')
     if empty(list)
@@ -1685,6 +1695,7 @@ fu! csv#MaxColumn(list) "{{{3
     endif
     return s:additional.ismax ? reverse(result)[:9] : result[:9]
 endfu
+
 fu! csv#CountColumn(list) "{{{3
     if empty(a:list)
         return 0
@@ -2314,6 +2325,7 @@ fu! csv#CommandDefinitions() "{{{3
     call csv#LocalCmd("HistogramCol", ':echo csv#EvalColumn(<q-args>, "csv#HistogramCol", <line1>,<line2>)', '-range=% -nargs=?')
     call csv#LocalCmd("HiColumn", ':call csv#HiCol(<q-args>,<bang>0)', '-bang -nargs=?')
     call csv#LocalCmd("MaxCol", ':echo csv#EvalColumn(<q-args>, "csv#MaxColumn", <line1>,<line2>, 1)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
+    call csv#LocalCmd("MedianCol", ':echo csv#EvalColumn(<q-args>, "csv#MedianCol", <line1>,<line2>)', '-range=% -nargs=?')
     call csv#LocalCmd("MinCol", ':echo csv#EvalColumn(<q-args>, "csv#MaxColumn", <line1>,<line2>, 0)', '-nargs=? -range=% -complete=custom,csv#SortComplete')
     call csv#LocalCmd("MoveColumn", ':call csv#MoveColumn(<line1>,<line2>,<f-args>)', '-range=% -nargs=* -complete=custom,csv#SortComplete')
     call csv#LocalCmd("NewDelimiter", ':call csv#NewDelimiter(<q-args>, 1, line(''$''))', '-nargs=1')
