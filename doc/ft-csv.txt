@@ -40,8 +40,10 @@ NO WARRANTY, EXPRESS OR IMPLIED.  USE AT-YOUR-OWN-RISK.
     3.28 Average values.........................|AvgCol_CSV|
     3.29 Variance of a Column...................|VarCol_CSV|
     3.30 Standard Deviation of a Column.........|StdDevCol_CSV|
-    3.31 Duplicate columns......................|DupColumn_CSV|
-    3.32 Column width...........................|ColumnWidth_CSV|
+    3.31 Histogram..............................|Histogram_CSV|
+    3.32 Duplicate columns......................|DupColumn_CSV|
+    3.33 Column width...........................|ColumnWidth_CSV|
+    3.34 Sum the values in the row..............|SumRow_CSV|
 4. CSV Filetype configuration...................|csv-configuration|
     4.1 Delimiter...............................|csv-delimiter|
     4.2 Column..................................|csv-column|
@@ -1022,11 +1024,16 @@ If [distinct] is given, only returns the number of distinct values.
 
 The result is also available in the buffer-local variable `b:csv_result`.
 
-3.28 Average value of a Column 				*AvgCol_CSV*
+3.28 Average value of a Column      *AvgCol_CSV* *MedianCol*
 ------------------------------
-You can let Vim output the value of a column using the `:CSVAvgCol` command >
+Calculate and output either of two average values of a column using the `:CSVAvgCol` or `:CSVMedianCol` command >
 
     :[range]AvgCol [nr] [/format/]
+    :[range]MedianCol [nr] [/format/]
+
+`:AvgCol` calculates the arithmetic mean, the sum divided by the count.
+`:MedianCol` calculates the median, The one number (or the average of two
+numbers) in exact middle of the sorted list of values.
 
 This outputs the result of the column <nr> within the range given. If no range
 is given, this will calculate the average value of the whole column. If <nr> is not
@@ -1076,8 +1083,23 @@ The result is also available in the buffer-local variable `b:csv_result`.
 
 For the [/format/] part, see |format_number_csv|.
 
-                                                            *:CSVDupColumn*
-3.31 Duplicate columns                                       *DupColumn_CSV*
+3.31 Histogram                         *:CSVHistogram* *Histogram_CSV*
+--------------
+
+`:[range]HistogramCol [nr] [/format/]`
+
+Generate and print a histogram for the specified column.
+
+This outputs the result of the column `<nr>` within the range given. If no range
+is given, this will calculate the standard deviation of the whole column. If <nr> is not
+given, this calculates the standard deviation for the column the cursor is on. Note, that
+the delimiter will be stripped away from each value and also empty values won't be considered.
+
+The result is also available in the buffer-local variable `b:csv_result`.
+
+For the [/format/] part, see |format_number_csv|.
+
+3.32 Duplicate columns                 *:CSVDupColumn*  *DupColumn_CSV*
 ----------------------
 If you want to add duplicate an existing column you can use the
 `:CSVDupColumn` or `:DupColumn` command: >
@@ -1090,17 +1112,16 @@ the cursor is, but you can add as first argument which column will be duplicated
 
 Additionally, you can also provide a count to copy several columns at once.
 
-                                                        *ColumnWidth_CSV*
-3.32 Column Width                                       *:CSVColumnWidth*
+3.33 Column Width                *ColumnWidth_CSV*  *:CSVColumnWidth*
 -----------------
 If you want to know the width of each column, you can use the `:CSVColumnWidth` command: >
 
-    :CSVColumnWidth 
+    :CSVColumnWidth
 
 This will output the width for each column at the bottom. See also
 |CSVWidth()| function
 
-3.33 Sum of Numbers in a Row	                   				*SumRow_CSV*
+3.34 Sum of Numbers in a Row                        *SumRow_CSV*
 ----------------------------
 You can let Vim output the sum of a field in a row using the `:CSVASumRow` command >
 
