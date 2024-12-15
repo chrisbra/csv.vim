@@ -1081,7 +1081,7 @@ Calculate and output either of two average values of a column using the `:CSVAvg
 ```
 
 `:AvgCol` calculates the arithmetic mean, the sum divided by the count.
-`:MedianCol` calculates the median, The one number (or the average of two
+`:MedianCol` calculates the median, the one number (or the average of two
 numbers) in exact middle of the sorted list of values.
 
 This outputs the result of the column `<nr>` within the range given. If no range
