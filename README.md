@@ -1071,11 +1071,18 @@ See also [Defining custom aggregate functions](#defining-custom-aggregate-functi
 
 ## Average value of a Column
 
-You can let Vim output the value of a column using the `:CSVAvgCol` command
+Calculate and output either of two average values of a column using the `:CSVAvgCol` or `:CSVMedianCol` command
 
 ```vim
 :[range]AvgCol [nr] [/format/]
 ```
+```vim
+:[range]MedianCol [nr] [/format/]
+```
+
+`:AvgCol` calculates the arithmetic mean, the sum divided by the count.
+`:MedianCol` calculates the median, The one number (or the average of two
+numbers) in exact middle of the sorted list of values.
 
 This outputs the result of the column `<nr>` within the range given. If no range
 is given, this will calculate the average value of the whole column. If `<nr>` is not
@@ -1121,6 +1128,36 @@ For the `[/format/]` part, see [Number format](#number-format).
 ```
 
 Calculate the Population or Sample Standard Deviation for the specified column.
+
+This outputs the result of the column `<nr>` within the range given. If no range
+is given, this will calculate the standard deviation of the whole column. If `<nr>` is not
+given, this calculates the standard deviation for the column the cursor is on. Note, that
+the delimiter will be stripped away from each value and also empty values won't be considered.
+
+The result is also available in the buffer-local variable `b:csv_result`.
+
+For the `[/format/]` part, see [Number format](#number-format).
+
+## Histogram
+
+```vim
+:[range]Histogram [nr] [/format/]
+```
+
+Generate and print a histogram of the specified column, like so:
+
+```
+------------------------------------------------------------
+Count = 140  Min = -74.640797  Max = 1122.363535
+------------------------------------------------------------
+≥ -200.0|  2|▇  2
+≥    0.0|  2|▇  2
+≥  200.0| 31|▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇  31
+≥  400.0| 51|▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇  51
+≥  600.0| 41|▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇  41
+≥  800.0| 11|▇▇▇▇▇▇▇▇  11
+≥ 1000.0|  2|▇  2```
+```
 
 This outputs the result of the column `<nr>` within the range given. If no range
 is given, this will calculate the standard deviation of the whole column. If `<nr>` is not
