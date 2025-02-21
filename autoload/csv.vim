@@ -3004,7 +3004,7 @@ fu! csv#EvalColumn(nr, func, first, last, ...) range "{{{3
         try
             let s = []
             " parse the optional number format
-            let str = matchstr(format, '/\zs[^/]*\ze/', 0, start)
+            let str = matchstr(format, '/\zs[^/]*\ze/')
             let s = matchlist(str, '\(.\)\?:\(.\)\?')[1:2]
             if empty(s)
                 " Number format wrong
@@ -3071,7 +3071,7 @@ fu! csv#SumCSVRow(line, nr) "{{{3
         try
             let s = []
             " parse the optional number format
-            let str = matchstr(format, '/\zs[^/]*\ze/', 0, start)
+            let str = matchstr(format, '/\zs[^/]*\ze/')
             let s = matchlist(str, '\(.\)\?:\(.\)\?')[1:2]
             if empty(s)
                 " Number format wrong
