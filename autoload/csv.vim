@@ -1491,7 +1491,7 @@ fu! csv#AddColumn(start, stop, ...) range "{{{3
 endfu
 fu! csv#ExtractValue(item) "{{{3
     let formatThousands = '\d\+\zs\V' . s:nr_format[0] . '\m\ze\d'
-    let formatDecimal   = '\d\+\zs\V' . s:nr_format[1] . '\m\ze\d'
+    let formatDecimal   = '\(^-\?\|\d\+\)\zs\V' . s:nr_format[1] . '\m\ze\d'
     try
         let nr = substitute(a:item, formatThousands, '', 'g')
         if s:nr_format[1] != '.'
