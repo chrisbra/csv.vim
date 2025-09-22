@@ -1,4 +1,4 @@
-*ft-csv.txt*	For Vim version 9.1	Last Change: 2024 Dec 15
+*ft-csv.txt*	Filetup plugin for CSV
 
 Author:		Christian Brabandt <cb@256bit.org>
 Version:	0.31
