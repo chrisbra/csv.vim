@@ -634,7 +634,15 @@ fu! csv#ColWidth(colnr, row, silent) "{{{3
                 call add(tlist, get(item, a:colnr-1, ''))
             endfor
             call map(tlist, 'strdisplaywidth(v:val)')
-            return max(tlist)
+            let maxwidth = max(tlist)
+            " Use header width as minimum to prevent empty columns from
+            " collapsing.
+            let header_line = get(b:, 'csv_headerline', 1)
+            let header = getline(header_line)
+            let header_cols = split(header, b:col . '\zs')
+            let header_val = get(header_cols, a:colnr - 1, '')
+            let header_width = strdisplaywidth(header_val)
+            return max([maxwidth, header_width])
         catch
             throw "ColWidth-error"
             return width
